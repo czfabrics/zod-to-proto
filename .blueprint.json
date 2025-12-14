@@ -1,0 +1,11 @@
+{
+    "package": "package.json",
+    "blueprint": ".blueprint.md",
+    "input": ".blueprint.md",
+    "output": "README.md",
+    "headingPrefix": {
+        "1": "",
+        "2": ""
+    },
+    "line": "dark"
+}

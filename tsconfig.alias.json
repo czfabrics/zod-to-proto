@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+        "paths": {
+            "#proto3_definition/*": ["src/proto3_definition/*"],
+            "#proto3_processor/*": ["src/proto3_processor/*"],
+            "#zod_converter/*": ["src/zod_converter/*"],
+            "#file/*": ["src/file/*"],
+            "#core/*": ["src/core/*"]
+        }
+    }
+}

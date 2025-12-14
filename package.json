@@ -1,0 +1,54 @@
+{
+    "name": "@czlab/zod-to-proto",
+    "description": "TODO:",
+    "keywords": [
+        "zod",
+        "zod4",
+        "zodv4",
+        "proto",
+        "proto3",
+        "converter"
+    ],
+    "version": "0.1.0",
+    "author": {
+        "name": "Dylan Valentin",
+        "email": "dylan.valentin@ik.me",
+        "url": "https://github.com/czyrok"
+    },
+    "homepage": "https://github.com/czyrok/czlab.zod-to-proto#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/czyrok/czlab.zod-to-proto.git"
+    },
+    "license": "MIT",
+    "scripts": {
+        "typecheck": "tsc --project ./tsconfig.typecheck.json",
+        "format:all": "prettier ./**/*.ts ./**/*.json --write",
+        "prepare:dist": "tsx build.ts",
+        "prepare:declaration": "tsc --project ./tsconfig.declaration.json",
+        "build": "rimraf .dist && npm run prepare:dist && npm run prepare:declaration",
+        "generate:readme": "readme generate --config .blueprint.json"
+    },
+    "bin": {
+        "zod-to-proto3": ".dist/index.mjs"
+    },
+    "files": [
+        "package.json",
+        "README.md",
+        "LICENSE",
+        ".dist/**/*"
+    ],
+    "dependencies": {
+        "change-case": "^5.4.4",
+        "ts-pattern": "^5.9.0",
+        "zod": "^4.1.8"
+    },
+    "devDependencies": {
+        "@appnest/readme": "^1.2.7",
+        "esbuild": "^0.25.9",
+        "prettier": "^3.6.2",
+        "rimraf": "^6.0.1",
+        "ts-arithmetic": "^0.1.1",
+        "typescript": "^5.9.2"
+    }
+}
