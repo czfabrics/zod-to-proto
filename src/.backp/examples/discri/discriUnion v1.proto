@@ -1,0 +1,39 @@
+// Message corresponding to MySchema
+message MySchema {
+    // The 'scope' field is a message that will contain the explicit 'name' field
+    ScopeDefinition scope = 1;
+}
+
+// --- Scope Definition Message ---
+
+// This message represents the combined structure of the discriminated union's members.
+message ScopeDefinition {
+    // 1. The explicit 'name' field (the discriminator) is kept.
+    // In proto3, this will be a string. Your application logic must validate that
+    // it is one of the allowed literals: "OFFICE_USER" or "PARTNERSHIP".
+    string name = 1;
+
+    // 2. The 'target' structure is modeled using a 'oneof'.
+    // The presence of a field in this oneof will correspond to the value of the 'name' field.
+    // TODO: et en fait c'est pour chaque champs
+    oneof target {
+        OfficeUserTarget office_user = 2;
+        PartnershipTarget partnership = 3;
+    }
+}
+
+// --- Target Messages (The common definitions remain the same) ---
+
+// Corresponds to the target object in OfficeUserAuthScopeDefinitionSchema
+message OfficeUserTarget {
+    string office_key = 1;
+    // Proto3 has no native equivalent for .nonempty() validation.
+    string username = 2;
+}
+
+// Corresponds to the target object in PartnershipAuthScopeDefinitionSchema
+message PartnershipTarget {
+    string office_key = 1;
+    string company_key = 2;
+    string partnership_key = 3;
+}

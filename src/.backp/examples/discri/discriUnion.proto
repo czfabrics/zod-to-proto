@@ -1,0 +1,31 @@
+message MySchema {
+    oneof scope {
+        OfficeUserScopeDefinition office_user_scope = 2;
+        PartnershipScopeDefinition partnership_scope = 3;
+    }
+}
+
+message OfficeUserScopeDefinition {
+    string name = 1 [
+        (buf.validate.field).string.in = "OFFICE_USER"
+    ];
+    OfficeUserTarget target = 2;
+}
+
+message PartnershipScopeDefinition {
+    string name = 1 [
+        (buf.validate.field).string.in = "PARTNERSHIP"
+    ];
+    PartnershipTarget target = 2;
+}
+
+message OfficeUserTarget {
+    string office_key = 1;
+    string username = 2;
+}
+
+message PartnershipTarget {
+    string office_key = 1;
+    string company_key = 2;
+    string partnership_key = 3;
+}
