@@ -1,14 +1,15 @@
-import type { CheckTuple } from '#core/types/check_tuple'
 import type {
     AnyProto3MessageField,
     Proto3EnumField,
 } from '#proto3_definition/types/fields'
 import type { GetNewParams } from '#proto3_definition/types/get_new_params'
+import { Proto3ImportedType } from '#proto3_definition/types/imported_type'
 import type { ZodType } from 'zod'
 
 export type Proto3Message = {
     internalName: 'message'
     getDeepMessages(): AnyProto3Message[]
+    getDeepImportedTypes(): Proto3ImportedType[]
     getNextIndex(): number
     name: string
     schema: ZodType
@@ -26,6 +27,9 @@ export const Proto3Message = {
 
                 return [this, ...deepMessages]
             },
+            getDeepImportedTypes() {
+                return this.fields.map((field) => field.getDeepImportedTypes()).flat()
+            },
             getNextIndex() {
                 return this.fields.length
             },
@@ -36,10 +40,11 @@ export const Proto3Message = {
 
 export type Proto3Enum = {
     internalName: 'enum'
+    getDeepMessages(): AnyProto3Message[]
+    getDeepImportedTypes(): Proto3ImportedType[]
     name: string
     schema: ZodType
     fields: Proto3EnumField[]
-    getDeepMessages(): AnyProto3Message[]
 }
 
 export const Proto3Enum = {
@@ -49,31 +54,11 @@ export const Proto3Enum = {
             getDeepMessages() {
                 return [this]
             },
+            getDeepImportedTypes() {
+                return []
+            },
             ...params,
         }
-    },
-} as const
-
-type MessageInternalNameTuple = AnyProto3Message['internalName'][]
-
-const MessageInternalNameTuple = {
-    new: function <const TValues extends string[]>(
-        values: CheckTuple<AnyProto3Message['internalName'], TValues>
-    ): MessageInternalNameTuple {
-        return values as MessageInternalNameTuple
-    },
-} as const
-
-export const AnyProto3Message = {
-    is: <TObject extends { internalName: string }>(
-        object: TObject
-    ): object is TObject & { internalName: AnyProto3Message['internalName'] } => {
-        const internalNames: MessageInternalNameTuple = MessageInternalNameTuple.new([
-            'message',
-            'enum',
-        ])
-
-        return (internalNames as string[]).includes(object.internalName)
     },
 } as const
 

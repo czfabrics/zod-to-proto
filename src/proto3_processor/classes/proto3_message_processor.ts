@@ -19,6 +19,7 @@ export class Proto3MessageProcessor {
                         messageContent.endLine()
                     }
 
+                    // TODO: devrait être dans Proto3FieldProcessor
                     if (field.internalName === 'message_one_of_field') {
                         const oneOfFieldContent = fileContentMatter().singleNest()
 

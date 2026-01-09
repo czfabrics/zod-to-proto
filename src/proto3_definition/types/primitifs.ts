@@ -1,4 +1,4 @@
-import type { CheckTuple } from '#core/types/check_tuple'
+import { Proto3ImportedType } from '#proto3_definition/types/imported_type'
 import type { AnyProto3Message } from '#proto3_definition/types/messages'
 import type { WithInternalName } from '#proto3_definition/types/with_internal_name'
 import type { ZodType } from 'zod'
@@ -28,25 +28,36 @@ export type Proto3PrimitifType = {
         internalName: Lowercase<TKey>
         name: Proto3Primitifs[TKey]
         schema: SomeType
+        getDeepMessages(): AnyProto3Message[]
+        getDeepImportedTypes(): Proto3ImportedType[]
     }
 }[keyof Proto3Primitifs]
 
+// TODO: si on met 2 fois la meme value le checkTuple passe lol
+// tuple
+
 export type Proto3RepeatedInnerType =
     | AnyProto3Message
+    | Proto3ImportedType
     | Proto3PrimitifType
     | WithInternalName<Proto3ComplexPrimitifs, 'REPEATED'>
 
-export type Proto3MapValueType = AnyProto3Message | Proto3PrimitifType
+export type Proto3MapValueType =
+    | AnyProto3Message
+    | Proto3ImportedType
+    | Proto3PrimitifType
 
 type Proto3ComplexPrimitifs = {
     MAP: {
         getDeepMessages(): AnyProto3Message[]
+        getDeepImportedTypes(): Proto3ImportedType[]
         key: Proto3PrimitifType
         value: Proto3MapValueType
         schema: ZodType
     }
     REPEATED: {
         getDeepMessages(): AnyProto3Message[]
+        getDeepImportedTypes(): Proto3ImportedType[]
         inner: Proto3RepeatedInnerType
         schema: ZodType
     }
@@ -55,28 +66,5 @@ type Proto3ComplexPrimitifs = {
 export type Proto3ComplexPrimitifType = {
     [TKey in keyof Proto3ComplexPrimitifs]: WithInternalName<Proto3ComplexPrimitifs, TKey>
 }[keyof Proto3ComplexPrimitifs]
-
-type ComplexPrimitifInternalNameTuple = Proto3ComplexPrimitifType['internalName'][]
-
-const ComplexPrimitifInternalNameTuple = {
-    new: function <const TValues extends string[]>(
-        values: CheckTuple<Proto3ComplexPrimitifType['internalName'], TValues>
-    ): ComplexPrimitifInternalNameTuple {
-        return values as ComplexPrimitifInternalNameTuple
-    },
-} as const
-
-export const Proto3ComplexPrimitifType = {
-    is: <TObject extends { internalName: string }>(
-        object: TObject
-    ): object is TObject & {
-        internalName: Proto3ComplexPrimitifType['internalName']
-    } => {
-        const internalNames: ComplexPrimitifInternalNameTuple =
-            ComplexPrimitifInternalNameTuple.new(['map', 'repeated'])
-
-        return (internalNames as string[]).includes(object.internalName)
-    },
-} as const
 
 export type AnyProto3PrimitifType = Proto3ComplexPrimitifType | Proto3PrimitifType

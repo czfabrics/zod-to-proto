@@ -1,1 +1,4 @@
-export type GetNewParams<T> = Omit<T, 'internalName' | 'getDeepMessages' | 'getNextIndex'>
+export type GetNewParams<T> = Omit<
+    T,
+    'internalName' | 'getDeepMessages' | 'getDeepImportedTypes' | 'getNextIndex'
+>

@@ -1,11 +1,11 @@
 import { GetNewParams } from '#proto3_definition/types/get_new_params'
+import { Proto3ImportedType } from '#proto3_definition/types/imported_type'
 import { AnyProto3Message } from '#proto3_definition/types/messages'
-import type {
+import {
     AnyProto3PrimitifType,
     Proto3ComplexPrimitifType,
     Proto3PrimitifType,
 } from '#proto3_definition/types/primitifs'
-import { match } from 'ts-pattern'
 import { SomeType } from 'zod/v4/core'
 
 export const Proto3StringType = {
@@ -14,6 +14,12 @@ export const Proto3StringType = {
             internalName: 'string',
             name: 'string',
             schema,
+            getDeepMessages() {
+                return []
+            },
+            getDeepImportedTypes() {
+                return []
+            },
         }
     },
 } as const
@@ -24,6 +30,12 @@ export const Proto3BoolType = {
             internalName: 'bool',
             name: 'bool',
             schema,
+            getDeepMessages() {
+                return []
+            },
+            getDeepImportedTypes() {
+                return []
+            },
         }
     },
 } as const
@@ -34,6 +46,12 @@ export const Proto3Int32Type = {
             internalName: 'int32',
             name: 'int32',
             schema,
+            getDeepMessages() {
+                return []
+            },
+            getDeepImportedTypes() {
+                return []
+            },
         }
     },
 } as const
@@ -44,6 +62,12 @@ export const Proto3Int64Type = {
             internalName: 'int64',
             name: 'int64',
             schema,
+            getDeepMessages() {
+                return []
+            },
+            getDeepImportedTypes() {
+                return []
+            },
         }
     },
 } as const
@@ -54,6 +78,12 @@ export const Proto3UInt32Type = {
             internalName: 'uint32',
             name: 'uint32',
             schema,
+            getDeepMessages() {
+                return []
+            },
+            getDeepImportedTypes() {
+                return []
+            },
         }
     },
 } as const
@@ -64,6 +94,12 @@ export const Proto3UInt64Type = {
             internalName: 'uint64',
             name: 'uint64',
             schema,
+            getDeepMessages() {
+                return []
+            },
+            getDeepImportedTypes() {
+                return []
+            },
         }
     },
 } as const
@@ -74,6 +110,12 @@ export const Proto3SInt32Type = {
             internalName: 'sint32',
             name: 'sint32',
             schema,
+            getDeepMessages() {
+                return []
+            },
+            getDeepImportedTypes() {
+                return []
+            },
         }
     },
 } as const
@@ -84,6 +126,12 @@ export const Proto3SInt64Type = {
             internalName: 'sint64',
             name: 'sint64',
             schema,
+            getDeepMessages() {
+                return []
+            },
+            getDeepImportedTypes() {
+                return []
+            },
         }
     },
 } as const
@@ -94,6 +142,12 @@ export const Proto3Fixed32Type = {
             internalName: 'fixed32',
             name: 'fixed32',
             schema,
+            getDeepMessages() {
+                return []
+            },
+            getDeepImportedTypes() {
+                return []
+            },
         }
     },
 } as const
@@ -104,6 +158,12 @@ export const Proto3Fixed64Type = {
             internalName: 'fixed64',
             name: 'fixed64',
             schema,
+            getDeepMessages() {
+                return []
+            },
+            getDeepImportedTypes() {
+                return []
+            },
         }
     },
 } as const
@@ -114,6 +174,12 @@ export const Proto3SFixed32Type = {
             internalName: 'sfixed32',
             name: 'sfixed32',
             schema,
+            getDeepMessages() {
+                return []
+            },
+            getDeepImportedTypes() {
+                return []
+            },
         }
     },
 } as const
@@ -124,6 +190,12 @@ export const Proto3SFixed64Type = {
             internalName: 'sfixed64',
             name: 'sfixed64',
             schema,
+            getDeepMessages() {
+                return []
+            },
+            getDeepImportedTypes() {
+                return []
+            },
         }
     },
 } as const
@@ -134,6 +206,12 @@ export const Proto3DoubleType = {
             internalName: 'double',
             name: 'double',
             schema,
+            getDeepMessages() {
+                return []
+            },
+            getDeepImportedTypes() {
+                return []
+            },
         }
     },
 } as const
@@ -144,6 +222,12 @@ export const Proto3FloatType = {
             internalName: 'float',
             name: 'float',
             schema,
+            getDeepMessages() {
+                return []
+            },
+            getDeepImportedTypes() {
+                return []
+            },
         }
     },
 } as const
@@ -154,6 +238,12 @@ export const Proto3BytesType = {
             internalName: 'bytes',
             name: 'bytes',
             schema,
+            getDeepMessages() {
+                return []
+            },
+            getDeepImportedTypes() {
+                return []
+            },
         }
     },
 } as const
@@ -165,11 +255,10 @@ export const Proto3MapType = {
         return {
             internalName: 'map',
             getDeepMessages() {
-                if (AnyProto3Message.is(this.value)) {
-                    return this.value.getDeepMessages()
-                }
-
-                return []
+                return this.value.getDeepMessages()
+            },
+            getDeepImportedTypes() {
+                return this.value.getDeepImportedTypes()
             },
             ...params,
         }
@@ -185,19 +274,28 @@ export const Proto3RepeatedType = {
         return {
             internalName: 'repeated',
             getDeepMessages() {
-                let currentItem: AnyProto3Message | AnyProto3PrimitifType = this
+                let currentItem:
+                    | AnyProto3Message
+                    | Proto3ImportedType
+                    | AnyProto3PrimitifType = this
 
                 while (currentItem.internalName === 'repeated') {
-                    currentItem = match(currentItem)
-                        .with({ internalName: 'repeated' }, (repeated) => repeated.inner)
-                        .otherwise((other) => other)
+                    currentItem = currentItem.inner
                 }
 
-                if (AnyProto3Message.is(currentItem)) {
-                    return currentItem.getDeepMessages()
+                return currentItem.getDeepMessages()
+            },
+            getDeepImportedTypes() {
+                let currentItem:
+                    | AnyProto3Message
+                    | Proto3ImportedType
+                    | AnyProto3PrimitifType = this
+
+                while (currentItem.internalName === 'repeated') {
+                    currentItem = currentItem.inner
                 }
 
-                return []
+                return currentItem.getDeepImportedTypes()
             },
             ...params,
         }

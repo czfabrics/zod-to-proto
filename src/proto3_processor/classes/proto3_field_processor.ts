@@ -1,10 +1,9 @@
 import type { NestedFileContentMatter } from '#file/types/content_matter'
-import type { AnyProto3Field } from '#proto3_definition/types/fields'
-import type { AnyProto3Message } from '#proto3_definition/types/messages'
 import type {
-    AnyProto3PrimitifType,
-    Proto3PrimitifType,
-} from '#proto3_definition/types/primitifs'
+    AnyProto3Field,
+    Proto3MessageFieldType,
+} from '#proto3_definition/types/fields'
+import type { Proto3PrimitifType } from '#proto3_definition/types/primitifs'
 import { match } from 'ts-pattern'
 
 export class Proto3FieldProcessor {
@@ -14,9 +13,9 @@ export class Proto3FieldProcessor {
         return primitif.name
     }
 
-    private getTypeString(item: AnyProto3Message | AnyProto3PrimitifType): string {
+    private getTypeReferenceString(item: Proto3MessageFieldType): string {
         let finalType = ''
-        let currentItem: AnyProto3Message | AnyProto3PrimitifType | undefined = item
+        let currentItem: Proto3MessageFieldType | undefined = item
 
         while (currentItem) {
             let currentType = match(currentItem)
@@ -39,14 +38,20 @@ export class Proto3FieldProcessor {
                     { internalName: 'bytes' },
                     this.getScalarTypeString
                 )
-                .with({ internalName: 'message' }, (message) => message.name)
-                .with({ internalName: 'enum' }, (messageEnum) => messageEnum.name)
+                .with(
+                    { internalName: 'message' },
+                    { internalName: 'enum' },
+                    (message) => message.name
+                )
                 .with({ internalName: 'repeated' }, () => 'repeated')
                 .with({ internalName: 'map' }, (map) => {
                     const keyType: string = this.getScalarTypeString(map.key)
-                    const valueType: string = this.getTypeString(map.value)
+                    const valueType: string = this.getTypeReferenceString(map.value)
 
                     return `map<${keyType}, ${valueType}>`
+                })
+                .with({ internalName: 'imported' }, (imported) => {
+                    return imported.typeReference
                 })
                 .exhaustive()
 
@@ -73,7 +78,7 @@ export class Proto3FieldProcessor {
                 // }
                 // field.extensions
 
-                const typeString = this.getTypeString(field.type)
+                const typeString = this.getTypeReferenceString(field.type)
 
                 this.fileContent.write(
                     `${typeString} ${field.key} = ${field.index} EXTs;`
