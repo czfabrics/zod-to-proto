@@ -3,6 +3,7 @@ import type {
     AnyFileContentMatter,
     FreshFileContentMatter,
 } from '#file/types/content_matter'
+import { Proto3MessageField } from '#proto3_definition/types/fields'
 import { Proto3File } from '#proto3_definition/types/file'
 import { Proto3ImportedType } from '#proto3_definition/types/imported_type'
 import { AnyProto3Message } from '#proto3_definition/types/messages'
@@ -12,6 +13,12 @@ import { Proto3MessageProcessor } from '#proto3_processor/classes/proto3_message
 import { Proto3ServiceProcessor } from '#proto3_processor/classes/proto3_service_processor'
 
 export class Proto3Processor {
+    private applyOptionalToFields(fields: Proto3MessageField[]) {
+        for (const field of fields) {
+            field.isOptional = true
+        }
+    }
+
     private getImportContent(
         importedTypes: Proto3ImportedType[]
     ): FreshFileContentMatter {
@@ -62,6 +69,10 @@ export class Proto3Processor {
     }
 
     public process(file: Proto3File): AnyFileContentMatter {
+        if (file.forcesOptionalEverywhere) {
+            this.applyOptionalToFields(file.getDeepOptionalMessageFields())
+        }
+
         const content = fileContentMatter()
         const importedTypes = file.getDeepImportedTypes()
         const importContent = this.getImportContent(importedTypes)

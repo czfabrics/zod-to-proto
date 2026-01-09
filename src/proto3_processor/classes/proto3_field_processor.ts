@@ -81,6 +81,10 @@ export class Proto3FieldProcessor {
 
                 const typeString = this.getTypeReferenceString(field.type)
 
+                if (field.isOptional) {
+                    this.fileContent.write('optional ')
+                }
+
                 this.fileContent.write(
                     `${typeString} ${field.key} = ${field.index} EXTs;`
                 )
