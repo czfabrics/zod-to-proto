@@ -22,6 +22,7 @@ export class ZodMessageFieldConverter {
         return Proto3MessageField.new({
             index,
             key: snakeCase(key),
+            isOptional: false,
             type,
             schema: rootSchema,
             extensions: [],

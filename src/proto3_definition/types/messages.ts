@@ -1,6 +1,7 @@
 import type {
     AnyProto3MessageField,
     Proto3EnumField,
+    Proto3MessageField,
 } from '#proto3_definition/types/fields'
 import type { GetNewParams } from '#proto3_definition/types/get_new_params'
 import { Proto3ImportedType } from '#proto3_definition/types/imported_type'
@@ -10,6 +11,7 @@ export type Proto3Message = {
     internalName: 'message'
     getDeepMessages(): AnyProto3Message[]
     getDeepImportedTypes(): Proto3ImportedType[]
+    getDeepOptionalMessageFields(): Proto3MessageField[]
     getNextIndex(): number
     name: string
     schema: ZodType
@@ -30,6 +32,11 @@ export const Proto3Message = {
             getDeepImportedTypes() {
                 return this.fields.map((field) => field.getDeepImportedTypes()).flat()
             },
+            getDeepOptionalMessageFields() {
+                return this.fields
+                    .map((field) => field.getDeepOptionalMessageFields())
+                    .flat()
+            },
             getNextIndex() {
                 return this.fields.length
             },
@@ -42,6 +49,7 @@ export type Proto3Enum = {
     internalName: 'enum'
     getDeepMessages(): AnyProto3Message[]
     getDeepImportedTypes(): Proto3ImportedType[]
+    getDeepOptionalMessageFields(): Proto3MessageField[]
     name: string
     schema: ZodType
     fields: Proto3EnumField[]
@@ -55,6 +63,9 @@ export const Proto3Enum = {
                 return [this]
             },
             getDeepImportedTypes() {
+                return []
+            },
+            getDeepOptionalMessageFields() {
                 return []
             },
             ...params,

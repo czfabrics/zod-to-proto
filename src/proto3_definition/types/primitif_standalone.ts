@@ -20,6 +20,9 @@ export const Proto3StringType = {
             getDeepImportedTypes() {
                 return []
             },
+            getDeepOptionalMessageFields() {
+                return []
+            },
         }
     },
 } as const
@@ -34,6 +37,9 @@ export const Proto3BoolType = {
                 return []
             },
             getDeepImportedTypes() {
+                return []
+            },
+            getDeepOptionalMessageFields() {
                 return []
             },
         }
@@ -52,6 +58,9 @@ export const Proto3Int32Type = {
             getDeepImportedTypes() {
                 return []
             },
+            getDeepOptionalMessageFields() {
+                return []
+            },
         }
     },
 } as const
@@ -66,6 +75,9 @@ export const Proto3Int64Type = {
                 return []
             },
             getDeepImportedTypes() {
+                return []
+            },
+            getDeepOptionalMessageFields() {
                 return []
             },
         }
@@ -84,6 +96,9 @@ export const Proto3UInt32Type = {
             getDeepImportedTypes() {
                 return []
             },
+            getDeepOptionalMessageFields() {
+                return []
+            },
         }
     },
 } as const
@@ -98,6 +113,9 @@ export const Proto3UInt64Type = {
                 return []
             },
             getDeepImportedTypes() {
+                return []
+            },
+            getDeepOptionalMessageFields() {
                 return []
             },
         }
@@ -116,6 +134,9 @@ export const Proto3SInt32Type = {
             getDeepImportedTypes() {
                 return []
             },
+            getDeepOptionalMessageFields() {
+                return []
+            },
         }
     },
 } as const
@@ -130,6 +151,9 @@ export const Proto3SInt64Type = {
                 return []
             },
             getDeepImportedTypes() {
+                return []
+            },
+            getDeepOptionalMessageFields() {
                 return []
             },
         }
@@ -148,6 +172,9 @@ export const Proto3Fixed32Type = {
             getDeepImportedTypes() {
                 return []
             },
+            getDeepOptionalMessageFields() {
+                return []
+            },
         }
     },
 } as const
@@ -162,6 +189,9 @@ export const Proto3Fixed64Type = {
                 return []
             },
             getDeepImportedTypes() {
+                return []
+            },
+            getDeepOptionalMessageFields() {
                 return []
             },
         }
@@ -180,6 +210,9 @@ export const Proto3SFixed32Type = {
             getDeepImportedTypes() {
                 return []
             },
+            getDeepOptionalMessageFields() {
+                return []
+            },
         }
     },
 } as const
@@ -194,6 +227,9 @@ export const Proto3SFixed64Type = {
                 return []
             },
             getDeepImportedTypes() {
+                return []
+            },
+            getDeepOptionalMessageFields() {
                 return []
             },
         }
@@ -212,6 +248,9 @@ export const Proto3DoubleType = {
             getDeepImportedTypes() {
                 return []
             },
+            getDeepOptionalMessageFields() {
+                return []
+            },
         }
     },
 } as const
@@ -226,6 +265,9 @@ export const Proto3FloatType = {
                 return []
             },
             getDeepImportedTypes() {
+                return []
+            },
+            getDeepOptionalMessageFields() {
                 return []
             },
         }
@@ -244,6 +286,9 @@ export const Proto3BytesType = {
             getDeepImportedTypes() {
                 return []
             },
+            getDeepOptionalMessageFields() {
+                return []
+            },
         }
     },
 } as const
@@ -259,6 +304,9 @@ export const Proto3MapType = {
             },
             getDeepImportedTypes() {
                 return this.value.getDeepImportedTypes()
+            },
+            getDeepOptionalMessageFields() {
+                return this.value.getDeepOptionalMessageFields()
             },
             ...params,
         }
@@ -296,6 +344,18 @@ export const Proto3RepeatedType = {
                 }
 
                 return currentItem.getDeepImportedTypes()
+            },
+            getDeepOptionalMessageFields() {
+                let currentItem:
+                    | AnyProto3Message
+                    | Proto3ImportedType
+                    | AnyProto3PrimitifType = this
+
+                while (currentItem.internalName === 'repeated') {
+                    currentItem = currentItem.inner
+                }
+
+                return currentItem.getDeepOptionalMessageFields()
             },
             ...params,
         }

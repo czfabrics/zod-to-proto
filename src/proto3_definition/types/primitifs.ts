@@ -1,3 +1,4 @@
+import { Proto3MessageField } from '#proto3_definition/types/fields'
 import { Proto3ImportedType } from '#proto3_definition/types/imported_type'
 import type { AnyProto3Message } from '#proto3_definition/types/messages'
 import type { WithInternalName } from '#proto3_definition/types/with_internal_name'
@@ -30,6 +31,7 @@ export type Proto3PrimitifType = {
         schema: SomeType
         getDeepMessages(): AnyProto3Message[]
         getDeepImportedTypes(): Proto3ImportedType[]
+        getDeepOptionalMessageFields(): Proto3MessageField[]
     }
 }[keyof Proto3Primitifs]
 
@@ -51,6 +53,7 @@ type Proto3ComplexPrimitifs = {
     MAP: {
         getDeepMessages(): AnyProto3Message[]
         getDeepImportedTypes(): Proto3ImportedType[]
+        getDeepOptionalMessageFields(): Proto3MessageField[]
         key: Proto3PrimitifType
         value: Proto3MapValueType
         schema: ZodType
@@ -58,6 +61,7 @@ type Proto3ComplexPrimitifs = {
     REPEATED: {
         getDeepMessages(): AnyProto3Message[]
         getDeepImportedTypes(): Proto3ImportedType[]
+        getDeepOptionalMessageFields(): Proto3MessageField[]
         inner: Proto3RepeatedInnerType
         schema: ZodType
     }
