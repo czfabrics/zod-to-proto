@@ -1,4 +1,5 @@
-import type { NestedFileContentMatter } from '#file/types/content_matter'
+import { fileContentMatter } from '#file/classes/content_matter'
+import type { FreshFileContentMatter } from '#file/types/content_matter'
 import type {
     AnyProto3Field,
     Proto3MessageFieldType,
@@ -7,9 +8,9 @@ import type { Proto3PrimitifType } from '#proto3_definition/types/primitifs'
 import { match } from 'ts-pattern'
 
 export class Proto3FieldProcessor {
-    public constructor(private readonly fileContent: NestedFileContentMatter) {}
+    public constructor(private readonly fileContent: FreshFileContentMatter) {}
 
-    private getScalarTypeString(primitif: Proto3PrimitifType): string {
+    private getScalarTypeReferenceString(primitif: Proto3PrimitifType): string {
         return primitif.name
     }
 
@@ -36,7 +37,7 @@ export class Proto3FieldProcessor {
                     { internalName: 'float' },
                     { internalName: 'double' },
                     { internalName: 'bytes' },
-                    this.getScalarTypeString
+                    this.getScalarTypeReferenceString
                 )
                 .with(
                     { internalName: 'message' },
@@ -45,7 +46,7 @@ export class Proto3FieldProcessor {
                 )
                 .with({ internalName: 'repeated' }, () => 'repeated')
                 .with({ internalName: 'map' }, (map) => {
-                    const keyType: string = this.getScalarTypeString(map.key)
+                    const keyType: string = this.getScalarTypeReferenceString(map.key)
                     const valueType: string = this.getTypeReferenceString(map.value)
 
                     return `map<${keyType}, ${valueType}>`
@@ -85,19 +86,25 @@ export class Proto3FieldProcessor {
                 )
             })
             .with({ internalName: 'message_one_of_field' }, (field) => {
+                const oneOfFieldContent = fileContentMatter()
+
                 let isFirst = true
 
                 for (const subField of field.subFields) {
                     if (!isFirst) {
-                        this.fileContent.endLine()
+                        oneOfFieldContent.endLine()
                     }
 
-                    const fieldProcessor = new Proto3FieldProcessor(this.fileContent)
+                    const fieldProcessor = new Proto3FieldProcessor(oneOfFieldContent)
 
                     fieldProcessor.process(subField)
 
                     isFirst = false
                 }
+
+                this.fileContent
+                    .write(`oneof ${field.key} `)
+                    .writeBlock(oneOfFieldContent)
             })
             .with({ internalName: 'enum_field' }, (field) => {
                 this.fileContent.write(`${field.key} = ${field.index};`)

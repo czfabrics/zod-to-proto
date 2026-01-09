@@ -17,7 +17,7 @@ export class Proto3Processor {
                 content.endLine().endLine()
             }
 
-            content = messageProcessor.process(message)
+            messageProcessor.process(message)
 
             isFirst = false
         }

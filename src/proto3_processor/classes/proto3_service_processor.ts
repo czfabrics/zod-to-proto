@@ -6,7 +6,7 @@ import { Proto3FunctionProcessor } from '#proto3_processor/classes/proto3_functi
 export class Proto3ServiceProcessor {
     public constructor(private readonly content: FreshFileContentMatter) {}
 
-    public process(service: Proto3RpcService): FreshFileContentMatter {
+    public process(service: Proto3RpcService): void {
         const serviceContent = fileContentMatter()
 
         let isFirst = true
@@ -23,6 +23,6 @@ export class Proto3ServiceProcessor {
             isFirst = false
         }
 
-        return this.content.write(`service ${service.name} `).writeBlock(serviceContent)
+        this.content.write(`service ${service.name} `).writeBlock(serviceContent)
     }
 }

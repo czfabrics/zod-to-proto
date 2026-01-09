@@ -7,10 +7,10 @@ import { match } from 'ts-pattern'
 export class Proto3MessageProcessor {
     public constructor(private readonly content: FreshFileContentMatter) {}
 
-    public process(anyMessage: AnyProto3Message): FreshFileContentMatter {
-        return match(anyMessage)
+    public process(anyMessage: AnyProto3Message): void {
+        match(anyMessage)
             .with({ internalName: 'message' }, (message) => {
-                const messageContent = fileContentMatter().singleNest()
+                const messageContent = fileContentMatter()
 
                 let isFirst = true
 
@@ -19,32 +19,17 @@ export class Proto3MessageProcessor {
                         messageContent.endLine()
                     }
 
-                    // TODO: devrait être dans Proto3FieldProcessor
-                    if (field.internalName === 'message_one_of_field') {
-                        const oneOfFieldContent = fileContentMatter().singleNest()
+                    const fieldProcessor = new Proto3FieldProcessor(messageContent)
 
-                        const fieldProcessor = new Proto3FieldProcessor(oneOfFieldContent)
-
-                        fieldProcessor.process(field)
-
-                        messageContent
-                            .write(`oneof ${field.key} `)
-                            .writeBlock(oneOfFieldContent)
-                    } else {
-                        const fieldProcessor = new Proto3FieldProcessor(messageContent)
-
-                        fieldProcessor.process(field)
-                    }
+                    fieldProcessor.process(field)
 
                     isFirst = false
                 }
 
-                return this.content
-                    .write(`message ${message.name} `)
-                    .writeBlock(messageContent)
+                this.content.write(`message ${message.name} `).writeBlock(messageContent)
             })
             .with({ internalName: 'enum' }, (messageEnum) => {
-                const enumContent = fileContentMatter().singleNest()
+                const enumContent = fileContentMatter()
 
                 let isFirst = true
 
@@ -60,9 +45,7 @@ export class Proto3MessageProcessor {
                     isFirst = false
                 }
 
-                return this.content
-                    .write(`enum ${messageEnum.name} `)
-                    .writeBlock(enumContent)
+                this.content.write(`enum ${messageEnum.name} `).writeBlock(enumContent)
             })
             .exhaustive()
     }

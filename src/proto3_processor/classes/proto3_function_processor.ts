@@ -20,11 +20,11 @@ export class Proto3FunctionProcessor {
             .exhaustive()
     }
 
-    public process(rpcFunction: Proto3RpcFunction): FreshFileContentMatter {
+    public process(rpcFunction: Proto3RpcFunction): void {
         const inTypeReference = this.getTypeReferenceString(rpcFunction.in)
         const outTypeReference = this.getTypeReferenceString(rpcFunction.out)
 
-        return this.content
+        this.content
             .write(
                 `rpc ${rpcFunction.name}(${inTypeReference}) returns (${outTypeReference}) `
             )
