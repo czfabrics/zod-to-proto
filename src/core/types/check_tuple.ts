@@ -6,7 +6,9 @@ export type CheckTuple<
     TValues extends string[],
 > = TValues[number] extends TUnion
     ? TValues['length'] extends TuplifyUnion<TUnion>['length']
-        ? TValues
+        ? TValues['length'] extends TuplifyUnion<TValues[number]>['length']
+            ? TValues
+            : TypeDebuggingError<`Duplicate values`>
         : TypeDebuggingError<`Missing values: ${ArrayToStringDisplay<TuplifyUnion<Exclude<TUnion, TValues[number]>>>}`>
     : TypeDebuggingError<`Unexpected values: ${ArrayToStringDisplay<RemoveFromArray<TValues, TUnion>>}`>
 
