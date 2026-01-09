@@ -38,7 +38,21 @@ export const Proto3Message = {
                     .flat()
             },
             getNextIndex() {
-                return this.fields.length
+                const normalFieldsCount = this.fields.filter(
+                    (field) => field.internalName === 'message_field'
+                ).length
+
+                const oneOfFieldsCounts = this.fields
+                    .filter((field) => field.internalName === 'message_one_of_field')
+                    .map((field) => field.subFields.length)
+
+                const counts = [normalFieldsCount, oneOfFieldsCounts].flat()
+                const fieldsCount = counts.reduce(
+                    (accumulator, currentValue) => accumulator + currentValue,
+                    0
+                )
+
+                return fieldsCount
             },
             ...params,
         }
