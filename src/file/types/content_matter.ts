@@ -43,12 +43,17 @@ export type BaseFileContentMatter<TSettings extends DynamicSettings, TExtend> = 
      */
     ['~sources']: DeepReadOnly<string[]>
     settings: DeepReadOnly<TSettings>
-    write: (line: string) => BaseFileContentMatter<TSettings, TExtend>
+    write: (
+        content:
+            | string
+            | BaseFileContentMatter<{ lineTabLevel: any; blockLevel: any }, {}>
+    ) => BaseFileContentMatter<TSettings, TExtend>
     endLine: () => BaseFileContentMatter<TSettings, TExtend>
     singleNest(): NestedFileContentMatter
     writeBlock: (
-        content: AnyFileContentMatter
+        content: BaseFileContentMatter<{ lineTabLevel: any; blockLevel: any }, {}>
     ) => BaseFileContentMatter<TSettings, TExtend>
+    isEmpty: () => boolean
 } & TExtend
 
 export type FileContentMatter<TSettings extends DynamicSettings> = BaseFileContentMatter<

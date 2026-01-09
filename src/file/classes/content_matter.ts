@@ -94,12 +94,28 @@ export class $FileContentMatter {
         return lastSource
     }
 
-    public write(data: string): FileContentMatter<DynamicSettings> {
-        let lastSource = this.popLastSource()
+    public write(
+        data: string | AnyFileContentMatter
+    ): FileContentMatter<DynamicSettings> {
+        if (typeof data === 'string') {
+            let lastSource = this.popLastSource()
 
-        const updatedSource = `${lastSource}${data}`
+            const updatedSource = `${lastSource}${data}`
 
-        this.#sources.push(updatedSource)
+            this.#sources.push(updatedSource)
+        } else {
+            let isFirst = true
+
+            for (const source of data['~sources']) {
+                if (!isFirst) {
+                    this.endLine()
+                }
+
+                this.write(source)
+
+                isFirst = false
+            }
+        }
 
         return this
     }
@@ -142,6 +158,18 @@ export class $FileContentMatter {
         this.closeBlock()
 
         return this
+    }
+
+    public isEmpty(): boolean {
+        if (this.#sources.length === 0) {
+            return true
+        }
+
+        if (this.#sources.length === 1) {
+            return this.#sources[0] === ''
+        }
+
+        return false
     }
 }
 
