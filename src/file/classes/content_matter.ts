@@ -141,6 +141,14 @@ export class $FileContentMatter {
     }
 
     public writeBlock(content: AnyFileContentMatter): FileContentMatter<DynamicSettings> {
+        if (content.isEmpty()) {
+            this.write(this.config.openingBlockCharacter).write(
+                this.config.closingBlockCharacter
+            )
+
+            return this
+        }
+
         this.openBlock()
 
         let isFirst = true
