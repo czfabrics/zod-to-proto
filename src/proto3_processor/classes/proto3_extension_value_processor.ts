@@ -40,6 +40,8 @@ export class Proto3ExtensionValueProcessor {
             }
 
             this.content.writeRecord(...recordContentEntries)
+        } else if (typeof extensionValue === 'string') {
+            this.content.write(`"${extensionValue}"`)
         } else {
             this.content.write('' + extensionValue)
         }
