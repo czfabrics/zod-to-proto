@@ -1,9 +1,8 @@
+import { Proto3RpcFunctionExtension } from '#proto3_definition/types/extensions/functions'
 import { Proto3MessageField } from '#proto3_definition/types/fields'
 import { GetNewParams } from '#proto3_definition/types/get_new_params'
 import { Proto3ImportedType } from '#proto3_definition/types/imported_type'
 import { AnyProto3Message } from '#proto3_definition/types/messages'
-
-export type Proto3RpcFunctionExtension = (this: Proto3RpcFunction) => string
 
 export type Proto3RpcFunction = {
     internalName: 'rpc_function'
@@ -27,7 +26,10 @@ export const Proto3RpcFunction = {
                 return [
                     ...this.in.getDeepImportedTypes(),
                     ...this.out.getDeepImportedTypes(),
-                ]
+                    ...this.extensions.map((extension) =>
+                        extension.getDeepImportedTypes()
+                    ),
+                ].flat()
             },
             getDeepOptionalMessageFields() {
                 return [
