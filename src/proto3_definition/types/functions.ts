@@ -1,4 +1,4 @@
-import { Proto3RpcFunctionExtension } from '#proto3_definition/types/extensions/functions'
+import { Proto3Extension } from '#proto3_definition/types/extension'
 import { Proto3MessageField } from '#proto3_definition/types/fields'
 import { GetNewParams } from '#proto3_definition/types/get_new_params'
 import { Proto3ImportedType } from '#proto3_definition/types/imported_type'
@@ -12,7 +12,7 @@ export type Proto3RpcFunction = {
     name: string
     in: AnyProto3Message | Proto3ImportedType
     out: AnyProto3Message | Proto3ImportedType
-    extensions: Proto3RpcFunctionExtension[]
+    extensions: Proto3Extension[]
 }
 
 export const Proto3RpcFunction = {

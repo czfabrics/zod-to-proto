@@ -3,7 +3,7 @@ import type {
     FreshFileContentMatter,
     NestedFileContentMatter,
 } from '#file/types/content_matter'
-import { Proto3RpcFunctionExtension } from '#proto3_definition/types/extensions/functions'
+import { Proto3Extension } from '#proto3_definition/types/extension'
 import { Proto3RpcFunction } from '#proto3_definition/types/functions'
 import { Proto3ImportedType } from '#proto3_definition/types/imported_type'
 import { AnyProto3Message } from '#proto3_definition/types/messages'
@@ -27,7 +27,7 @@ export class Proto3FunctionProcessor {
 
     private writeExtension(
         extensionContent: NestedFileContentMatter,
-        extension: Proto3RpcFunctionExtension
+        extension: Proto3Extension
     ): void {
         const extensionValueContent = fileContentMatter()
         const processor = new Proto3ExtensionValueProcessor(extensionValueContent)
@@ -41,7 +41,7 @@ export class Proto3FunctionProcessor {
     }
 
     private shouldSkipExtensionDependingOnValue(
-        extensionValue: Proto3RpcFunctionExtension['value']
+        extensionValue: Proto3Extension['value']
     ): boolean {
         if (typeof extensionValue === 'object' && !Array.isArray(extensionValue)) {
             const messageEntryLength = Object.keys(extensionValue).length
@@ -55,8 +55,8 @@ export class Proto3FunctionProcessor {
     }
 
     private alterateExtensionDependingOnValue(
-        extension: Proto3RpcFunctionExtension
-    ): Proto3RpcFunctionExtension {
+        extension: Proto3Extension
+    ): Proto3Extension {
         if (typeof extension.value !== 'object' || Array.isArray(extension.value)) {
             return extension
         }
@@ -70,7 +70,7 @@ export class Proto3FunctionProcessor {
         const firstKey = messageEntries[0]![0]
         const firstValue = messageEntries[0]![1]
 
-        return Proto3RpcFunctionExtension.new({
+        return Proto3Extension.new({
             ...extension,
             key: Proto3ImportedType.new({
                 ...extension.key,

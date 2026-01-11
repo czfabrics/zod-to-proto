@@ -1,6 +1,6 @@
 import { fileContentMatter } from '#file/classes/content_matter'
 import type { FreshFileContentMatter } from '#file/types/content_matter'
-import { AnyProto3ExtensionValue } from '#proto3_definition/types/extensions/values'
+import { AnyProto3ExtensionValue } from '#proto3_definition/types/extension'
 
 export class Proto3ExtensionValueProcessor {
     public constructor(private readonly content: FreshFileContentMatter) {}

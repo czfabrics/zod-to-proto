@@ -1,3 +1,4 @@
+import { Proto3Extension } from '#proto3_definition/types/extension'
 import type { GetNewParams } from '#proto3_definition/types/get_new_params'
 import { Proto3ImportedType } from '#proto3_definition/types/imported_type'
 import { AnyProto3Message } from '#proto3_definition/types/messages'
@@ -8,8 +9,6 @@ import { SomeType } from 'zod/v4/core'
 export type Proto3BaseField = {
     key: string
 }
-
-export type Proto3FieldExtension = (this: Proto3MessageField) => string
 
 export type Proto3MessageFieldType =
     | AnyProto3PrimitifType
@@ -24,7 +23,7 @@ export type Proto3MessageField = Proto3BaseField & {
     internalName: 'message_field'
     isOptional: boolean
     type: Proto3MessageFieldType
-    extensions: Proto3FieldExtension[]
+    extensions: Proto3Extension[]
     // TODO: faudrait être plus précis...
     schema: SomeType
 }
