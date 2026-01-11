@@ -36,7 +36,12 @@ export const Proto3MessageField = {
                 return this.type.getDeepMessages()
             },
             getDeepImportedTypes() {
-                return this.type.getDeepImportedTypes()
+                return [
+                    ...this.type.getDeepImportedTypes(),
+                    ...this.extensions.map((extension) =>
+                        extension.getDeepImportedTypes()
+                    ),
+                ].flat()
             },
             getDeepOptionalMessageFields() {
                 return [this, ...this.type.getDeepOptionalMessageFields()]
