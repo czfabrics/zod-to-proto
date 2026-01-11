@@ -11,6 +11,7 @@ export class $FileContentMatter {
     readonly #settings: DynamicSettings = {
         lineTabLevel: 0,
         blockLevel: 0,
+        listLevel: 0,
     }
     readonly #sources: string[] = ['']
 
@@ -27,6 +28,11 @@ export class $FileContentMatter {
             lineTabCharacter: string
             openingBlockCharacter: string
             closingBlockCharacter: string
+            openingListCharacter: string
+            closingListCharacter: string
+            listSeparatorCharacter: string
+            recordKeyValueSeparatorCharacter: string
+            recordEntrySeparatorCharacter: string
         }>
     ) {}
 
@@ -39,6 +45,12 @@ export class $FileContentMatter {
     private safeDecreaseBlockLevel(): void {
         if (this.#settings.blockLevel > 0) {
             this.#settings.blockLevel -= 1
+        }
+    }
+
+    private safeDecreaseListLevel(): void {
+        if (this.#settings.listLevel > 0) {
+            this.#settings.listLevel -= 1
         }
     }
 
@@ -71,7 +83,7 @@ export class $FileContentMatter {
 
     public closeBlock(): FileContentMatter<DynamicSettings> {
         if (this.#settings.blockLevel === 0) {
-            throw new Error('You should open a block before calling the clone method')
+            throw new Error('You should open a block before calling the close method')
         }
 
         this.safeDecreaseLineTabLevel()
@@ -80,6 +92,32 @@ export class $FileContentMatter {
         this.endLine()
 
         this.write(this.config.closingBlockCharacter)
+
+        return this
+    }
+
+    public openList(): FileContentMatter<DynamicSettings> {
+        this.write(this.config.openingListCharacter)
+
+        this.#settings.lineTabLevel += 1
+        this.#settings.listLevel += 1
+
+        this.endLine()
+
+        return this
+    }
+
+    public closeList(): FileContentMatter<DynamicSettings> {
+        if (this.#settings.listLevel === 0) {
+            throw new Error('You should open an array before calling the close method')
+        }
+
+        this.safeDecreaseLineTabLevel()
+        this.safeDecreaseListLevel()
+
+        this.endLine()
+
+        this.write(this.config.closingListCharacter)
 
         return this
     }
@@ -168,6 +206,88 @@ export class $FileContentMatter {
         return this
     }
 
+    public writeList(
+        ...contents: AnyFileContentMatter[]
+    ): FileContentMatter<DynamicSettings> {
+        if (contents.length === 0) {
+            this.write(this.config.openingListCharacter).write(
+                this.config.closingListCharacter
+            )
+
+            return this
+        }
+
+        this.openList()
+
+        let isFirstContent = true
+
+        for (const content of contents) {
+            if (!isFirstContent) {
+                this.write(this.config.listSeparatorCharacter).endLine()
+            }
+
+            let isFirstSource = true
+
+            for (const source of content['~sources']) {
+                if (!isFirstSource) {
+                    this.endLine()
+                }
+
+                this.write(source)
+
+                isFirstSource = false
+            }
+
+            isFirstContent = false
+        }
+
+        this.closeList()
+
+        return this
+    }
+
+    public writeRecord(
+        ...entries: { key: string; content: AnyFileContentMatter }[]
+    ): FileContentMatter<DynamicSettings> {
+        if (entries.length === 0) {
+            this.write(this.config.openingBlockCharacter).write(
+                this.config.closingBlockCharacter
+            )
+
+            return this
+        }
+
+        this.openBlock()
+
+        let isFirstContent = true
+
+        for (const entry of entries) {
+            if (!isFirstContent) {
+                this.write(this.config.listSeparatorCharacter).endLine()
+            }
+
+            this.write(`${entry.key}${this.config.recordKeyValueSeparatorCharacter}`)
+
+            let isFirstSource = true
+
+            for (const source of entry.content['~sources']) {
+                if (!isFirstSource) {
+                    this.endLine()
+                }
+
+                this.write(source)
+
+                isFirstSource = false
+            }
+
+            isFirstContent = false
+        }
+
+        this.closeBlock()
+
+        return this
+    }
+
     public isEmpty(): boolean {
         if (this.#sources.length === 0) {
             return true
@@ -186,5 +306,10 @@ export const fileContentMatter = function (): FreshFileContentMatter {
         lineTabCharacter: '  ',
         openingBlockCharacter: '{',
         closingBlockCharacter: '}',
+        openingListCharacter: '[',
+        closingListCharacter: ']',
+        listSeparatorCharacter: ',',
+        recordKeyValueSeparatorCharacter: ': ',
+        recordEntrySeparatorCharacter: ',',
     }) as FreshFileContentMatter
 }

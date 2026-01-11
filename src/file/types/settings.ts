@@ -4,9 +4,10 @@ import type { Add, Subtract } from 'ts-arithmetic'
 export type DynamicSettings = {
     lineTabLevel: number
     blockLevel: number
+    listLevel: number
 }
 
-export type SettingsCounters = 'lineTabLevel' | 'blockLevel'
+export type SettingsCounters = 'lineTabLevel' | 'blockLevel' | 'listLevel'
 
 export type IncreaseCounter<
     TSettings extends DynamicSettings,

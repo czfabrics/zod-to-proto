@@ -37,6 +37,22 @@ export type FileContentMatterBlockFn<TSettings extends DynamicSettings> =
               >
           }
 
+export type FileContentMatterListFn<TSettings extends DynamicSettings> =
+    TSettings['listLevel'] extends 0
+        ? {
+              openList: () => FileContentMatter<
+                  IncreaseCounter<TSettings, ['lineTabLevel', 'listLevel']>
+              >
+          }
+        : {
+              openList: () => FileContentMatter<
+                  IncreaseCounter<TSettings, ['lineTabLevel', 'listLevel']>
+              >
+              closeList: () => FileContentMatter<
+                  DecreaseCounter<TSettings, ['lineTabLevel', 'listLevel']>
+              >
+          }
+
 export type BaseFileContentMatter<TSettings extends DynamicSettings, TExtend> = {
     /**
      * @deprecated internal api (not deprecated)
@@ -46,32 +62,56 @@ export type BaseFileContentMatter<TSettings extends DynamicSettings, TExtend> = 
     write: (
         content:
             | string
-            | BaseFileContentMatter<{ lineTabLevel: any; blockLevel: any }, {}>
+            | BaseFileContentMatter<
+                  { lineTabLevel: any; blockLevel: any; listLevel: any },
+                  {}
+              >
     ) => BaseFileContentMatter<TSettings, TExtend>
     endLine: () => BaseFileContentMatter<TSettings, TExtend>
     singleNest(): NestedFileContentMatter
     writeBlock: (
-        content: BaseFileContentMatter<{ lineTabLevel: any; blockLevel: any }, {}>
+        content: BaseFileContentMatter<
+            { lineTabLevel: any; blockLevel: any; listLevel: any },
+            {}
+        >
+    ) => BaseFileContentMatter<TSettings, TExtend>
+    writeList: (
+        ...contents: BaseFileContentMatter<
+            { lineTabLevel: any; blockLevel: any; listLevel: any },
+            {}
+        >[]
+    ) => BaseFileContentMatter<TSettings, TExtend>
+    writeRecord: (
+        ...entries: {
+            key: string
+            content: BaseFileContentMatter<
+                { lineTabLevel: any; blockLevel: any; listLevel: any },
+                {}
+            >
+        }[]
     ) => BaseFileContentMatter<TSettings, TExtend>
     isEmpty: () => boolean
 } & TExtend
 
 export type FileContentMatter<TSettings extends DynamicSettings> = BaseFileContentMatter<
     TSettings,
-    FileContentMatterLineTabFn<TSettings> & FileContentMatterBlockFn<TSettings>
+    FileContentMatterLineTabFn<TSettings> &
+        FileContentMatterBlockFn<TSettings> &
+        FileContentMatterListFn<TSettings>
 >
 
 export type FreshFileContentMatter = FileContentMatter<{
     lineTabLevel: 0
     blockLevel: 0
+    listLevel: 0
 }>
 
 export type AnyFileContentMatter = BaseFileContentMatter<
-    { lineTabLevel: any; blockLevel: any },
+    { lineTabLevel: any; blockLevel: any; listLevel: any },
     {}
 >
 
 export type NestedFileContentMatter = BaseFileContentMatter<
-    { lineTabLevel: number; blockLevel: number },
+    { lineTabLevel: number; blockLevel: number; listLevel: number },
     {}
 >
