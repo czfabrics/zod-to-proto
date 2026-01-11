@@ -2,7 +2,10 @@ import { GetNewParams } from '#proto3_definition/types/get_new_params'
 import { Proto3ImportedType } from '#proto3_definition/types/imported_type'
 
 export type Proto3ExtensionScalarValue = string | number | boolean
-export type Proto3ExtensionRepeatedValue = Proto3ExtensionScalarValue[]
+export type Proto3ExtensionRepeatedValue = (
+    | Proto3ExtensionScalarValue
+    | Proto3ExtensionMessageValue
+)[]
 export type Proto3ExtensionMessageValue = {
     [key: string]:
         | Proto3ExtensionScalarValue
