@@ -8,7 +8,7 @@ import { Proto3File } from '#proto3_definition/types/file'
 import { Proto3ImportedType } from '#proto3_definition/types/imported_type'
 import { AnyProto3Message } from '#proto3_definition/types/messages'
 import { Proto3RpcService } from '#proto3_definition/types/service'
-import { Proto3ImportedTypeProcessor } from '#proto3_processor/classes/proto3_imported_type_processor'
+import { Proto3ImportProcessor } from '#proto3_processor/classes/proto3_import_processor'
 import { Proto3MessageProcessor } from '#proto3_processor/classes/proto3_message_processor'
 import { Proto3ServiceProcessor } from '#proto3_processor/classes/proto3_service_processor'
 
@@ -23,19 +23,9 @@ export class Proto3Processor {
         importedTypes: Proto3ImportedType[]
     ): FreshFileContentMatter {
         const content = fileContentMatter()
-        const processor = new Proto3ImportedTypeProcessor(content)
+        const processor = new Proto3ImportProcessor(content)
 
-        let isFirst = true
-
-        for (const imported of importedTypes) {
-            if (!isFirst) {
-                content.endLine().endLine()
-            }
-
-            processor.process(imported)
-
-            isFirst = false
-        }
+        processor.process(importedTypes)
 
         return content
     }
