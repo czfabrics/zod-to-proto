@@ -5,8 +5,8 @@ import type {
 } from '#file/types/content_matter'
 import { Proto3Extension } from '#proto3_definition/types/extension'
 import { Proto3RpcFunction } from '#proto3_definition/types/functions'
-import { Proto3ImportedType } from '#proto3_definition/types/imported_type'
 import { AnyProto3Message } from '#proto3_definition/types/messages'
+import { Proto3ImportedType } from '#proto3_definition/types/types'
 import { Proto3ExtensionValueProcessor } from '#proto3_processor/classes/proto3_extension_value_processor'
 import { match } from 'ts-pattern'
 
@@ -21,7 +21,7 @@ export class Proto3FunctionProcessor {
                 { internalName: 'message' },
                 (message) => message.name
             )
-            .with({ internalName: 'imported' }, (imported) => imported.typeReference)
+            .with({ internalName: 'imported_type' }, (imported) => imported.typeReference)
             .exhaustive()
     }
 

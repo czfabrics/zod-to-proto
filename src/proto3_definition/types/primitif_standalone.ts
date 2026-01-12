@@ -1,11 +1,11 @@
 import { GetNewParams } from '#proto3_definition/types/get_new_params'
-import { Proto3ImportedType } from '#proto3_definition/types/imported_type'
 import { AnyProto3Message } from '#proto3_definition/types/messages'
 import {
     AnyProto3PrimitifType,
     Proto3ComplexPrimitifType,
     Proto3PrimitifType,
 } from '#proto3_definition/types/primitifs'
+import { Proto3ImportedType } from '#proto3_definition/types/types'
 import { SomeType } from 'zod/v4/core'
 
 export const Proto3StringType = {

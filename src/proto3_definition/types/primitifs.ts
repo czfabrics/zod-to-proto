@@ -1,6 +1,6 @@
 import { Proto3MessageField } from '#proto3_definition/types/fields'
-import { Proto3ImportedType } from '#proto3_definition/types/imported_type'
 import type { AnyProto3Message } from '#proto3_definition/types/messages'
+import { Proto3ImportedType } from '#proto3_definition/types/types'
 import type { WithInternalName } from '#proto3_definition/types/with_internal_name'
 import type { ZodType } from 'zod'
 import { SomeType } from 'zod/v4/core'

@@ -5,8 +5,8 @@ import type {
     AnyProto3Field,
     Proto3MessageFieldType,
 } from '#proto3_definition/types/fields'
-import { Proto3ImportedType } from '#proto3_definition/types/imported_type'
 import type { Proto3PrimitifType } from '#proto3_definition/types/primitifs'
+import { Proto3ImportedType } from '#proto3_definition/types/types'
 import { Proto3ExtensionValueProcessor } from '#proto3_processor/classes/proto3_extension_value_processor'
 import { match } from 'ts-pattern'
 
@@ -54,7 +54,7 @@ export class Proto3FieldProcessor {
 
                     return `map<${keyType}, ${valueType}>`
                 })
-                .with({ internalName: 'imported' }, (imported) => {
+                .with({ internalName: 'imported_type' }, (imported) => {
                     return imported.typeReference
                 })
                 .exhaustive()

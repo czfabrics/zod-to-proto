@@ -1,4 +1,4 @@
-import { Proto3ImportedType } from '#proto3_definition/types/imported_type'
+import { Proto3ImportedType } from '#proto3_definition/types/types'
 
 export const Proto3Empty = {
     useType: () => {

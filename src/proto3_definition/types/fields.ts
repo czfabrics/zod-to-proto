@@ -1,8 +1,8 @@
 import { Proto3Extension } from '#proto3_definition/types/extension'
 import type { GetNewParams } from '#proto3_definition/types/get_new_params'
-import { Proto3ImportedType } from '#proto3_definition/types/imported_type'
 import { AnyProto3Message } from '#proto3_definition/types/messages'
 import { type AnyProto3PrimitifType } from '#proto3_definition/types/primitifs'
+import { Proto3ImportedType } from '#proto3_definition/types/types'
 import { ZodType } from 'zod'
 import { SomeType } from 'zod/v4/core'
 

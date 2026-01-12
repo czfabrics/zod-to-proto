@@ -1,5 +1,5 @@
 import type { FreshFileContentMatter } from '#file/types/content_matter'
-import { Proto3ImportedType } from '#proto3_definition/types/imported_type'
+import { Proto3ImportedType } from '#proto3_definition/types/types'
 
 export class Proto3ImportProcessor {
     public constructor(private readonly content: FreshFileContentMatter) {}

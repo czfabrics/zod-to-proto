@@ -4,7 +4,7 @@ import type {
     Proto3MessageField,
 } from '#proto3_definition/types/fields'
 import type { GetNewParams } from '#proto3_definition/types/get_new_params'
-import { Proto3ImportedType } from '#proto3_definition/types/imported_type'
+import { Proto3ImportedType } from '#proto3_definition/types/types'
 import type { ZodType } from 'zod'
 
 export type Proto3Message = {
