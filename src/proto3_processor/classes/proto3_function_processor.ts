@@ -35,7 +35,7 @@ export class Proto3FunctionProcessor {
         processor.process(extension.value)
 
         extensionContent
-            .write(`option (${extension.key.typeReference}) = `)
+            .write(`option ${extension.key.typeReference} = `)
             .write(extensionValueContent)
             .write(';')
     }
