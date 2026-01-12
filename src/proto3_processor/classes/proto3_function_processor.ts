@@ -107,9 +107,11 @@ export class Proto3FunctionProcessor {
         }
 
         this.content
-            .write(
-                `rpc ${rpcFunction.name}(${inTypeReference}) returns (${outTypeReference}) `
-            )
+            .write(`rpc ${rpcFunction.name}(`)
+            .writeIf(rpcFunction.inStream, 'stream ')
+            .write(`${inTypeReference}) returns (`)
+            .writeIf(rpcFunction.outStream, 'stream ')
+            .write(`${outTypeReference}) `)
             .writeBlock(extensionContent)
     }
 }

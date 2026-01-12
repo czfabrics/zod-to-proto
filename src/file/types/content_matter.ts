@@ -67,6 +67,15 @@ export type BaseFileContentMatter<TSettings extends DynamicSettings, TExtend> = 
                   {}
               >
     ) => BaseFileContentMatter<TSettings, TExtend>
+    writeIf: (
+        condition: boolean,
+        content:
+            | string
+            | BaseFileContentMatter<
+                  { lineTabLevel: any; blockLevel: any; listLevel: any },
+                  {}
+              >
+    ) => BaseFileContentMatter<TSettings, TExtend>
     endLine: () => BaseFileContentMatter<TSettings, TExtend>
     singleNest(): NestedFileContentMatter
     writeBlock: (

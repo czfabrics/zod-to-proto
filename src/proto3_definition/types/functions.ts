@@ -11,7 +11,9 @@ export type Proto3RpcFunction = {
     getDeepOptionalMessageFields(): Proto3MessageField[]
     name: string
     in: AnyProto3Message | Proto3ImportedType
+    inStream: boolean
     out: AnyProto3Message | Proto3ImportedType
+    outStream: boolean
     extensions: Proto3Extension[]
 }
 

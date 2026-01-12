@@ -158,6 +158,17 @@ export class $FileContentMatter {
         return this
     }
 
+    public writeIf(
+        condition: boolean,
+        data: string | AnyFileContentMatter
+    ): FileContentMatter<DynamicSettings> {
+        if (condition) {
+            return this.write(data)
+        }
+
+        return this
+    }
+
     public endLine(): FileContentMatter<DynamicSettings> {
         let newLine = ''
 
