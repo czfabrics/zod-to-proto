@@ -6,7 +6,7 @@ import type {
     Proto3MessageFieldType,
 } from '#proto3_definition/types/fields'
 import type { Proto3PrimitifType } from '#proto3_definition/types/primitifs'
-import { Proto3ImportedType } from '#proto3_definition/types/types'
+import { AnyProto3Type } from '#proto3_definition/types/types'
 import { Proto3ExtensionValueProcessor } from '#proto3_processor/classes/proto3_extension_value_processor'
 import { match } from 'ts-pattern'
 
@@ -120,7 +120,7 @@ export class Proto3FieldProcessor {
 
         return Proto3Extension.new({
             ...extension,
-            key: Proto3ImportedType.new({
+            key: AnyProto3Type.new({
                 ...extension.key,
                 typeReference: `(${extension.key.typeReference}).${firstKey}`,
             }),

@@ -1,5 +1,5 @@
 import { GetNewParams } from '#proto3_definition/types/get_new_params'
-import { Proto3ImportedType } from '#proto3_definition/types/types'
+import { AnyProto3Type, Proto3ImportedType } from '#proto3_definition/types/types'
 
 export type Proto3ExtensionScalarValue = string | number | boolean | undefined
 export type Proto3ExtensionRepeatedValue = (
@@ -22,7 +22,7 @@ export type Proto3Extension = {
     internalName: 'extension'
     getDeepImportedTypes(): Proto3ImportedType[]
     //// TODO: handle extend keyword (custom extension)
-    key: Proto3ImportedType
+    key: AnyProto3Type
     value: AnyProto3ExtensionValue
 }
 

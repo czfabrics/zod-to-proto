@@ -6,7 +6,7 @@ import type {
 import { Proto3Extension } from '#proto3_definition/types/extension'
 import { Proto3RpcFunction } from '#proto3_definition/types/functions'
 import { AnyProto3Message } from '#proto3_definition/types/messages'
-import { Proto3ImportedType } from '#proto3_definition/types/types'
+import { AnyProto3Type, Proto3ImportedType } from '#proto3_definition/types/types'
 import { Proto3ExtensionValueProcessor } from '#proto3_processor/classes/proto3_extension_value_processor'
 import { match } from 'ts-pattern'
 
@@ -72,7 +72,7 @@ export class Proto3FunctionProcessor {
 
         return Proto3Extension.new({
             ...extension,
-            key: Proto3ImportedType.new({
+            key: AnyProto3Type.new({
                 ...extension.key,
                 typeReference: `(${extension.key.typeReference}).${firstKey}`,
             }),

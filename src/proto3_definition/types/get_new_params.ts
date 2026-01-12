@@ -6,3 +6,11 @@ export type GetNewParams<T> = Omit<
     | 'getDeepOptionalMessageFields'
     | 'getNextIndex'
 >
+
+export type GetAnyNewParams<T> = Omit<
+    T,
+    | 'getDeepMessages'
+    | 'getDeepImportedTypes'
+    | 'getDeepOptionalMessageFields'
+    | 'getNextIndex'
+>
