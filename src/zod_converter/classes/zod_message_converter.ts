@@ -14,10 +14,13 @@ import { ZodMessageOneOfFieldConverter } from '#zod_converter/classes/zod_messag
 import { zodTypePattern } from '#zod_converter/helpers/zod_type_pattern'
 import { ZodMessageFieldType, type AnyZodMessage } from '#zod_converter/types/messages'
 import { ZodPassthroughType } from '#zod_converter/types/passthroughs'
+import { ZodConversionTransformers } from '#zod_converter/types/transformers'
 import { pascalCase } from 'change-case'
 import { match } from 'ts-pattern'
 
 export class ZodMessageConverter {
+    public constructor(private readonly transformers: ZodConversionTransformers) {}
+
     public convert(
         name: string,
         // TODO: par contre si on prend ZodCatch, on ne sait pas si c'est un ZodMessageFieldType en innerType...
@@ -42,11 +45,17 @@ export class ZodMessageConverter {
                     let field: Proto3MessageField | Proto3MessageOneOfField
 
                     if (ZodMessageFieldType.is(valueDeepSchema)) {
-                        const converter = new ZodMessageFieldConverter(message)
+                        const converter = new ZodMessageFieldConverter(
+                            message,
+                            this.transformers
+                        )
 
                         field = converter.convert(key, valueDeepSchema)
                     } else {
-                        const converter = new ZodMessageOneOfFieldConverter(message)
+                        const converter = new ZodMessageOneOfFieldConverter(
+                            message,
+                            this.transformers
+                        )
 
                         field = converter.convert(key, valueDeepSchema)
                     }
@@ -60,7 +69,7 @@ export class ZodMessageConverter {
                 const fields = Array.from(schema._zod.values).map((value, index) => {
                     if (typeof value !== 'string') {
                         throw new Error(
-                            'This `ZodEnum` contains a value that is not a string, this is impossible depending one the `z.enum()` method'
+                            'This `ZodEnum` contains a value that is not a string, this is impossible depending one the `z.enum()` method type'
                         )
                     }
 

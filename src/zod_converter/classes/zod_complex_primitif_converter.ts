@@ -10,9 +10,12 @@ import { ZodMessageFieldTypeConverter } from '#zod_converter/classes/zod_message
 import { zodTypePattern } from '#zod_converter/helpers/zod_type_pattern'
 import type { ZodComplexPrimitifType } from '#zod_converter/types/complex_primitifs'
 import { ZodPassthroughType } from '#zod_converter/types/passthroughs'
+import { ZodConversionTransformers } from '#zod_converter/types/transformers'
 import { match } from 'ts-pattern'
 
 export class ZodComplexPrimitifConverter {
+    public constructor(private readonly transformers: ZodConversionTransformers) {}
+
     public convert(
         key: string,
         rootSchema: ZodComplexPrimitifType | ZodPassthroughType
@@ -22,7 +25,7 @@ export class ZodComplexPrimitifConverter {
         return match(deepSchema)
             .returnType<Proto3ComplexPrimitifType>()
             .with(zodTypePattern('array'), (schema) => {
-                const converter = new ZodMessageFieldTypeConverter()
+                const converter = new ZodMessageFieldTypeConverter(this.transformers)
 
                 // TODO: c'est dans le typage ? le fait qu'un array ne peut pas prendre un record?
                 assertsZodRepeatedInnerType(schema._zod.def.element)
@@ -35,7 +38,7 @@ export class ZodComplexPrimitifConverter {
                 })
             })
             .with(zodTypePattern('set'), (schema) => {
-                const converter = new ZodMessageFieldTypeConverter()
+                const converter = new ZodMessageFieldTypeConverter(this.transformers)
 
                 // TODO: c'est dans le typage ? le fait qu'un array ne peut pas prendre un record?
                 assertsZodRepeatedInnerType(schema._zod.def.valueType)
@@ -48,7 +51,7 @@ export class ZodComplexPrimitifConverter {
                 })
             })
             .with(zodTypePattern('record'), (schema) => {
-                const converter = new ZodMessageFieldTypeConverter()
+                const converter = new ZodMessageFieldTypeConverter(this.transformers)
 
                 // TODO: ajouter le typage le $ZodRecordKey sans SYMBOL
                 // TODO: ajouter au typage key map

@@ -17,8 +17,11 @@ import {
 import type { AnyZodMessage, ZodMessageFieldType } from '#zod_converter/types/messages'
 import type { ZodPassthroughType } from '#zod_converter/types/passthroughs'
 import { ZodPrimitifType } from '#zod_converter/types/primitifs'
+import { ZodConversionTransformers } from '#zod_converter/types/transformers'
 
 export class ZodMessageFieldTypeConverter {
+    public constructor(private readonly transformers: ZodConversionTransformers) {}
+
     public convert(
         key: string,
         schema: ZodPrimitifType | ZodPassthroughType
@@ -54,12 +57,12 @@ export class ZodMessageFieldTypeConverter {
         }
 
         if (ZodComplexPrimitifType.is(schema)) {
-            const converter = new ZodComplexPrimitifConverter()
+            const converter = new ZodComplexPrimitifConverter(this.transformers)
 
             return converter.convert(key, schema)
         }
 
-        const converter = new ZodMessageConverter()
+        const converter = new ZodMessageConverter(this.transformers)
 
         return converter.convert(key, schema)
     }

@@ -12,19 +12,23 @@ import { zodTypePattern } from '#zod_converter/helpers/zod_type_pattern'
 import type { Literal } from '#zod_converter/types/literal'
 import type { ZodMessageOneOfFieldType } from '#zod_converter/types/messages'
 import { ZodPassthroughType } from '#zod_converter/types/passthroughs'
+import { ZodConversionTransformers } from '#zod_converter/types/transformers'
 import { snakeCase } from 'change-case'
 import { match } from 'ts-pattern'
 import { SomeType } from 'zod/v4/core'
 
 export class ZodMessageOneOfFieldConverter {
-    public constructor(private readonly message: Proto3Message) {}
+    public constructor(
+        private readonly message: Proto3Message,
+        private readonly transformers: ZodConversionTransformers
+    ) {}
 
     private getSubFields(
         subFieldSchema: SomeType,
         parentKey: string,
         subFieldIndex: number
     ): Proto3MessageField {
-        const converter = new ZodMessageFieldConverter(this.message)
+        const converter = new ZodMessageFieldConverter(this.message, this.transformers)
 
         assertsZodMessageFieldType(subFieldSchema)
 
@@ -38,7 +42,7 @@ export class ZodMessageOneOfFieldConverter {
         parentKey: string,
         values: Literal[]
     ): Proto3MessageField[] {
-        const converter = new ZodMessageFieldConverter(this.message)
+        const converter = new ZodMessageFieldConverter(this.message, this.transformers)
 
         assertsZodMessageFieldType(subFieldSchema)
 
