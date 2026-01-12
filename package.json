@@ -49,6 +49,7 @@
         "prettier": "^3.6.2",
         "rimraf": "^6.0.1",
         "ts-arithmetic": "^0.1.1",
+        "type-fest": "^5.3.1",
         "typescript": "^5.9.2"
     }
 }

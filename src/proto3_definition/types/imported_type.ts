@@ -12,7 +12,7 @@ export type Proto3ImportedType = {
 }
 
 export const Proto3ImportedType = {
-    new: (params: GetNewParams<Proto3ImportedType>): Proto3ImportedType => {
+    new: <const TParams extends GetNewParams<Proto3ImportedType>>(params: TParams) => {
         return {
             internalName: 'imported',
             getDeepMessages() {
@@ -25,6 +25,6 @@ export const Proto3ImportedType = {
                 return []
             },
             ...params,
-        }
+        } as const satisfies Proto3ImportedType
     },
 } as const
