@@ -52,7 +52,7 @@ export const Proto3Message = {
                     0
                 )
 
-                return fieldsCount
+                return fieldsCount + 1
             },
             ...params,
         }
