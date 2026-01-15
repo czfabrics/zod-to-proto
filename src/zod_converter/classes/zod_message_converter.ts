@@ -70,7 +70,14 @@ export class ZodMessageConverter {
                     message.fields.push(field)
                 }
 
-                return message
+                const updatedMessage = this.transformers.message.reduce(
+                    (message, transformer) => {
+                        return transformer.transform(rootSchema, message)
+                    },
+                    message
+                )
+
+                return updatedMessage
             })
             .with(zodTypePattern('enum'), (schema) => {
                 const fields = Array.from(schema._zod.values).map((value, index) => {
@@ -87,12 +94,21 @@ export class ZodMessageConverter {
                     })
                 })
 
-                return Proto3Enum.new({
+                const messageEnum = Proto3Enum.new({
                     name: pascalCase(name),
                     fields,
                     schema: rootSchema,
                     extensions: [],
                 })
+
+                const updatedMessageEnum = this.transformers.enum.reduce(
+                    (messageEnum, transformer) => {
+                        return transformer.transform(rootSchema, messageEnum)
+                    },
+                    messageEnum
+                )
+
+                return updatedMessageEnum
             })
             .exhaustive()
     }
