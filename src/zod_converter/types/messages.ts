@@ -1,7 +1,7 @@
 import type { CheckTuple } from '#core/types/check_tuple'
 import type { Prettify } from '#core/types/prettify'
 import type {
-    ZodTypeCategoryChildArray,
+    ZodTypeCategoryChildArrayCasseCouille,
     ZodTypeCategoryChildRecord,
 } from '#zod_converter/types/check'
 import { ZodComplexPrimitifType } from '#zod_converter/types/complex_primitifs'
@@ -79,7 +79,7 @@ export const ZodMessageFieldType = {
     },
 } as const
 
-export type ZodMessageOneOfFieldType = ZodTypeCategoryChildArray
+export type ZodMessageOneOfFieldType = ZodTypeCategoryChildArrayCasseCouille
 export type ZodMessageOneOfFieldTypeValue = Prettify<
     GetZodTypeValue<ZodMessageOneOfFieldType>
 >

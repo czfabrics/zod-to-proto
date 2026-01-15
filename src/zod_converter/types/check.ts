@@ -1,6 +1,7 @@
 import type { CheckTuple } from '#core/types/check_tuple'
 import type { GetFirstInUnion } from '#core/types/tuplify_union'
 import type { TypeDebuggingError } from '#core/types/type_debugging_error'
+import type { ZodOneOfUnion } from '#zod/types/zod_one_of_union'
 import type { GetZodTypeValue } from '#zod_converter/types/zod_type_value'
 import {
     type ZodArray,
@@ -10,7 +11,6 @@ import {
     type ZodCatch,
     type ZodCodec,
     type ZodDefault,
-    type ZodDiscriminatedUnion,
     type ZodEnum,
     type ZodFile,
     type ZodIntersection,
@@ -30,14 +30,18 @@ import {
     type ZodString,
     type ZodStringFormat,
     type ZodTemplateLiteral,
-    type ZodUnion,
 } from 'zod'
-import type { $ZodRecordKey, $ZodType, SomeType } from 'zod/v4/core'
+import type {
+    $ZodRecordKey,
+    $ZodType,
+    $ZodTypeDiscriminable,
+    SomeType,
+} from 'zod/v4/core'
 
 export type ZodCompatibleType =
     | ZodTypeCategoryNoChild
     | ZodTypeCategoryChildRecord
-    | ZodTypeCategoryChildArray
+    | ZodTypeCategoryChildArrayCasseCouille
     | ZodTypeCategoryTwoChildren
     | ZodTypeCategoryTwoChildrenCasseCouille
     | ZodTypeCategoryOneChild
@@ -109,7 +113,7 @@ export type ZodChildRecord = {
 /**
  * **WARNING:** `$ZodType[]` instead of `readonly SomeType[]` DIDN'T WORK, IT NEEDS THE TRUE TYPE USED BY ZOD
  */
-export type ZodChildArray = readonly SomeType[]
+export type ZodChildArray<TInnerType extends SomeType = SomeType> = readonly TInnerType[]
 
 export type ZodTypeCategoryChildRecord<
     TChildRecord extends ZodChildRecord = ZodChildRecord,
@@ -147,13 +151,25 @@ type PassthroughZodTypeCategoryTwoChildren<
       ? TZodType
       : never
 
-export type ZodTypeCategoryChildArray<TChildArray extends ZodChildArray = ZodChildArray> =
-    ZodDiscriminatedUnion<TChildArray> | ZodUnion<TChildArray>
+export type ZodTypeCategoryChildArrayCasseCouille<
+    TChildArray extends ZodChildArray<
+        ZodObject<{ $case: ZodLiteral<string>; value: $ZodTypeDiscriminable }>
+    > = ZodChildArray<
+        ZodObject<{ $case: ZodLiteral<string>; value: $ZodTypeDiscriminable }>
+    >,
+> = ZodOneOfUnion<TChildArray>
 
 type PassthroughZodTypeCategoryChildArray<
     TZodType extends SomeType,
     TChildArray extends ZodChildArray,
-> = TZodType extends ZodTypeCategoryChildArray<TChildArray> ? TZodType : never
+> =
+    TChildArray extends ZodChildArray<
+        ZodObject<{ $case: ZodLiteral<string>; value: $ZodTypeDiscriminable }>
+    >
+        ? TZodType extends ZodTypeCategoryChildArrayCasseCouille<TChildArray>
+            ? TZodType
+            : never
+        : never
 
 export type ZodTypeCategoryOneChild<TChild extends SomeType = SomeType> =
     | ZodSet<TChild>
@@ -278,6 +294,16 @@ export type CheckZodSchemaCompatibility<TZodType extends SomeType> =
 // cliArgument(
 //     z.object({
 //         test: z.string(), //.catch(''),
+//         scope2: z.union([
+//             z.object({
+//                 name: z.literal('OFFICE_USER'),
+//                 // name: z.string(),
+//             }),
+//             z.object({
+//                 name: z.literal('PARTNERSHIP'),
+//                 // name: z.string(),
+//             }),
+//         ]),
 //         // test2: z.unknown(),
 //         // test3: z.any(),
 //     })

@@ -1,3 +1,4 @@
+import { assertsOneElementArray } from '#core/asserts/one_element_array'
 import {
     Proto3MessageOneOfField,
     Proto3MessageOneOfFieldSubField,
@@ -5,11 +6,7 @@ import {
 import type { Proto3Message } from '#proto3_definition/types/messages'
 import { assertsZodMessageFieldType } from '#zod_converter/asserts/zod_message_field_type'
 import { ZodMessageFieldConverter } from '#zod_converter/classes/zod_message_field_converter'
-import { isZodDiscriminatedUnion } from '#zod_converter/helpers/is_zod_discriminated_union'
-import { isZodLiteralNotNullishValues } from '#zod_converter/helpers/is_zod_literal_not_nullish_values'
-import { isZodObject } from '#zod_converter/helpers/is_zod_object'
 import { zodTypePattern } from '#zod_converter/helpers/zod_type_pattern'
-import type { Literal } from '#zod_converter/types/literal'
 import type { ZodMessageOneOfFieldType } from '#zod_converter/types/messages'
 import { ZodPassthroughType } from '#zod_converter/types/passthroughs'
 import { ZodConversionTransformers } from '#zod_converter/types/transformers'
@@ -23,38 +20,14 @@ export class ZodMessageOneOfFieldConverter {
         private readonly transformers: ZodConversionTransformers
     ) {}
 
-    private getSubFields(
-        subFieldSchema: SomeType,
-        parentKey: string,
-        subFieldIndex: number
-    ): Proto3MessageOneOfFieldSubField {
+    private getSubField(schema: SomeType, key: string): Proto3MessageOneOfFieldSubField {
         const converter = new ZodMessageFieldConverter(this.message, this.transformers)
 
-        assertsZodMessageFieldType(subFieldSchema)
+        assertsZodMessageFieldType(schema)
 
-        const subField = converter.convert(
-            `${parentKey}${subFieldIndex}`,
-            subFieldSchema,
-            'NOT_NEEDED'
-        )
+        const subField = converter.convert(key, schema, 'NOT_NEEDED')
 
         return subField
-    }
-
-    private getDiscriminatedSubFields(
-        subFieldSchema: SomeType,
-        parentKey: string,
-        values: Literal[]
-    ): Proto3MessageOneOfFieldSubField[] {
-        const converter = new ZodMessageFieldConverter(this.message, this.transformers)
-
-        assertsZodMessageFieldType(subFieldSchema)
-
-        const subFields = values.map((value) => {
-            return converter.convert(`${parentKey}${value}`, subFieldSchema, 'NOT_NEEDED')
-        })
-
-        return subFields
     }
 
     public convert(
@@ -68,46 +41,21 @@ export class ZodMessageOneOfFieldConverter {
             .with(zodTypePattern('union'), (schema) => {
                 let subFields: Proto3MessageOneOfFieldSubField[] = []
 
-                if (isZodDiscriminatedUnion(schema)) {
-                    const discriminator = schema._zod.def.discriminator
+                for (
+                    let subFieldIndex = 0;
+                    subFieldIndex < schema._zod.def.options.length;
+                    subFieldIndex++
+                ) {
+                    const unionOptionSchema = schema._zod.def.options[subFieldIndex]!
 
-                    for (
-                        let subFieldIndex = 0;
-                        subFieldIndex < schema._zod.def.options.length;
-                        subFieldIndex++
-                    ) {
-                        const subFieldSchema = schema._zod.def.options[subFieldIndex]!
+                    const caseName = unionOptionSchema.shape.$case._zod.def.values
+                    const valueSchema = unionOptionSchema.shape.value
 
-                        if (isZodObject(subFieldSchema)) {
-                            const discriminatorSchema =
-                                subFieldSchema.shape[discriminator]
+                    assertsOneElementArray(caseName)
 
-                            if (isZodLiteralNotNullishValues(discriminatorSchema)) {
-                                const discriminatorValues =
-                                    discriminatorSchema._zod.def.values
+                    const subField = this.getSubField(valueSchema, caseName[0])
 
-                                subFields.push(
-                                    ...this.getDiscriminatedSubFields(
-                                        subFieldSchema,
-                                        key,
-                                        discriminatorValues
-                                    )
-                                )
-
-                                continue
-                            }
-                        }
-
-                        subFields.push(
-                            this.getSubFields(subFieldSchema, key, subFieldIndex)
-                        )
-                    }
-                } else {
-                    subFields = schema._zod.def.options.map(
-                        (subFieldSchema, subFieldIndex) => {
-                            return this.getSubFields(subFieldSchema, key, subFieldIndex)
-                        }
-                    )
+                    subFields.push(subField)
                 }
 
                 for (
