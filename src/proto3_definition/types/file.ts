@@ -1,8 +1,8 @@
 import { Proto3MessageField } from '#proto3_definition/types/fields'
 import { GetNewParams } from '#proto3_definition/types/get_new_params'
-import { Proto3ImportedType } from '#proto3_definition/types/imported_type'
 import { AnyProto3Message } from '#proto3_definition/types/messages'
 import { Proto3RpcService } from '#proto3_definition/types/service'
+import { Proto3ImportedType } from '#proto3_definition/types/types'
 
 export type Proto3File = {
     internalName: 'file'
@@ -12,7 +12,6 @@ export type Proto3File = {
     packageName: string
     syntax: 'proto3'
     service: Proto3RpcService
-    forcesOptionalEverywhere: boolean
 }
 
 export const Proto3File = {

@@ -1,4 +1,7 @@
-import { Proto3MessageField } from '#proto3_definition/types/fields'
+import {
+    Proto3MessageField,
+    Proto3MessageOneOfFieldSubField,
+} from '#proto3_definition/types/fields'
 import type { Proto3Message } from '#proto3_definition/types/messages'
 import { ZodMessageFieldTypeConverter } from '#zod_converter/classes/zod_message_field_type_converter'
 import type { ZodMessageFieldType } from '#zod_converter/types/messages'
@@ -14,11 +17,25 @@ export class ZodMessageFieldConverter {
 
     public convert(
         key: string,
-        rootSchema: ZodMessageFieldType | ZodPassthroughType
-    ): Proto3MessageField {
+        rootSchema: ZodMessageFieldType | ZodPassthroughType,
+        optionalKeywordState?: 'PRESENT' | 'NONE'
+    ): Proto3MessageField
+    public convert(
+        key: string,
+        rootSchema: ZodMessageFieldType | ZodPassthroughType,
+        optionalKeywordState: 'NOT_NEEDED'
+    ): Proto3MessageOneOfFieldSubField
+    public convert(
+        key: string,
+        rootSchema: ZodMessageFieldType | ZodPassthroughType,
+        // TODO: enum
+        optionalState?: 'PRESENT' | 'NONE' | 'NOT_NEEDED'
+    ): Proto3MessageField | Proto3MessageOneOfFieldSubField {
         const deepSchema = ZodPassthroughType.pass(rootSchema)
 
         const converter = new ZodMessageFieldTypeConverter(this.transformers)
+
+        optionalState ??= rootSchema.safeParse(undefined).success ? 'PRESENT' : 'NONE'
 
         const index = this.message.getNextIndex()
         const type = converter.convert(key, deepSchema)
@@ -26,7 +43,7 @@ export class ZodMessageFieldConverter {
         const field = Proto3MessageField.new({
             index,
             key: snakeCase(key),
-            isOptional: false,
+            optionalState: optionalState,
             type,
             schema: rootSchema,
             extensions: [],

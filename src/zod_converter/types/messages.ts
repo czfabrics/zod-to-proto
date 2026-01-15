@@ -91,6 +91,9 @@ export const ZodMessageOneOfFieldTypeTuple = {
     ): ZodMessageOneOfFieldTypeTuple {
         return values as ZodMessageOneOfFieldTypeTuple
     },
+    get: (): ZodMessageOneOfFieldTypeTuple => {
+        return ZodMessageOneOfFieldTypeTuple.new(['union'])
+    },
 } as const
 
 export const ZodMessageOneOfFieldType = {

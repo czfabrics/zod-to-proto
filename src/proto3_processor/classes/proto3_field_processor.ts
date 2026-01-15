@@ -152,7 +152,7 @@ export class Proto3FieldProcessor {
 
                 const typeString = this.getTypeReferenceString(field.type)
 
-                if (field.isOptional) {
+                if (field.optionalState === 'PRESENT') {
                     this.fileContent.write('optional ')
                 }
 

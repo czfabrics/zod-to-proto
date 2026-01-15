@@ -21,7 +21,7 @@ export type Proto3MessageField = Proto3BaseField & {
     getDeepOptionalMessageFields(): Proto3MessageField[]
     index: number
     internalName: 'message_field'
-    isOptional: boolean
+    optionalState: 'PRESENT' | 'NONE' | 'NOT_NEEDED'
     type: Proto3MessageFieldType
     extensions: Proto3Extension[]
     // TODO: faudrait être plus précis...
@@ -51,12 +51,27 @@ export const Proto3MessageField = {
     },
 } as const
 
+export type Proto3MessageOneOfFieldSubField = Proto3MessageField & {
+    optionalState: 'NOT_NEEDED'
+}
+
+export const Proto3MessageOneOfFieldSubField = {
+    new: (
+        params: GetNewParams<Proto3MessageOneOfFieldSubField>
+    ): Proto3MessageOneOfFieldSubField => {
+        return {
+            ...Proto3MessageField.new(params),
+            optionalState: 'NOT_NEEDED',
+        }
+    },
+} as const
+
 export type Proto3MessageOneOfField = Proto3BaseField & {
     getDeepMessages(): AnyProto3Message[]
     getDeepImportedTypes(): Proto3ImportedType[]
     getDeepOptionalMessageFields(): Proto3MessageField[]
     internalName: 'message_one_of_field'
-    subFields: Proto3MessageField[]
+    subFields: Proto3MessageOneOfFieldSubField[]
     schema: ZodType
 }
 

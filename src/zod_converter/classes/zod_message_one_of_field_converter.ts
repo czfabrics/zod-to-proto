@@ -1,6 +1,6 @@
 import {
-    type Proto3MessageField,
     Proto3MessageOneOfField,
+    Proto3MessageOneOfFieldSubField,
 } from '#proto3_definition/types/fields'
 import type { Proto3Message } from '#proto3_definition/types/messages'
 import { assertsZodMessageFieldType } from '#zod_converter/asserts/zod_message_field_type'
@@ -27,12 +27,16 @@ export class ZodMessageOneOfFieldConverter {
         subFieldSchema: SomeType,
         parentKey: string,
         subFieldIndex: number
-    ): Proto3MessageField {
+    ): Proto3MessageOneOfFieldSubField {
         const converter = new ZodMessageFieldConverter(this.message, this.transformers)
 
         assertsZodMessageFieldType(subFieldSchema)
 
-        const subField = converter.convert(`${parentKey}${subFieldIndex}`, subFieldSchema)
+        const subField = converter.convert(
+            `${parentKey}${subFieldIndex}`,
+            subFieldSchema,
+            'NOT_NEEDED'
+        )
 
         return subField
     }
@@ -41,13 +45,13 @@ export class ZodMessageOneOfFieldConverter {
         subFieldSchema: SomeType,
         parentKey: string,
         values: Literal[]
-    ): Proto3MessageField[] {
+    ): Proto3MessageOneOfFieldSubField[] {
         const converter = new ZodMessageFieldConverter(this.message, this.transformers)
 
         assertsZodMessageFieldType(subFieldSchema)
 
         const subFields = values.map((value) => {
-            return converter.convert(`${parentKey}${value}`, subFieldSchema)
+            return converter.convert(`${parentKey}${value}`, subFieldSchema, 'NOT_NEEDED')
         })
 
         return subFields
@@ -62,7 +66,7 @@ export class ZodMessageOneOfFieldConverter {
         return match(deepSchema)
             .returnType<Proto3MessageOneOfField>()
             .with(zodTypePattern('union'), (schema) => {
-                let subFields: Proto3MessageField[] = []
+                let subFields: Proto3MessageOneOfFieldSubField[] = []
 
                 if (isZodDiscriminatedUnion(schema)) {
                     const discriminator = schema._zod.def.discriminator
