@@ -70,11 +70,21 @@ export class ZodMessageOneOfFieldConverter {
                     subField.index = this.message.getNextIndex() + subFieldIndex
                 }
 
-                return Proto3MessageOneOfField.new({
+                const field = Proto3MessageOneOfField.new({
                     key: snakeCase(key),
                     schema: rootSchema,
                     subFields,
+                    extensions: [],
                 })
+
+                const updatedField = this.transformers.messageOneOfField.reduce(
+                    (field, transformer) => {
+                        return transformer.transform(rootSchema, field)
+                    },
+                    field
+                )
+
+                return updatedField
             })
             .exhaustive()
     }

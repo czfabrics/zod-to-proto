@@ -1,5 +1,11 @@
-import { Proto3MessageField } from '#proto3_definition/types/fields'
-import { ZodMessageFieldType } from '#zod_converter/types/messages'
+import {
+    Proto3MessageField,
+    Proto3MessageOneOfField,
+} from '#proto3_definition/types/fields'
+import {
+    ZodMessageFieldType,
+    ZodMessageOneOfFieldType,
+} from '#zod_converter/types/messages'
 import { ZodPassthroughType } from '#zod_converter/types/passthroughs'
 import { SomeType } from 'zod/v4/core'
 
@@ -12,6 +18,12 @@ export type ZodMessageFieldConversionTransformer = ZodConversionTransformer<
     Proto3MessageField
 >
 
+export type ZodMessageOneOfFieldConversionTransformer = ZodConversionTransformer<
+    ZodMessageOneOfFieldType | ZodPassthroughType,
+    Proto3MessageOneOfField
+>
+
 export type ZodConversionTransformers = {
     messageField: ZodMessageFieldConversionTransformer[]
+    messageOneOfField: ZodMessageOneOfFieldConversionTransformer[]
 }
