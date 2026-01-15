@@ -4,6 +4,7 @@ import {
 } from '#proto3_definition/types/fields'
 import type { Proto3Message } from '#proto3_definition/types/messages'
 import { ZodMessageFieldTypeConverter } from '#zod_converter/classes/zod_message_field_type_converter'
+import { isZodSchemaOptional } from '#zod_converter/helpers/is_zod_schema_optional'
 import type { ZodMessageFieldType } from '#zod_converter/types/messages'
 import { ZodPassthroughType } from '#zod_converter/types/passthroughs'
 import { ZodConversionTransformers } from '#zod_converter/types/transformers'
@@ -35,7 +36,7 @@ export class ZodMessageFieldConverter {
 
         const converter = new ZodMessageFieldTypeConverter(this.transformers)
 
-        optionalState ??= rootSchema.safeParse(undefined).success ? 'PRESENT' : 'NONE'
+        optionalState ??= isZodSchemaOptional(rootSchema) ? 'PRESENT' : 'NONE'
 
         const index = this.message.getNextIndex()
         const type = converter.convert(key, deepSchema)
