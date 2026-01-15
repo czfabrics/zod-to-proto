@@ -1,7 +1,7 @@
 import { GetNewParams } from '#proto3_definition/types/get_new_params'
 import { AnyProto3Type, Proto3ImportedType } from '#proto3_definition/types/types'
 
-export type Proto3ExtensionScalarValue = string | number | boolean | undefined
+export type Proto3ExtensionScalarValue = string | number | boolean
 export type Proto3ExtensionRepeatedValue = (
     | Proto3ExtensionScalarValue
     | Proto3ExtensionMessageValue

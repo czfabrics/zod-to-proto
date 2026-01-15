@@ -7,7 +7,7 @@ import type {
 } from '#proto3_definition/types/fields'
 import type { Proto3PrimitifType } from '#proto3_definition/types/primitifs'
 import { AnyProto3Type } from '#proto3_definition/types/types'
-import { Proto3ExtensionValueProcessor } from '#proto3_processor/classes/proto3_extension_value_processor'
+import { Proto3FieldExtensionProcessor } from '#proto3_processor/classes/proto3_field_extension_processor'
 import { match } from 'ts-pattern'
 
 export class Proto3FieldProcessor {
@@ -75,33 +75,14 @@ export class Proto3FieldProcessor {
 
     private getExtensionContent(extension: Proto3Extension): FreshFileContentMatter {
         const extensionContent = fileContentMatter()
+        const extensionProcessor = new Proto3FieldExtensionProcessor(extensionContent)
 
-        const extensionValueContent = fileContentMatter()
-        const processor = new Proto3ExtensionValueProcessor(extensionValueContent)
-
-        processor.process(extension.value)
-
-        extensionContent
-            .write(`${extension.key.typeReference} = `)
-            .write(extensionValueContent)
+        extensionProcessor.process(extension)
 
         return extensionContent
     }
 
-    private shouldSkipExtensionDependingOnValue(
-        extensionValue: Proto3Extension['value']
-    ): boolean {
-        if (typeof extensionValue === 'object' && !Array.isArray(extensionValue)) {
-            const messageEntryLength = Object.keys(extensionValue).length
-
-            if (messageEntryLength === 0) {
-                return true
-            }
-        }
-
-        return false
-    }
-
+    // TODO: can be a transformer...
     private alterateExtensionDependingOnValue(
         extension: Proto3Extension
     ): Proto3Extension {
@@ -134,18 +115,14 @@ export class Proto3FieldProcessor {
                 const extensionContents: FreshFileContentMatter[] = []
 
                 for (const extension of field.extensions) {
-                    const shouldSkip = this.shouldSkipExtensionDependingOnValue(
-                        extension.value
-                    )
-
-                    if (shouldSkip) {
-                        continue
-                    }
-
                     const updatedExtension =
                         this.alterateExtensionDependingOnValue(extension)
 
                     const extensionContent = this.getExtensionContent(updatedExtension)
+
+                    if (extensionContent.isEmpty()) {
+                        continue
+                    }
 
                     extensionContents.push(extensionContent)
                 }

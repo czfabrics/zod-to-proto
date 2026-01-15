@@ -73,6 +73,7 @@ export type Proto3MessageOneOfField = Proto3BaseField & {
     internalName: 'message_one_of_field'
     subFields: Proto3MessageOneOfFieldSubField[]
     schema: ZodType
+    extensions: Proto3Extension[]
 }
 
 export const Proto3MessageOneOfField = {

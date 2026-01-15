@@ -1,6 +1,6 @@
 import { fileContentMatter } from '#file/classes/content_matter'
 import type { FreshFileContentMatter } from '#file/types/content_matter'
-import { AnyProto3ExtensionValue } from '#proto3_definition/types/extension'
+import type { AnyProto3ExtensionValue } from '#proto3_definition/types/extension'
 
 export class Proto3ExtensionValueProcessor {
     public constructor(private readonly content: FreshFileContentMatter) {}
@@ -15,6 +15,10 @@ export class Proto3ExtensionValueProcessor {
 
                 processor.process(arrayValue)
 
+                if (arrayValueContent.isEmpty()) {
+                    continue
+                }
+
                 arrayContents.push(arrayValueContent)
             }
 
@@ -27,11 +31,19 @@ export class Proto3ExtensionValueProcessor {
 
             const messageEntries = Object.entries(extensionValue)
 
+            if (messageEntries.length === 0) {
+                return
+            }
+
             for (const [key, value] of messageEntries) {
                 const valueContent = fileContentMatter()
                 const processor = new Proto3ExtensionValueProcessor(valueContent)
 
                 processor.process(value)
+
+                if (valueContent.isEmpty()) {
+                    continue
+                }
 
                 recordContentEntries.push({
                     key,

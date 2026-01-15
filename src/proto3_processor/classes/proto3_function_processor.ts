@@ -1,13 +1,10 @@
 import { fileContentMatter } from '#file/classes/content_matter'
-import type {
-    FreshFileContentMatter,
-    NestedFileContentMatter,
-} from '#file/types/content_matter'
+import type { FreshFileContentMatter } from '#file/types/content_matter'
 import { Proto3Extension } from '#proto3_definition/types/extension'
 import { Proto3RpcFunction } from '#proto3_definition/types/functions'
 import { AnyProto3Message } from '#proto3_definition/types/messages'
 import { AnyProto3Type, Proto3ImportedType } from '#proto3_definition/types/types'
-import { Proto3ExtensionValueProcessor } from '#proto3_processor/classes/proto3_extension_value_processor'
+import { Proto3RecordExtensionProcessor } from '#proto3_processor/classes/proto3_record_extension_processor'
 import { match } from 'ts-pattern'
 
 export class Proto3FunctionProcessor {
@@ -25,35 +22,7 @@ export class Proto3FunctionProcessor {
             .exhaustive()
     }
 
-    private writeExtension(
-        extensionContent: NestedFileContentMatter,
-        extension: Proto3Extension
-    ): void {
-        const extensionValueContent = fileContentMatter()
-        const processor = new Proto3ExtensionValueProcessor(extensionValueContent)
-
-        processor.process(extension.value)
-
-        extensionContent
-            .write(`option ${extension.key.typeReference} = `)
-            .write(extensionValueContent)
-            .write(';')
-    }
-
-    private shouldSkipExtensionDependingOnValue(
-        extensionValue: Proto3Extension['value']
-    ): boolean {
-        if (typeof extensionValue === 'object' && !Array.isArray(extensionValue)) {
-            const messageEntryLength = Object.keys(extensionValue).length
-
-            if (messageEntryLength === 0) {
-                return true
-            }
-        }
-
-        return false
-    }
-
+    // TODO: transformer
     private alterateExtensionDependingOnValue(
         extension: Proto3Extension
     ): Proto3Extension {
@@ -84,24 +53,29 @@ export class Proto3FunctionProcessor {
         const inTypeReference = this.getTypeReferenceString(rpcFunction.in)
         const outTypeReference = this.getTypeReferenceString(rpcFunction.out)
 
-        const extensionContent = fileContentMatter().singleNest()
+        const extensionBlockContent = fileContentMatter()
 
         let isFirstExtension = true
 
         for (const extension of rpcFunction.extensions) {
-            if (!isFirstExtension) {
-                extensionContent.endLine()
-            }
-
-            const shouldSkip = this.shouldSkipExtensionDependingOnValue(extension.value)
-
-            if (shouldSkip) {
-                continue
-            }
+            const extensionContent = fileContentMatter()
+            const extensionProcessor = new Proto3RecordExtensionProcessor(
+                extensionContent
+            )
 
             const updatedExtension = this.alterateExtensionDependingOnValue(extension)
 
-            this.writeExtension(extensionContent, updatedExtension)
+            extensionProcessor.process(updatedExtension)
+
+            if (extensionContent.isEmpty()) {
+                continue
+            }
+
+            if (!isFirstExtension) {
+                extensionBlockContent.endLine()
+            }
+
+            extensionBlockContent.write(extensionContent)
 
             isFirstExtension = false
         }
@@ -112,6 +86,6 @@ export class Proto3FunctionProcessor {
             .write(`${inTypeReference}) returns (`)
             .writeIf(rpcFunction.outStream, 'stream ')
             .write(`${outTypeReference}) `)
-            .writeBlock(extensionContent)
+            .writeBlock(extensionBlockContent)
     }
 }
