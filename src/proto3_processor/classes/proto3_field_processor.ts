@@ -8,6 +8,7 @@ import type {
 import type { Proto3PrimitifType } from '#proto3_definition/types/primitifs'
 import { AnyProto3Type } from '#proto3_definition/types/types'
 import { Proto3FieldExtensionProcessor } from '#proto3_processor/classes/proto3_field_extension_processor'
+import { Proto3RecordExtensionProcessor } from '#proto3_processor/classes/proto3_record_extension_processor'
 import { match } from 'ts-pattern'
 
 export class Proto3FieldProcessor {
@@ -73,9 +74,20 @@ export class Proto3FieldProcessor {
         return finalType
     }
 
-    private getExtensionContent(extension: Proto3Extension): FreshFileContentMatter {
+    private getFieldExtensionContent(extension: Proto3Extension): FreshFileContentMatter {
         const extensionContent = fileContentMatter()
         const extensionProcessor = new Proto3FieldExtensionProcessor(extensionContent)
+
+        extensionProcessor.process(extension)
+
+        return extensionContent
+    }
+
+    private getRecordExtensionContent(
+        extension: Proto3Extension
+    ): FreshFileContentMatter {
+        const extensionContent = fileContentMatter()
+        const extensionProcessor = new Proto3RecordExtensionProcessor(extensionContent)
 
         extensionProcessor.process(extension)
 
@@ -118,7 +130,8 @@ export class Proto3FieldProcessor {
                     const updatedExtension =
                         this.alterateExtensionDependingOnValue(extension)
 
-                    const extensionContent = this.getExtensionContent(updatedExtension)
+                    const extensionContent =
+                        this.getFieldExtensionContent(updatedExtension)
 
                     if (extensionContent.isEmpty()) {
                         continue
@@ -145,6 +158,26 @@ export class Proto3FieldProcessor {
                 const oneOfFieldContent = fileContentMatter()
 
                 let isFirst = true
+
+                for (const extension of field.extensions) {
+                    const updatedExtension =
+                        this.alterateExtensionDependingOnValue(extension)
+
+                    const extensionContent =
+                        this.getRecordExtensionContent(updatedExtension)
+
+                    if (extensionContent.isEmpty()) {
+                        continue
+                    }
+
+                    if (!isFirst) {
+                        oneOfFieldContent.endLine()
+                    }
+
+                    oneOfFieldContent.write(extensionContent)
+
+                    isFirst = false
+                }
 
                 for (const subField of field.subFields) {
                     if (!isFirst) {
