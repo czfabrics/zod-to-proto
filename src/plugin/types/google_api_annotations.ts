@@ -88,15 +88,16 @@ export type GoogleApiHttpRule = RequireOneOrNone<
     Partial<GoogleApiHttpRuleCommon>
 
 export const Proto3HttpAnnotation = {
-    useType: () => {
+    useType: function () {
         return Proto3ImportedType.new({
             importPath: 'google/api/annotations.proto',
             typeReference: 'google.api.http',
         })
     },
-    useExtension: (value: GoogleApiHttpRule) => {
+    useExtension: function (value: GoogleApiHttpRule) {
+        // TODO: purge undefined value...
         return Proto3Extension.new({
-            key: Proto3HttpAnnotation.useType(),
+            key: this.useType(),
             value,
         })
     },

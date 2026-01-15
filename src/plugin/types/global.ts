@@ -2,14 +2,14 @@ import { Proto3Extension } from '#proto3_definition/types/extension'
 import { Proto3GlobalType } from '#proto3_definition/types/types'
 
 export const Proto3Deprecated = {
-    useType: () => {
+    useType: function () {
         return Proto3GlobalType.new({
             typeReference: 'deprecated',
         })
     },
-    useExtension: (value: boolean) => {
+    useExtension: function (value: boolean) {
         return Proto3Extension.new({
-            key: Proto3Deprecated.useType(),
+            key: this.useType(),
             value,
         })
     },
