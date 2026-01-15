@@ -3,12 +3,14 @@ import type {
     AnyFileContentMatter,
     FreshFileContentMatter,
 } from '#file/types/content_matter'
+import { Proto3Extension } from '#proto3_definition/types/extension'
 import { Proto3File } from '#proto3_definition/types/file'
 import { AnyProto3Message } from '#proto3_definition/types/messages'
 import { Proto3RpcService } from '#proto3_definition/types/service'
-import { Proto3ImportedType } from '#proto3_definition/types/types'
+import { AnyProto3Type, Proto3ImportedType } from '#proto3_definition/types/types'
 import { Proto3ImportProcessor } from '#proto3_processor/classes/proto3_import_processor'
 import { Proto3MessageProcessor } from '#proto3_processor/classes/proto3_message_processor'
+import { Proto3RecordExtensionProcessor } from '#proto3_processor/classes/proto3_record_extension_processor'
 import { Proto3ServiceProcessor } from '#proto3_processor/classes/proto3_service_processor'
 
 export class Proto3Processor {
@@ -21,6 +23,64 @@ export class Proto3Processor {
         processor.process(importedTypes)
 
         return content
+    }
+
+    private getRecordExtensionContent(
+        extension: Proto3Extension
+    ): FreshFileContentMatter {
+        const extensionContent = fileContentMatter()
+        const extensionProcessor = new Proto3RecordExtensionProcessor(extensionContent)
+
+        extensionProcessor.process(extension)
+
+        return extensionContent
+    }
+
+    // TODO: can be a transformer...
+    private alterateExtensionDependingOnValue(
+        extension: Proto3Extension
+    ): Proto3Extension {
+        if (typeof extension.value !== 'object' || Array.isArray(extension.value)) {
+            return extension
+        }
+
+        const messageEntries = Object.entries(extension.value)
+
+        if (messageEntries.length < 1 || messageEntries.length > 1) {
+            return extension
+        }
+
+        const firstKey = messageEntries[0]![0]
+        const firstValue = messageEntries[0]![1]
+
+        return Proto3Extension.new({
+            ...extension,
+            key: AnyProto3Type.new({
+                ...extension.key,
+                typeReference: `(${extension.key.typeReference}).${firstKey}`,
+            }),
+            value: firstValue,
+        })
+    }
+
+    private getExtensionContents(
+        extensions: Proto3Extension[]
+    ): FreshFileContentMatter[] {
+        const contents: FreshFileContentMatter[] = []
+
+        for (const extension of extensions) {
+            const updatedExtension = this.alterateExtensionDependingOnValue(extension)
+
+            const content = this.getRecordExtensionContent(updatedExtension)
+
+            if (content.isEmpty()) {
+                continue
+            }
+
+            contents.push(content)
+        }
+
+        return contents
     }
 
     private getServiceContent(service: Proto3RpcService): FreshFileContentMatter {
@@ -55,6 +115,7 @@ export class Proto3Processor {
         const content = fileContentMatter()
         const importedTypes = file.getDeepImportedTypes()
         const importContent = this.getImportContent(importedTypes)
+        const extensionContents = this.getExtensionContents(file.extensions)
         const serviceContent = this.getServiceContent(file.service)
         const messages = file.getDeepMessages()
         const messageContent = this.getMessageContent(messages)
@@ -66,6 +127,22 @@ export class Proto3Processor {
         }
 
         content.endLine().endLine().write(`package ${file.packageName};`)
+
+        if (extensionContents.length > 0) {
+            content.endLine().endLine()
+
+            let isFirst = true
+
+            for (const extensionContent of extensionContents) {
+                if (!isFirst) {
+                    extensionContent.endLine()
+                }
+
+                content.write(extensionContent)
+
+                isFirst = false
+            }
+        }
 
         if (!serviceContent.isEmpty()) {
             content.endLine().endLine().write(serviceContent)

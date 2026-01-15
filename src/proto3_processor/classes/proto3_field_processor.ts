@@ -196,7 +196,29 @@ export class Proto3FieldProcessor {
                     .writeBlock(oneOfFieldContent)
             })
             .with({ internalName: 'enum_field' }, (field) => {
-                this.fileContent.write(`${field.key} = ${field.index};`)
+                const extensionContents: FreshFileContentMatter[] = []
+
+                for (const extension of field.extensions) {
+                    const updatedExtension =
+                        this.alterateExtensionDependingOnValue(extension)
+
+                    const extensionContent =
+                        this.getFieldExtensionContent(updatedExtension)
+
+                    if (extensionContent.isEmpty()) {
+                        continue
+                    }
+
+                    extensionContents.push(extensionContent)
+                }
+
+                this.fileContent.write(`${field.key} = ${field.index}`)
+
+                if (extensionContents.length > 0) {
+                    this.fileContent.write(' ').writeList(...extensionContents)
+                }
+
+                this.fileContent.write(';')
             })
             .exhaustive()
     }
