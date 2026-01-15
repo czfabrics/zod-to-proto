@@ -1,3 +1,4 @@
+import { Proto3Extension } from '#proto3_definition/types/extension'
 import { Proto3MessageField } from '#proto3_definition/types/fields'
 import { GetNewParams } from '#proto3_definition/types/get_new_params'
 import { AnyProto3Message } from '#proto3_definition/types/messages'
@@ -12,6 +13,7 @@ export type Proto3File = {
     packageName: string
     syntax: 'proto3'
     service: Proto3RpcService
+    extensions: Proto3Extension[]
 }
 
 export const Proto3File = {

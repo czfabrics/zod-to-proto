@@ -37,6 +37,7 @@ export class ZodMessageConverter {
                     name: pascalCase(name),
                     fields: [],
                     schema: rootSchema,
+                    extensions: [],
                 })
 
                 for (const [key, entrySchema] of Object.entries(schema.shape)) {
@@ -82,6 +83,7 @@ export class ZodMessageConverter {
                     return Proto3EnumField.new({
                         index,
                         key: value,
+                        extensions: [],
                     })
                 })
 
@@ -89,6 +91,7 @@ export class ZodMessageConverter {
                     name: pascalCase(name),
                     fields,
                     schema: rootSchema,
+                    extensions: [],
                 })
             })
             .exhaustive()

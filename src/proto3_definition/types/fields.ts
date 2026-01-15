@@ -99,6 +99,7 @@ export const Proto3MessageOneOfField = {
 export type Proto3EnumField = Proto3BaseField & {
     index: number
     internalName: 'enum_field'
+    extensions: Proto3Extension[]
 }
 
 export const Proto3EnumField = {

@@ -1,3 +1,4 @@
+import { Proto3Extension } from '#proto3_definition/types/extension'
 import { Proto3MessageField } from '#proto3_definition/types/fields'
 import { Proto3RpcFunction } from '#proto3_definition/types/functions'
 import { GetNewParams } from '#proto3_definition/types/get_new_params'
@@ -11,6 +12,7 @@ export type Proto3RpcService = {
     getDeepOptionalMessageFields(): Proto3MessageField[]
     name: string
     functions: Proto3RpcFunction[]
+    extensions: Proto3Extension[]
 }
 
 export const Proto3RpcService = {

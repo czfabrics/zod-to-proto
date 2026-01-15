@@ -1,3 +1,4 @@
+import { Proto3Extension } from '#proto3_definition/types/extension'
 import type {
     AnyProto3MessageField,
     Proto3EnumField,
@@ -16,6 +17,7 @@ export type Proto3Message = {
     name: string
     schema: ZodType
     fields: AnyProto3MessageField[]
+    extensions: Proto3Extension[]
 }
 
 export const Proto3Message = {
@@ -67,6 +69,7 @@ export type Proto3Enum = {
     name: string
     schema: ZodType
     fields: Proto3EnumField[]
+    extensions: Proto3Extension[]
 }
 
 export const Proto3Enum = {
