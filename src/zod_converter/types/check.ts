@@ -1,7 +1,20 @@
-import type { CheckTuple } from '#core/types/check_tuple'
-import type { GetFirstInUnion } from '#core/types/tuplify_union'
+import type { ArrayToStringDisplay, CheckTuple } from '#core/types/check_tuple'
+import type { TuplifyUnion } from '#core/types/tuplify_union'
 import type { TypeDebuggingError } from '#core/types/type_debugging_error'
 import type { ZodOneOfUnion } from '#zod/types/zod_one_of_union'
+import type {
+    ExcludeZodType,
+    IntoSomeZodType,
+    SomeZodArray,
+    SomeZodIntersection,
+    SomeZodObject,
+    SomeZodPassthrough,
+    SomeZodRecord,
+    SomeZodSet,
+    SomeZodShape,
+    SomeZodType,
+    SomeZodUnion,
+} from '#zod_converter/types/some_type'
 import type { GetZodTypeValue } from '#zod_converter/types/zod_type_value'
 import {
     type ZodArray,
@@ -17,7 +30,6 @@ import {
     type ZodLazy,
     type ZodLiteral,
     type ZodNonOptional,
-    type ZodNullable,
     type ZodNumber,
     type ZodNumberFormat,
     type ZodObject,
@@ -31,21 +43,18 @@ import {
     type ZodStringFormat,
     type ZodTemplateLiteral,
 } from 'zod'
-import type {
-    $ZodRecordKey,
-    $ZodType,
-    $ZodTypeDiscriminable,
-    SomeType,
-} from 'zod/v4/core'
+import type { $ZodTypeDiscriminable, SomeType } from 'zod/v4/core'
+
+type ZodChildRecordIntoTuple<TChildRecord extends SomeZodShape> = TuplifyUnion<
+    TChildRecord[keyof TChildRecord]
+>
 
 export type ZodCompatibleType =
-    | ZodTypeCategoryNoChild
-    | ZodTypeCategoryChildRecord
-    | ZodTypeCategoryChildArrayCasseCouille
-    | ZodTypeCategoryTwoChildren
-    | ZodTypeCategoryTwoChildrenCasseCouille
-    | ZodTypeCategoryOneChild
-    | ZodTypeCategoryPassthrough
+    | ZodCategoryNoChild
+    | ZodCategoryChildRecord
+    | ZodCategoryChildArray
+    | ZodCategoryOneChild
+    | ZodCategoryTwoChildren
 
 export type CompatibleZodTypeValue = GetZodTypeValue<ZodCompatibleType>
 export type CompatibleZodTypeTuple = CompatibleZodTypeValue[]
@@ -77,7 +86,6 @@ export const CompatibleZodTypeTuple = {
             'catch',
             'optional',
             'nonoptional',
-            'nullable',
             'readonly',
             'set',
             'array',
@@ -93,7 +101,12 @@ export const ZodCompatibleType = {
     },
 } as const
 
-export type ZodTypeCategoryNoChild =
+export type CheckZodTypeCompatibility<TZodType extends SomeType> =
+    GetZodTypeValue<TZodType> extends GetZodTypeValue<ZodCompatibleType>
+        ? TZodType
+        : never
+
+export type ZodCategoryNoChild =
     | ZodString
     | ZodStringFormat
     | ZodLiteral
@@ -106,234 +119,217 @@ export type ZodTypeCategoryNoChild =
     | ZodBoolean
     | ZodFile
 
-export type ZodChildRecord = {
-    [key: string]: $ZodType
-}
-
-/**
- * **WARNING:** `$ZodType[]` instead of `readonly SomeType[]` DIDN'T WORK, IT NEEDS THE TRUE TYPE USED BY ZOD
- */
-export type ZodChildArray<TInnerType extends SomeType = SomeType> = readonly TInnerType[]
-
-export type ZodTypeCategoryChildRecord<
-    TChildRecord extends ZodChildRecord = ZodChildRecord,
-> = ZodObject<TChildRecord>
-
-type PassthroughZodTypeCategoryChildRecord<
-    TZodType extends SomeType,
-    TChildRecord extends ZodChildRecord,
-> = TZodType extends ZodTypeCategoryChildRecord<TChildRecord> ? TZodType : never
-
-export type ZodTypeCategoryTwoChildren<
-    TChild1 extends SomeType = SomeType,
-    TChild2 extends SomeType = SomeType,
-> =
-    | ZodPipe<TChild1, TChild2>
-    | ZodCodec<TChild1, TChild2>
-    | ZodIntersection<TChild1, TChild2>
-
-export type ZodTypeCategoryTwoChildrenCasseCouille<
-    TChild1 extends $ZodRecordKey = $ZodRecordKey,
-    TChild2 extends SomeType = SomeType,
-> = ZodRecord<TChild1, TChild2>
-
-type PassthroughZodTypeCategoryTwoChildren<
-    TZodType extends SomeType,
-    TChild1 extends SomeType,
-    TChild2 extends SomeType,
-> = TChild1 extends $ZodRecordKey
-    ? TZodType extends ZodTypeCategoryTwoChildrenCasseCouille<TChild1, TChild2>
-        ? TZodType
-        : TZodType extends ZodTypeCategoryTwoChildren<TChild1, TChild2>
-          ? TZodType
-          : never
-    : TZodType extends ZodTypeCategoryTwoChildren<TChild1, TChild2>
-      ? TZodType
-      : never
-
-export type ZodTypeCategoryChildArrayCasseCouille<
-    TChildArray extends ZodChildArray<
-        ZodObject<{ $case: ZodLiteral<string>; value: $ZodTypeDiscriminable }>
-    > = ZodChildArray<
-        ZodObject<{ $case: ZodLiteral<string>; value: $ZodTypeDiscriminable }>
-    >,
-> = ZodOneOfUnion<TChildArray>
-
-type PassthroughZodTypeCategoryChildArray<
-    TZodType extends SomeType,
-    TChildArray extends ZodChildArray,
-> =
-    TChildArray extends ZodChildArray<
-        ZodObject<{ $case: ZodLiteral<string>; value: $ZodTypeDiscriminable }>
-    >
-        ? TZodType extends ZodTypeCategoryChildArrayCasseCouille<TChildArray>
-            ? TZodType
-            : never
-        : never
-
-export type ZodTypeCategoryOneChild<TChild extends SomeType = SomeType> =
-    | ZodSet<TChild>
-    | ZodArray<TChild>
-
-export type ZodTypeCategoryPassthrough<TChild extends SomeType = SomeType> =
+export type ZodCategoryPassthrough<TChild extends SomeType = SomeType> =
     | ZodCatch<TChild>
     | ZodOptional<TChild>
     | ZodNonOptional<TChild>
-    | ZodNullable<TChild>
     | ZodReadonly<TChild>
     | ZodDefault<TChild>
     | ZodPrefault<TChild>
     | ZodLazy<TChild>
+    //// We consider `ZodPipe` to have one child because we don’t care about the output type.
+    | ZodPipe<TChild>
+    //// We consider `ZodCodec` to have one child because we don’t care about the output type.
+    | ZodCodec<TChild>
 
-type PassthroughZodTypeCategoryOneChild<
-    TZodType extends SomeType,
-    TChild extends $ZodType,
-> =
-    TZodType extends ZodTypeCategoryOneChild<TChild>
-        ? TZodType
-        : TZodType extends ZodTypeCategoryPassthrough<TChild>
-          ? TZodType
-          : never
+export type ZodCategoryOneChildWithoutPasstrough = ZodSet | ZodArray
 
-// TODO: à voir pour le remettre...
-// type PassthroughZodType<
-//     TZodTypeValue extends $ZodTypeDef['type'],
-//     TChild1 extends $ZodType,
-//     TChild2 extends $ZodType,
-//     TChildRecord extends Test,
-//     TChildArray extends Test2,
-// > =
-//     PassthroughZodTypeCategory1<TZodTypeValue, TChildRecord> extends infer T
-//         ? T
-//         : PassthroughZodTypeCategory2<TZodTypeValue, TChild1, TChild2> extends infer T
-//           ? T
-//           : PassthroughZodTypeCategory2_5<TZodTypeValue, TChildArray> extends infer T
-//             ? T
-//             : PassthroughZodTypeCategory3<TZodTypeValue, TChild1> extends infer T
-//               ? T
-//               : never
+export type ZodCategoryOneChild =
+    | ZodCategoryOneChildWithoutPasstrough
+    | ZodCategoryPassthrough
+type GetChild<TZodType extends SomeType> =
+    TZodType extends SomeZodSet<infer TChild>
+        ? readonly [TChild]
+        : TZodType extends SomeZodArray<infer TChild>
+          ? readonly [TChild]
+          : TZodType extends SomeZodPassthrough<infer TChild>
+            ? readonly [TChild]
+            : []
 
-type ContinueRecursiveRecord<TChildRecord extends ZodChildRecord> = {
-    [TKey in keyof TChildRecord]: CheckZodSchemaCompatibility<TChildRecord[TKey]>
-}
+type ZodCategoryTwoChildren = ZodRecord | ZodIntersection
+type GetTwoChildren<TZodType extends SomeType> =
+    TZodType extends SomeZodRecord<infer TChild1, infer TChild2>
+        ? readonly [TChild1, TChild2]
+        : TZodType extends SomeZodIntersection<infer TChild1, infer TChild2>
+          ? readonly [TChild1, TChild2]
+          : []
 
-type ContinueRecursiveRecordDebug<TChildRecord extends ZodChildRecord> = GetFirstInUnion<
+type ZodCategoryChildRecord = ZodObject
+type GetChildrenFromChildRecord<TZodType extends SomeType> =
+    TZodType extends SomeZodObject<infer TChildRecord>
+        ? readonly [...ZodChildRecordIntoTuple<TChildRecord>]
+        : []
+
+type ZodCategoryChildArray = ZodOneOfUnion
+type GetChildrenFromChildArray<TZodType extends SomeType> =
+    TZodType extends SomeZodUnion<infer TChildArray> ? TChildArray : []
+
+type GetChildZodType<TZodType extends SomeType> =
+    GetZodTypeValue<TZodType> extends GetZodTypeValue<ZodCategoryNoChild>
+        ? []
+        : GetZodTypeValue<TZodType> extends GetZodTypeValue<ZodCategoryOneChild>
+          ? GetChild<TZodType>
+          : GetZodTypeValue<TZodType> extends GetZodTypeValue<ZodCategoryChildRecord>
+            ? GetChildrenFromChildRecord<TZodType>
+            : GetZodTypeValue<TZodType> extends GetZodTypeValue<ZodCategoryChildArray>
+              ? GetChildrenFromChildArray<TZodType>
+              : GetZodTypeValue<TZodType> extends GetZodTypeValue<ZodCategoryTwoChildren>
+                ? GetTwoChildren<TZodType>
+                : []
+
+type OneChildConditions = readonly [
     {
-        [TKey in keyof TChildRecord]: TChildRecord[TKey] extends CheckZodSchemaCompatibility<
-            TChildRecord[TKey]
-        >
-            ? never
-            : CheckZodSchemaCompatibility<TChildRecord[TKey]>
-    }[keyof TChildRecord]
->
-
-type ContinueRecursiveArray<TChildArray extends ZodChildArray> = {
-    [TKey in keyof TChildArray]: CheckZodSchemaCompatibility<TChildArray[TKey]>
-}
-
-type ContinueRecursiveArrayDebug<TChildArray extends ZodChildArray> = GetFirstInUnion<
-    {
-        [TKey in keyof TChildArray]: TChildArray[TKey] extends CheckZodSchemaCompatibility<
-            TChildArray[TKey]
-        >
-            ? never
-            : CheckZodSchemaCompatibility<TChildArray[TKey]>
-    }[number]
->
-
-type ContinueRecursiveOneChild<TChild extends SomeType> =
-    TChild extends CheckZodSchemaCompatibility<TChild> ? TChild : never
-
-type ContinueRecursiveOneChildDebug<TChild extends SomeType> =
-    TChild extends CheckZodSchemaCompatibility<TChild>
-        ? never
-        : CheckZodSchemaCompatibility<TChild>
-
-// TODO: optimize to use GetZodTypeValue to increase performance check
-export type CheckZodSchemaCompatibility<TZodType extends SomeType> =
-    TZodType extends ZodTypeCategoryNoChild
-        ? TZodType
-        : TZodType extends PassthroughZodTypeCategoryChildRecord<
-                TZodType,
-                infer TChildRecord
-            >
-          ? TChildRecord extends ContinueRecursiveRecord<TChildRecord>
-              ? TZodType
-              : ContinueRecursiveRecordDebug<TChildRecord>
-          : TZodType extends PassthroughZodTypeCategoryTwoChildren<
-                  TZodType,
-                  infer TChild1,
-                  infer TChild2
-              >
-            ? TChild1 extends ContinueRecursiveOneChild<TChild1>
-                ? TChild2 extends ContinueRecursiveOneChild<TChild2>
-                    ? TZodType
-                    : ContinueRecursiveOneChildDebug<TChild2>
-                : ContinueRecursiveOneChildDebug<TChild1>
-            : TZodType extends PassthroughZodTypeCategoryChildArray<
-                    TZodType,
-                    infer TChildArray
+        parent: SomeZodType<'array'>
+        childConditions: readonly [
+            | IntoSomeZodType<ZodCategoryNoChild>
+            | IntoSomeZodType<ZodCategoryOneChildWithoutPasstrough>
+            | IntoSomeZodType<ZodCategoryChildRecord>
+            | IntoSomeZodType<ExcludeZodType<ZodCategoryTwoChildren, 'record'>>,
+        ]
+        error: TypeDebuggingError<`${GetZodTypeValue<SomeZodType<'array'>>}'s children should be of these types '${ArrayToStringDisplay<
+            TuplifyUnion<
+                GetZodTypeValue<
+                    | IntoSomeZodType<ZodCategoryNoChild>
+                    | IntoSomeZodType<ZodCategoryOneChildWithoutPasstrough>
+                    | IntoSomeZodType<ZodCategoryChildRecord>
+                    | IntoSomeZodType<ExcludeZodType<ZodCategoryTwoChildren, 'record'>>
                 >
-              ? TChildArray extends ContinueRecursiveArray<TChildArray>
-                  ? TZodType
-                  : ContinueRecursiveArrayDebug<TChildArray>
-              : TZodType extends PassthroughZodTypeCategoryOneChild<
-                      TZodType,
-                      infer TChild
-                  >
-                ? TChild extends ContinueRecursiveOneChild<TChild>
-                    ? TZodType
-                    : ContinueRecursiveOneChildDebug<TChild>
-                : TypeDebuggingError<`This Zod type '${GetZodTypeValue<TZodType>}' is not supported`>
+            >
+        >}'`>
+    },
+]
 
-// TODO: remove
+type TwoChildConditions = readonly [
+    {
+        parent: SomeZodType<'intersection'>
+        childConditions: readonly [SomeZodObject, SomeZodObject]
+        error: TypeDebuggingError<`${GetZodTypeValue<SomeZodType<'intersection'>>}'s children should be of this type '${GetZodTypeValue<SomeZodObject>}'`>
+    },
+    {
+        parent: SomeZodType<'record'>
+        childConditions: readonly [
+            SomeZodType<any, string | number, string | number>,
+            (
+                | IntoSomeZodType<ZodCategoryNoChild>
+                | IntoSomeZodType<ZodCategoryChildRecord>
+                | IntoSomeZodType<ExcludeZodType<ZodCategoryTwoChildren, 'record'>>
+            ),
+        ]
+        error: TypeDebuggingError<`${GetZodTypeValue<ZodRecord>}'s key should be of these types '${ArrayToStringDisplay<
+            TuplifyUnion<GetZodTypeValue<SomeZodType<'string' | 'number'>>>
+        >}', ${GetZodTypeValue<ZodRecord>}'s value should be of these types '${ArrayToStringDisplay<
+            TuplifyUnion<
+                GetZodTypeValue<
+                    | IntoSomeZodType<ZodCategoryNoChild>
+                    | IntoSomeZodType<ZodCategoryChildRecord>
+                    | IntoSomeZodType<ExcludeZodType<ZodCategoryTwoChildren, 'record'>>
+                >
+            >
+        >}'`>
+    },
+]
+
+type ChildArrayConditions = readonly [
+    {
+        parent: SomeZodUnion
+        childConditions: readonly [
+            SomeZodObject<{ $case: ZodLiteral<string>; value: $ZodTypeDiscriminable }>,
+        ]
+        error: TypeDebuggingError<`You should use 'pz.oneOfUnion()' to make an union`>
+    },
+]
+
+type ChildConditions = readonly [
+    ...OneChildConditions,
+    ...TwoChildConditions,
+    ...ChildArrayConditions,
+]
+
+type GetChildConditions<
+    TZodType extends SomeType,
+    TRawIndex extends string[] = [],
+    TIndex extends number = TRawIndex['length'],
+> = ChildConditions['length'] extends TIndex
+    ? []
+    : GetZodTypeValue<TZodType> extends GetZodTypeValue<ChildConditions[TIndex]['parent']>
+      ? ChildConditions[TIndex]['childConditions']
+      : GetChildConditions<TZodType, [...TRawIndex, '+1']>
+
+type GetChildConditionError<
+    TZodType extends SomeType,
+    TRawIndex extends string[] = [],
+    TIndex extends number = TRawIndex['length'],
+> = ChildConditions['length'] extends TIndex
+    ? TypeDebuggingError<'No error'>
+    : GetZodTypeValue<TZodType> extends GetZodTypeValue<ChildConditions[TIndex]['parent']>
+      ? ChildConditions[TIndex]['error']
+      : GetChildConditionError<TZodType, [...TRawIndex, '+1']>
+
+type CheckChildConditions<
+    TChildren extends readonly SomeType[],
+    TChildConditions extends readonly SomeType[],
+    TRawIndex extends string[] = [],
+    TIndex extends number = TRawIndex['length'],
+> = TChildren['length'] extends TIndex
+    ? true
+    : //// Avoid using `GetZodTypeValue` since the conditions need strict validation.
+      TChildren[TIndex] extends TChildConditions[TIndex]
+      ? CheckChildConditions<TChildren, TChildConditions, [...TRawIndex, '+1']>
+      : false
+
+type ContinueRecursiveForChildren<
+    TRoot extends SomeType,
+    TZodTypes extends readonly SomeType[],
+    TRawIndex extends string[] = [],
+    TIndex extends number = TRawIndex['length'],
+> = TZodTypes['length'] extends TIndex
+    ? TRoot
+    : CheckZodSchemaCompatibility<TZodTypes[TIndex]> extends infer TResult extends
+            TypeDebuggingError<string>
+      ? TResult
+      : ContinueRecursiveForChildren<TRoot, TZodTypes, [...TRawIndex, '+1']>
+
+export type CheckZodSchemaCompatibility<
+    TZodType extends SomeType,
+    TChildren extends readonly SomeType[] = GetChildZodType<TZodType>,
+    TChildConditions extends readonly SomeType[] = GetChildConditions<TZodType>,
+    TChildConditionError extends TypeDebuggingError<string> =
+        GetChildConditionError<TZodType>,
+> =
+    CheckZodTypeCompatibility<TZodType> extends never
+        ? TypeDebuggingError<`This Zod type '${GetZodTypeValue<TZodType>}' is not supported`>
+        : TChildConditions['length'] extends 0
+          ? TChildren['length'] extends 0
+              ? TZodType
+              : ContinueRecursiveForChildren<TZodType, TChildren>
+          : CheckChildConditions<TChildren, TChildConditions> extends true
+            ? ContinueRecursiveForChildren<TZodType, TChildren>
+            : TChildConditionError
+
 // export function cliArgument<const TInner extends $ZodType>(
 //     innerType: CheckZodSchemaCompatibility<TInner>
 // ): void {}
 
-// cliArgument(
-//     z.object({
-//         test: z.string(), //.catch(''),
-//         scope2: z.union([
-//             z.object({
-//                 name: z.literal('OFFICE_USER'),
-//                 // name: z.string(),
-//             }),
-//             z.object({
-//                 name: z.literal('PARTNERSHIP'),
-//                 // name: z.string(),
-//             }),
-//         ]),
-//         // test2: z.unknown(),
-//         // test3: z.any(),
-//     })
-// )
+// TODO: poubelle
+// const schema = z.intersection(z.object({ d: z.string() }), z.object({ d2: z.string() }))
+// const schema = z.intersection(z.string(), z.string())
+// const schema = pz.oneOfUnion([['test', z.object()]])
+// const schema = z.union([z.object({ t2: z.string() }), z.object({ t: z.string() })])
+// const schema = z.record(z.string(), z.array(z.string()))
+// const schema = z.record(z.string(), z.number())
+// const schema = z.string().nullable()
+// const schema = z.array(z.string())
+// const schema = z.object({
+//     hihi: z.array(z.string()),
+// })
+// const schema = z.object({ test: z.string() })
 
-// cliArgument(z.intersection(z.string(), z.boolean()))
-// cliArgument(z.union([z.string(), z.boolean()]))
-// cliArgument(z.union([z.string().optional(), z.string()]))
-// cliArgument(
-//     z.object({
-//         test: z.union([z.string().optional()]),
-//         test3: z.number(),
-//     })
-// )
-// cliArgument(z.string().catch(''))
-// cliArgument(z.record(z.string(), z.boolean()))
-// cliArgument(
-//     z.object({
-//         test: z.union([z.string().optional()]),
-//         test3: z.record(z.string(), z.boolean()),
-//         test4: z.record(z.string(), z.boolean()),
-//     })
-// )
-// cliArgument(z.set(z.string()))
-// cliArgument(z.array(z.string()))
+// type TCHildren = GetChildZodType<typeof schema>
+// type TCond = GetChildConditions<typeof schema>
+// type TresultChekc = CheckChildConditions<TCHildren, TCond>
 
-// cliArgument(
-//     z.object({
-//         test: z.set(z.string()),
-//         test3: z.array(z.string()),
-//         // test4: z.array(z.any()),
-//     })
-// )
+// cliArgument(schema)
+// type child = GetChildZodType<Schema>
+
+// type allo22 = ContinueRecursiveForArray<[ZodAny]>
+// type inter = inferCorrectZod<child>

@@ -4,22 +4,27 @@ import { assertsZodCompatibleType } from '#zod_converter/asserts/zod_compatible_
 import { assertsZodObject } from '#zod_converter/asserts/zod_object'
 import { zodTypePattern } from '#zod_converter/helpers/zod_type_pattern'
 import type {
+    ZodCategoryPassthrough,
     ZodCompatibleType,
-    ZodTypeCategoryOneChildCasseCouille,
-    ZodTypeCategoryPassthrough,
 } from '#zod_converter/types/check'
-import { SomeZodObject } from '#zod_converter/types/some_type'
+import type { SomeZodObject } from '#zod_converter/types/some_type'
 import type { GetZodTypeValue } from '#zod_converter/types/zod_type_value'
 import { match } from 'ts-pattern'
-import type { SomeType } from 'zod/v4/core'
+import type { ZodIntersection } from 'zod'
+import type { SomeType, util } from 'zod/v4/core'
 
 export type AnyZodPassthroughInner = SomeType | SomeZodObject
+
+type ZodObjectIntersection<TChild extends SomeZodObject = SomeZodObject> =
+    TChild extends SomeZodObject<util.Extend<infer TPartialChild1, infer TPartialChild2>>
+        ? ZodIntersection<SomeZodObject<TPartialChild1>, SomeZodObject<TPartialChild2>>
+        : never
 
 export type ZodPassthroughTypeNotRecursive<
     TInner extends AnyZodPassthroughInner = AnyZodPassthroughInner,
 > = TInner extends SomeZodObject
-    ? ZodTypeCategoryOneChildCasseCouille<TInner> | ZodTypeCategoryPassthrough<TInner>
-    : ZodTypeCategoryPassthrough<TInner>
+    ? ZodObjectIntersection<TInner> | ZodCategoryPassthrough<TInner>
+    : ZodCategoryPassthrough<TInner>
 
 export type ZodPassthroughType<
     TInner extends AnyZodPassthroughInner = AnyZodPassthroughInner,
@@ -57,7 +62,6 @@ export const ZodPassthroughType = {
             'catch',
             'optional',
             'nonoptional',
-            'nullable',
             'readonly',
             'default',
             'prefault',
@@ -85,7 +89,6 @@ export const ZodPassthroughType = {
                     zodTypePattern('readonly'),
                     zodTypePattern('default'),
                     zodTypePattern('prefault'),
-                    zodTypePattern('nullable'),
                     zodTypePattern('optional'),
                     zodTypePattern('nonoptional'),
                     (schema) => {
@@ -110,7 +113,13 @@ export const ZodPassthroughType = {
                     assertsZodObject(schema._zod.def.right)
                     assertsZodObject(schema._zod.def.left)
 
-                    return schema._zod.def.left.extend(schema._zod.def.right['shape'])
+                    const finalSchema = schema._zod.def.left.extend(
+                        schema._zod.def.right['shape']
+                    )
+
+                    assertsZodCompatibleType(finalSchema)
+
+                    return finalSchema
                 })
                 .exhaustive()
 

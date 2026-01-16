@@ -1,14 +1,14 @@
 import type { CheckTuple } from '#core/types/check_tuple'
-import type { ZodTypeCategoryNoChild } from '#zod_converter/types/check'
+import type { ZodCategoryNoChild } from '#zod_converter/types/check'
 import {
-    AnyZodPassthroughInner,
-    WithMaybeZodPassthrough,
+    type AnyZodPassthroughInner,
+    type WithMaybeZodPassthrough,
     ZodPassthroughType,
 } from '#zod_converter/types/passthroughs'
 import type { GetZodTypeValue } from '#zod_converter/types/zod_type_value'
 import type { ZodEnum } from 'zod'
 
-export type ZodPrimitifType = Exclude<ZodTypeCategoryNoChild, ZodEnum>
+export type ZodPrimitifType = Exclude<ZodCategoryNoChild, ZodEnum>
 
 export type ZodPrimitifTypeValue = GetZodTypeValue<ZodPrimitifType>
 export type ZodPrimitifTypeTuple = ZodPrimitifTypeValue[]

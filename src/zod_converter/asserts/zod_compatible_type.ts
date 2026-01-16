@@ -1,4 +1,4 @@
-import { CompatibleZodTypeTuple, ZodCompatibleType } from '#zod_converter/types/check'
+import { CompatibleZodTypeTuple, ZodCompatibleType } from '#zod_converter/types/check2'
 import { SchemaError } from '#zod_converter/types/error'
 import type { SomeType } from 'zod/v4/core'
 
@@ -12,6 +12,7 @@ export const assertsZodCompatibleType: AssertsZodCompatibleTypeFn = function <
 >(
     schema: TSchema
     // @ts-expect-error fuck of
+    // faire un SomeCompatibleType
 ): asserts schema is ZodCompatibleType {
     if (!ZodCompatibleType.is(schema)) {
         const validZodTypes = CompatibleZodTypeTuple.get()

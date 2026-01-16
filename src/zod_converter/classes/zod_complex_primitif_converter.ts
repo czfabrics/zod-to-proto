@@ -30,7 +30,6 @@ export class ZodComplexPrimitifConverter {
             .with(zodTypePattern('array'), (schema) => {
                 const converter = new ZodMessageFieldTypeConverter(this.transformers)
 
-                // TODO: c'est dans le typage ? le fait qu'un array ne peut pas prendre un record?
                 assertsZodRepeatedInnerType(schema._zod.def.element)
 
                 const inner = converter.convert(key, schema._zod.def.element)
@@ -43,7 +42,6 @@ export class ZodComplexPrimitifConverter {
             .with(zodTypePattern('set'), (schema) => {
                 const converter = new ZodMessageFieldTypeConverter(this.transformers)
 
-                // TODO: c'est dans le typage ? le fait qu'un array ne peut pas prendre un record?
                 assertsZodRepeatedInnerType(schema._zod.def.valueType)
 
                 const inner = converter.convert(key, schema._zod.def.valueType)
@@ -55,10 +53,6 @@ export class ZodComplexPrimitifConverter {
             })
             .with(zodTypePattern('record'), (schema) => {
                 const converter = new ZodMessageFieldTypeConverter(this.transformers)
-
-                // TODO: ajouter le typage le $ZodRecordKey sans SYMBOL
-                // TODO: ajouter au typage key map
-                // TODO: ajouter au typage value map
 
                 assertsZodPrimitifType(schema._zod.def.keyType)
 

@@ -12,7 +12,7 @@ export type CheckTuple<
         : TypeDebuggingError<`Missing values: ${ArrayToStringDisplay<TuplifyUnion<Exclude<TUnion, TValues[number]>>>}`>
     : TypeDebuggingError<`Unexpected values: ${ArrayToStringDisplay<RemoveFromArray<TValues, TUnion>>}`>
 
-type ArrayToStringDisplay<
+export type ArrayToStringDisplay<
     TValues extends unknown[],
     TDisplay extends string = '[',
     TRawIndex extends string[] = [],

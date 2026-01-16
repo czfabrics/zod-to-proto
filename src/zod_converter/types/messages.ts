@@ -1,20 +1,17 @@
 import type { CheckTuple } from '#core/types/check_tuple'
 import type { Prettify } from '#core/types/prettify'
-import type {
-    ZodTypeCategoryChildArrayCasseCouille,
-    ZodTypeCategoryChildRecord,
-} from '#zod_converter/types/check'
-import { ZodComplexPrimitifType } from '#zod_converter/types/complex_primitifs'
+import type { ZodOneOfUnion } from '#zod/types/zod_one_of_union'
+import type { ZodComplexPrimitifType } from '#zod_converter/types/complex_primitifs'
 import {
-    AnyZodPassthroughInner,
-    WithMaybeZodPassthrough,
+    type AnyZodPassthroughInner,
+    type WithMaybeZodPassthrough,
     ZodPassthroughType,
 } from '#zod_converter/types/passthroughs'
-import { ZodPrimitifType } from '#zod_converter/types/primitifs'
+import type { ZodPrimitifType } from '#zod_converter/types/primitifs'
 import type { GetZodTypeValue } from '#zod_converter/types/zod_type_value'
-import type { ZodEnum } from 'zod'
+import type { ZodEnum, ZodObject } from 'zod'
 
-export type AnyZodMessage = ZodTypeCategoryChildRecord | ZodEnum
+export type AnyZodMessage = ZodObject | ZodEnum
 
 export type AnyZodMessageTypeValue = Prettify<GetZodTypeValue<AnyZodMessage>>
 export type AnyZodMessageTypeTuple = AnyZodMessageTypeValue[]
@@ -79,7 +76,7 @@ export const ZodMessageFieldType = {
     },
 } as const
 
-export type ZodMessageOneOfFieldType = ZodTypeCategoryChildArrayCasseCouille
+export type ZodMessageOneOfFieldType = ZodOneOfUnion
 export type ZodMessageOneOfFieldTypeValue = Prettify<
     GetZodTypeValue<ZodMessageOneOfFieldType>
 >

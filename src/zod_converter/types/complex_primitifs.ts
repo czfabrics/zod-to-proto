@@ -1,23 +1,20 @@
 import type { CheckTuple } from '#core/types/check_tuple'
 import type { Prettify } from '#core/types/prettify'
-import type {
-    ZodTypeCategoryOneChild,
-    ZodTypeCategoryTwoChildrenCasseCouille,
-} from '#zod_converter/types/check'
-import { AnyZodMessage } from '#zod_converter/types/messages'
+import type { ZodCategoryOneChildWithoutPasstrough } from '#zod_converter/types/check'
+import type { AnyZodMessage } from '#zod_converter/types/messages'
 import {
-    AnyZodPassthroughInner,
-    WithMaybeZodPassthrough,
+    type AnyZodPassthroughInner,
+    type WithMaybeZodPassthrough,
     ZodPassthroughType,
 } from '#zod_converter/types/passthroughs'
-import { ZodPrimitifType } from '#zod_converter/types/primitifs'
+import type { ZodPrimitifType } from '#zod_converter/types/primitifs'
 import type { GetZodTypeValue } from '#zod_converter/types/zod_type_value'
 import type { ZodRecord } from 'zod'
-import type { $ZodRecordKey, SomeType } from 'zod/v4/core'
+import type { $ZodType, SomeType } from 'zod/v4/core'
 
 export type ZodComplexPrimitifType =
-    | ZodTypeCategoryOneChild
-    | ZodTypeCategoryTwoChildrenCasseCouille<$ZodRecordKey>
+    | ZodCategoryOneChildWithoutPasstrough
+    | ZodRecord<$ZodType<string, string>, SomeType>
 
 export type ZodComplexPrimitifTypeValue = Prettify<
     GetZodTypeValue<ZodComplexPrimitifType>
@@ -50,8 +47,10 @@ export const ZodComplexPrimitifType = {
 
 export type ZodRepeatedInnerType =
     | ZodPrimitifType
-    | Exclude<ZodComplexPrimitifType, ZodRecord<$ZodRecordKey, SomeType>>
+    | ZodCategoryOneChildWithoutPasstrough
     | AnyZodMessage
+
+export type ZodRepeatedInnerTypee = GetZodTypeValue<ZodRepeatedInnerType>
 
 export type ZodRepeatedInnerTypeValue = GetZodTypeValue<ZodRepeatedInnerType>
 export type ZodRepeatedInnerTypeTuple = ZodRepeatedInnerTypeValue[]
