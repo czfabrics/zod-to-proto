@@ -5,13 +5,14 @@ import type {
     ZodTypeCategoryChildRecord,
 } from '#zod_converter/types/check'
 import { ZodComplexPrimitifType } from '#zod_converter/types/complex_primitifs'
+import {
+    AnyZodPassthroughInner,
+    WithMaybeZodPassthrough,
+    ZodPassthroughType,
+} from '#zod_converter/types/passthroughs'
 import { ZodPrimitifType } from '#zod_converter/types/primitifs'
-import type {
-    CastZodTypeFromTypeValue,
-    GetZodTypeValue,
-} from '#zod_converter/types/zod_type_value'
+import type { GetZodTypeValue } from '#zod_converter/types/zod_type_value'
 import type { ZodEnum } from 'zod'
-import type { SomeType } from 'zod/v4/core'
 
 export type AnyZodMessage = ZodTypeCategoryChildRecord | ZodEnum
 
@@ -27,16 +28,14 @@ export const AnyZodMessageTypeTuple = {
 } as const
 
 export const AnyZodMessage = {
-    is: <TSchema extends SomeType>(
-        schema: TSchema
-        // @ts-expect-error TS compiler doesn't like this type CastZodTypeFromTypeValue but it works...
-    ): schema is CastZodTypeFromTypeValue<TSchema, AnyZodMessageType> => {
-        const zodTypes: AnyZodMessageTypeTuple = AnyZodMessageTypeTuple.new([
-            'object',
-            'enum',
-        ])
+    is: function (
+        schema: WithMaybeZodPassthrough<AnyZodPassthroughInner>
+    ): schema is WithMaybeZodPassthrough<AnyZodMessage> {
+        const deepSchema = ZodPassthroughType.pass(schema)
 
-        return (zodTypes as string[]).includes(schema._zod.def.type)
+        const zodTypes: string[] = AnyZodMessageTypeTuple.new(['object', 'enum'])
+
+        return zodTypes.includes(deepSchema._zod.def.type)
     },
 } as const
 
@@ -69,13 +68,14 @@ export const ZodMessageFieldTypeTuple = {
 } as const
 
 export const ZodMessageFieldType = {
-    is: <TSchema extends SomeType>(
-        schema: TSchema
-        // @ts-expect-error TS compiler doesn't like this type CastZodTypeFromTypeValue but it works...
-    ): schema is CastZodTypeFromTypeValue<TSchema, ZodMessageFieldType> => {
-        const zodTypes: ZodMessageFieldTypeTuple = ZodMessageFieldTypeTuple.get()
+    is: function (
+        schema: WithMaybeZodPassthrough<AnyZodPassthroughInner>
+    ): schema is WithMaybeZodPassthrough<ZodMessageFieldType> {
+        const deepSchema = ZodPassthroughType.pass(schema)
 
-        return (zodTypes as string[]).includes(schema._zod.def.type)
+        const zodTypes: string[] = ZodMessageFieldTypeTuple.get()
+
+        return zodTypes.includes(deepSchema._zod.def.type)
     },
 } as const
 
@@ -97,15 +97,14 @@ export const ZodMessageOneOfFieldTypeTuple = {
 } as const
 
 export const ZodMessageOneOfFieldType = {
-    is: <TSchema extends SomeType>(
-        schema: TSchema
-        // @ts-expect-error TS compiler doesn't like this type CastZodTypeFromTypeValue but it works...
-    ): schema is CastZodTypeFromTypeValue<TSchema, ZodMessageOneOfFieldType> => {
-        const zodTypes: ZodMessageOneOfFieldTypeTuple = ZodMessageOneOfFieldTypeTuple.new(
-            ['union']
-        )
+    is: function (
+        schema: WithMaybeZodPassthrough<AnyZodPassthroughInner>
+    ): schema is WithMaybeZodPassthrough<ZodMessageOneOfFieldType> {
+        const deepSchema = ZodPassthroughType.pass(schema)
 
-        return (zodTypes as string[]).includes(schema._zod.def.type)
+        const zodTypes: string[] = ZodMessageOneOfFieldTypeTuple.get()
+
+        return zodTypes.includes(deepSchema._zod.def.type)
     },
 } as const
 
@@ -139,12 +138,13 @@ export const AnyZodMessageFieldTypeTuple = {
 } as const
 
 export const AnyZodMessageFieldType = {
-    is: <TSchema extends SomeType>(
-        schema: TSchema
-        // @ts-expect-error TS compiler doesn't like this type CastZodTypeFromTypeValue but it works...
-    ): schema is CastZodTypeFromTypeValue<TSchema, ZodMessageOneOfFieldType> => {
-        const zodTypes: AnyZodMessageFieldTypeTuple = AnyZodMessageFieldTypeTuple.get()
+    is: function (
+        schema: WithMaybeZodPassthrough<AnyZodPassthroughInner>
+    ): schema is WithMaybeZodPassthrough<AnyZodMessageFieldType> {
+        const deepSchema = ZodPassthroughType.pass(schema)
 
-        return (zodTypes as string[]).includes(schema._zod.def.type)
+        const zodTypes: string[] = AnyZodMessageFieldTypeTuple.get()
+
+        return zodTypes.includes(deepSchema._zod.def.type)
     },
 } as const

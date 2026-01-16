@@ -5,19 +5,40 @@ import { assertsZodObject } from '#zod_converter/asserts/zod_object'
 import { zodTypePattern } from '#zod_converter/helpers/zod_type_pattern'
 import type {
     ZodCompatibleType,
+    ZodTypeCategoryOneChildCasseCouille,
     ZodTypeCategoryPassthrough,
-    ZodTypeCategoryTwoChildren,
 } from '#zod_converter/types/check'
-import type {
-    CastZodTypeFromTypeValue,
-    GetZodTypeValue,
-} from '#zod_converter/types/zod_type_value'
+import { SomeZodObject } from '#zod_converter/types/some_type'
+import type { GetZodTypeValue } from '#zod_converter/types/zod_type_value'
 import { match } from 'ts-pattern'
 import type { SomeType } from 'zod/v4/core'
 
-export type ZodPassthroughType = ZodTypeCategoryTwoChildren | ZodTypeCategoryPassthrough
+export type AnyZodPassthroughInner = SomeType | SomeZodObject
 
-export type ZodPassthroughTypeValue = Prettify<GetZodTypeValue<ZodPassthroughType>>
+export type ZodPassthroughTypeNotRecursive<
+    TInner extends AnyZodPassthroughInner = AnyZodPassthroughInner,
+> = TInner extends SomeZodObject
+    ? ZodTypeCategoryOneChildCasseCouille<TInner> | ZodTypeCategoryPassthrough<TInner>
+    : ZodTypeCategoryPassthrough<TInner>
+
+export type ZodPassthroughType<
+    TInner extends AnyZodPassthroughInner = AnyZodPassthroughInner,
+> =
+    TInner extends ZodPassthroughTypeNotRecursive<infer TNewInner>
+        ? ZodPassthroughType<TNewInner>
+        : ZodPassthroughTypeNotRecursive<TInner>
+
+export type PassthroughTypeToExtractZodSchema<TSchema extends AnyZodPassthroughInner> =
+    TSchema extends ZodPassthroughType<infer TDeepSchema>
+        ? PassthroughTypeToExtractZodSchema<TDeepSchema>
+        : TSchema
+export type WithMaybeZodPassthrough<TSchema extends AnyZodPassthroughInner> =
+    | ZodPassthroughType<TSchema>
+    | PassthroughTypeToExtractZodSchema<TSchema>
+
+export type ZodPassthroughTypeValue = Prettify<
+    GetZodTypeValue<ZodPassthroughTypeNotRecursive>
+>
 export type ZodPassthroughTypeTuple = ZodPassthroughTypeValue[]
 
 export const ZodPassthroughTypeTuple = {
@@ -29,11 +50,10 @@ export const ZodPassthroughTypeTuple = {
 } as const
 
 export const ZodPassthroughType = {
-    is: <TSchema extends SomeType>(
-        schema: TSchema
-        // @ts-expect-error TS compiler doesn't like this type CastZodTypeFromTypeValue but it works...
-    ): schema is CastZodTypeFromTypeValue<TSchema, ZodPassthroughType> => {
-        const zodTypes: ZodPassthroughTypeTuple = ZodPassthroughTypeTuple.new([
+    is: <TSchema extends AnyZodPassthroughInner>(
+        schema: WithMaybeZodPassthrough<TSchema>
+    ): schema is ZodPassthroughType<TSchema> => {
+        const zodTypes: string[] = ZodPassthroughTypeTuple.new([
             'catch',
             'optional',
             'nonoptional',
@@ -46,17 +66,19 @@ export const ZodPassthroughType = {
             'intersection',
         ])
 
-        return (zodTypes as string[]).includes(schema._zod.def.type)
+        return zodTypes.includes(schema._zod.def.type)
     },
-    pass: <TSchema extends ZodCompatibleType>(
-        schema: TSchema
-    ): Exclude<TSchema, ZodPassthroughType> => {
+    pass: <TSchema extends AnyZodPassthroughInner>(
+        schema: WithMaybeZodPassthrough<TSchema>
+    ): PassthroughTypeToExtractZodSchema<TSchema> => {
         if (!ZodPassthroughType.is(schema)) {
-            return schema as Exclude<TSchema, ZodPassthroughType>
+            return schema
         }
 
+        let passthroughSchema: ZodPassthroughType = schema
+
         while (true) {
-            const inner: ZodCompatibleType = match(schema as ZodPassthroughType)
+            const inner: AnyZodPassthroughInner = match(passthroughSchema)
                 .returnType<ZodCompatibleType>()
                 .with(
                     zodTypePattern('catch'),
@@ -85,18 +107,17 @@ export const ZodPassthroughType = {
                     return schema._zod.def.in
                 })
                 .with(zodTypePattern('intersection'), (schema) => {
-                    // TODO: ajouter au typage
                     assertsZodObject(schema._zod.def.right)
                     assertsZodObject(schema._zod.def.left)
 
-                    return schema._zod.def.right.extend(schema._zod.def.left)
+                    return schema._zod.def.left.extend(schema._zod.def.right['shape'])
                 })
                 .exhaustive()
 
             if (ZodPassthroughType.is(inner)) {
-                schema = inner as TSchema
+                passthroughSchema = inner
             } else {
-                return inner as Exclude<TSchema, ZodPassthroughType>
+                return inner as PassthroughTypeToExtractZodSchema<TSchema>
             }
         }
     },

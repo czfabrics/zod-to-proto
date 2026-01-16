@@ -1,23 +1,22 @@
-import type { ZodCompatibleType } from '#zod_converter/types/check'
 import {
     ZodRepeatedInnerType,
     ZodRepeatedInnerTypeTuple,
 } from '#zod_converter/types/complex_primitifs'
 import { SchemaError } from '#zod_converter/types/error'
-import { ZodPassthroughType } from '#zod_converter/types/passthroughs'
-import type { SomeType } from 'zod/v4/core'
+import {
+    AnyZodPassthroughInner,
+    WithMaybeZodPassthrough,
+} from '#zod_converter/types/passthroughs'
 
-type AssertsZodRepeatedInnerTypeFn = (
-    schema: SomeType
-) => asserts schema is ZodRepeatedInnerType | ZodPassthroughType
+type AssertsZodRepeatedInnerTypeFn = <TSchema extends AnyZodPassthroughInner>(
+    schema: WithMaybeZodPassthrough<TSchema>
+) => asserts schema is WithMaybeZodPassthrough<TSchema & ZodRepeatedInnerType>
 
-export const assertsZodRepeatedInnerType: AssertsZodRepeatedInnerTypeFn = function (
-    schema: SomeType
-): asserts schema is ZodRepeatedInnerType | ZodPassthroughType {
-    if (ZodPassthroughType.is(schema)) {
-        schema = ZodPassthroughType.pass(schema as unknown as ZodCompatibleType)
-    }
-
+export const assertsZodRepeatedInnerType: AssertsZodRepeatedInnerTypeFn = function <
+    TSchema extends AnyZodPassthroughInner,
+>(
+    schema: WithMaybeZodPassthrough<TSchema>
+): asserts schema is WithMaybeZodPassthrough<TSchema & ZodRepeatedInnerType> {
     if (!ZodRepeatedInnerType.is(schema)) {
         const validZodTypes = ZodRepeatedInnerTypeTuple.get()
 

@@ -5,11 +5,13 @@ import type {
     ZodTypeCategoryTwoChildrenCasseCouille,
 } from '#zod_converter/types/check'
 import { AnyZodMessage } from '#zod_converter/types/messages'
+import {
+    AnyZodPassthroughInner,
+    WithMaybeZodPassthrough,
+    ZodPassthroughType,
+} from '#zod_converter/types/passthroughs'
 import { ZodPrimitifType } from '#zod_converter/types/primitifs'
-import type {
-    CastZodTypeFromTypeValue,
-    GetZodTypeValue,
-} from '#zod_converter/types/zod_type_value'
+import type { GetZodTypeValue } from '#zod_converter/types/zod_type_value'
 import type { ZodRecord } from 'zod'
 import type { $ZodRecordKey, SomeType } from 'zod/v4/core'
 
@@ -31,17 +33,18 @@ export const ZodComplexPrimitifTypeTuple = {
 } as const
 
 export const ZodComplexPrimitifType = {
-    is: <TSchema extends SomeType>(
-        schema: TSchema
-        // @ts-expect-error TS compiler doesn't like this type CastZodTypeFromTypeValue but it works...
-    ): schema is CastZodTypeFromTypeValue<TSchema, ZodComplexPrimitifType> => {
-        const zodTypes: ZodComplexPrimitifTypeTuple = ZodComplexPrimitifTypeTuple.new([
+    is: function (
+        schema: WithMaybeZodPassthrough<AnyZodPassthroughInner>
+    ): schema is WithMaybeZodPassthrough<ZodComplexPrimitifType> {
+        const deepSchema = ZodPassthroughType.pass(schema)
+
+        const zodTypes: string[] = ZodComplexPrimitifTypeTuple.new([
             'array',
             'set',
             'record',
         ])
 
-        return (zodTypes as string[]).includes(schema._zod.def.type)
+        return zodTypes.includes(deepSchema._zod.def.type)
     },
 } as const
 
@@ -77,13 +80,14 @@ export const ZodRepeatedInnerTypeTuple = {
 } as const
 
 export const ZodRepeatedInnerType = {
-    is: <TSchema extends SomeType>(
-        schema: TSchema
-        // @ts-expect-error TS compiler doesn't like this type CastZodTypeFromTypeValue but it works...
-    ): schema is CastZodTypeFromTypeValue<TSchema, ZodRepeatedInnerType> => {
-        const zodTypes: ZodRepeatedInnerTypeTuple = ZodRepeatedInnerTypeTuple.get()
+    is: function (
+        schema: WithMaybeZodPassthrough<AnyZodPassthroughInner>
+    ): schema is WithMaybeZodPassthrough<ZodRepeatedInnerType> {
+        const deepSchema = ZodPassthroughType.pass(schema)
 
-        return (zodTypes as string[]).includes(schema._zod.def.type)
+        const zodTypes: string[] = ZodRepeatedInnerTypeTuple.get()
+
+        return zodTypes.includes(deepSchema._zod.def.type)
     },
 } as const
 
@@ -113,12 +117,13 @@ export const ZodMapValueTypeTuple = {
 } as const
 
 export const ZodMapValueType = {
-    is: <TSchema extends SomeType>(
-        schema: TSchema
-        // @ts-expect-error TS compiler doesn't like this type CastZodTypeFromTypeValue but it works...
-    ): schema is CastZodTypeFromTypeValue<TSchema, ZodMapValueType> => {
-        const zodTypes: ZodMapValueTypeTuple = ZodMapValueTypeTuple.get()
+    is: function (
+        schema: WithMaybeZodPassthrough<AnyZodPassthroughInner>
+    ): schema is WithMaybeZodPassthrough<ZodMapValueType> {
+        const deepSchema = ZodPassthroughType.pass(schema)
 
-        return (zodTypes as string[]).includes(schema._zod.def.type)
+        const zodTypes: string[] = ZodMapValueTypeTuple.get()
+
+        return zodTypes.includes(deepSchema._zod.def.type)
     },
 } as const

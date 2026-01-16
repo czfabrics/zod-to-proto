@@ -6,7 +6,10 @@ import type { Proto3Message } from '#proto3_definition/types/messages'
 import { ZodMessageFieldTypeConverter } from '#zod_converter/classes/zod_message_field_type_converter'
 import { isZodSchemaOptional } from '#zod_converter/helpers/is_zod_schema_optional'
 import type { ZodMessageFieldType } from '#zod_converter/types/messages'
-import { ZodPassthroughType } from '#zod_converter/types/passthroughs'
+import {
+    WithMaybeZodPassthrough,
+    ZodPassthroughType,
+} from '#zod_converter/types/passthroughs'
 import { ZodConversionTransformers } from '#zod_converter/types/transformers'
 import { snakeCase } from 'change-case'
 
@@ -18,17 +21,17 @@ export class ZodMessageFieldConverter {
 
     public convert(
         key: string,
-        rootSchema: ZodMessageFieldType | ZodPassthroughType,
+        rootSchema: WithMaybeZodPassthrough<ZodMessageFieldType>,
         optionalKeywordState?: 'PRESENT' | 'NONE'
     ): Proto3MessageField
     public convert(
         key: string,
-        rootSchema: ZodMessageFieldType | ZodPassthroughType,
+        rootSchema: WithMaybeZodPassthrough<ZodMessageFieldType>,
         optionalKeywordState: 'NOT_NEEDED'
     ): Proto3MessageOneOfFieldSubField
     public convert(
         key: string,
-        rootSchema: ZodMessageFieldType | ZodPassthroughType,
+        rootSchema: WithMaybeZodPassthrough<ZodMessageFieldType>,
         // TODO: enum
         optionalState?: 'PRESENT' | 'NONE' | 'NOT_NEEDED'
     ): Proto3MessageField | Proto3MessageOneOfFieldSubField {

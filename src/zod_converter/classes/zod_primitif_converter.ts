@@ -12,12 +12,17 @@ import {
 import type { Proto3PrimitifType } from '#proto3_definition/types/primitifs'
 import { assertsZodFormat } from '#zod_converter/asserts/zod_format'
 import { zodTypePattern } from '#zod_converter/helpers/zod_type_pattern'
-import { ZodPassthroughType } from '#zod_converter/types/passthroughs'
+import {
+    WithMaybeZodPassthrough,
+    ZodPassthroughType,
+} from '#zod_converter/types/passthroughs'
 import type { ZodPrimitifType } from '#zod_converter/types/primitifs'
 import { match } from 'ts-pattern'
 
 export class ZodPrimitifConverter {
-    public convert(rootSchema: ZodPrimitifType | ZodPassthroughType): Proto3PrimitifType {
+    public convert(
+        rootSchema: WithMaybeZodPassthrough<ZodPrimitifType>
+    ): Proto3PrimitifType {
         const deepSchema = ZodPassthroughType.pass(rootSchema)
 
         return match(deepSchema)

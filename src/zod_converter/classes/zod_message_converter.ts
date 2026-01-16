@@ -9,13 +9,14 @@ import {
     type AnyProto3Message,
 } from '#proto3_definition/types/messages'
 import { assertsAnyZodMessageFieldType } from '#zod_converter/asserts/any_zod_message_field_type'
-import { assertsZodMessageFieldType } from '#zod_converter/asserts/zod_message_field_type'
-import { assertsZodMessageOneOfFieldType } from '#zod_converter/asserts/zod_message_one_of_field_type'
 import { ZodMessageFieldConverter } from '#zod_converter/classes/zod_message_field_converter'
 import { ZodMessageOneOfFieldConverter } from '#zod_converter/classes/zod_message_one_of_field_converter'
 import { zodTypePattern } from '#zod_converter/helpers/zod_type_pattern'
 import { ZodMessageFieldType, type AnyZodMessage } from '#zod_converter/types/messages'
-import { ZodPassthroughType } from '#zod_converter/types/passthroughs'
+import {
+    WithMaybeZodPassthrough,
+    ZodPassthroughType,
+} from '#zod_converter/types/passthroughs'
 import { ZodConversionTransformers } from '#zod_converter/types/transformers'
 import { pascalCase } from 'change-case'
 import { match } from 'ts-pattern'
@@ -25,8 +26,7 @@ export class ZodMessageConverter {
 
     public convert(
         name: string,
-        // TODO: par contre si on prend ZodCatch, on ne sait pas si c'est un ZodMessageFieldType en innerType...
-        rootSchema: AnyZodMessage | ZodPassthroughType
+        rootSchema: WithMaybeZodPassthrough<AnyZodMessage>
     ): AnyProto3Message {
         const deepSchema = ZodPassthroughType.pass(rootSchema)
 
@@ -43,13 +43,9 @@ export class ZodMessageConverter {
                 for (const [key, entrySchema] of Object.entries(schema.shape)) {
                     assertsAnyZodMessageFieldType(entrySchema)
 
-                    const entryDeepSchema = ZodPassthroughType.pass(entrySchema)
-
                     let field: Proto3MessageField | Proto3MessageOneOfField
 
-                    if (ZodMessageFieldType.is(entryDeepSchema)) {
-                        assertsZodMessageFieldType(entrySchema)
-
+                    if (ZodMessageFieldType.is(entrySchema)) {
                         const converter = new ZodMessageFieldConverter(
                             message,
                             this.transformers
@@ -57,8 +53,6 @@ export class ZodMessageConverter {
 
                         field = converter.convert(key, entrySchema)
                     } else {
-                        assertsZodMessageOneOfFieldType(entrySchema)
-
                         const converter = new ZodMessageOneOfFieldConverter(
                             message,
                             this.transformers

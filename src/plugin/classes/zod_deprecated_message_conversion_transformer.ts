@@ -1,12 +1,12 @@
 import { Proto3Deprecated } from '#plugin/types/global'
 import { Proto3Message } from '#proto3_definition/types/messages'
-import { AnyZodMessage } from '#zod_converter/types/messages'
-import { ZodPassthroughType } from '#zod_converter/types/passthroughs'
+import type { AnyZodMessage } from '#zod_converter/types/messages'
+import type { WithMaybeZodPassthrough } from '#zod_converter/types/passthroughs'
 import type { ZodMessageConversionTransformer } from '#zod_converter/types/transformers'
 
 export class ZodDeprecatedMessageConversionTransformer implements ZodMessageConversionTransformer {
     transform(
-        schema: AnyZodMessage | ZodPassthroughType,
+        schema: WithMaybeZodPassthrough<AnyZodMessage>,
         protoDefinition: Proto3Message
     ): Proto3Message {
         // TODO: tous les checker ? et si un à deprecated = true

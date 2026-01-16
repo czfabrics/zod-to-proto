@@ -1,11 +1,12 @@
 import type { CheckTuple } from '#core/types/check_tuple'
 import type { ZodTypeCategoryNoChild } from '#zod_converter/types/check'
-import type {
-    CastZodTypeFromTypeValue,
-    GetZodTypeValue,
-} from '#zod_converter/types/zod_type_value'
+import {
+    AnyZodPassthroughInner,
+    WithMaybeZodPassthrough,
+    ZodPassthroughType,
+} from '#zod_converter/types/passthroughs'
+import type { GetZodTypeValue } from '#zod_converter/types/zod_type_value'
 import type { ZodEnum } from 'zod'
-import type { SomeType } from 'zod/v4/core'
 
 export type ZodPrimitifType = Exclude<ZodTypeCategoryNoChild, ZodEnum>
 
@@ -32,12 +33,13 @@ export const ZodPrimitifTypeTuple = {
 } as const
 
 export const ZodPrimitifType = {
-    is: <TSchema extends SomeType>(
-        schema: TSchema
-        // @ts-expect-error TS compiler doesn't like this type CastZodTypeFromTypeValue but it works...
-    ): schema is CastZodTypeFromTypeValue<TSchema, ZodPrimitifType> => {
-        const zodTypes: ZodPrimitifTypeTuple = ZodPrimitifTypeTuple.get()
+    is: function (
+        schema: WithMaybeZodPassthrough<AnyZodPassthroughInner>
+    ): schema is WithMaybeZodPassthrough<ZodPrimitifType> {
+        const deepSchema = ZodPassthroughType.pass(schema)
 
-        return (zodTypes as string[]).includes(schema._zod.def.type)
+        const zodTypes: string[] = ZodPrimitifTypeTuple.get()
+
+        return zodTypes.includes(deepSchema._zod.def.type)
     },
 } as const

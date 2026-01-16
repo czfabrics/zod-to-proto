@@ -9,7 +9,10 @@ import { assertsZodRepeatedInnerType } from '#zod_converter/asserts/zod_repeated
 import { ZodMessageFieldTypeConverter } from '#zod_converter/classes/zod_message_field_type_converter'
 import { zodTypePattern } from '#zod_converter/helpers/zod_type_pattern'
 import type { ZodComplexPrimitifType } from '#zod_converter/types/complex_primitifs'
-import { ZodPassthroughType } from '#zod_converter/types/passthroughs'
+import {
+    WithMaybeZodPassthrough,
+    ZodPassthroughType,
+} from '#zod_converter/types/passthroughs'
 import { ZodConversionTransformers } from '#zod_converter/types/transformers'
 import { match } from 'ts-pattern'
 
@@ -18,7 +21,7 @@ export class ZodComplexPrimitifConverter {
 
     public convert(
         key: string,
-        rootSchema: ZodComplexPrimitifType | ZodPassthroughType
+        rootSchema: WithMaybeZodPassthrough<ZodComplexPrimitifType>
     ): Proto3ComplexPrimitifType {
         const deepSchema = ZodPassthroughType.pass(rootSchema)
 
@@ -58,8 +61,6 @@ export class ZodComplexPrimitifConverter {
                 // TODO: ajouter au typage value map
 
                 assertsZodPrimitifType(schema._zod.def.keyType)
-
-                schema._zod.def.keyType._zod.def.type
 
                 const keyType = converter.convert(key, schema._zod.def.keyType)
 

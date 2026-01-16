@@ -1,43 +1,43 @@
-import {
+import type {
     Proto3EnumField,
     Proto3MessageField,
     Proto3MessageOneOfField,
 } from '#proto3_definition/types/fields'
-import { Proto3Enum, Proto3Message } from '#proto3_definition/types/messages'
-import {
+import type { Proto3Enum, Proto3Message } from '#proto3_definition/types/messages'
+import type {
     AnyZodMessage,
     ZodMessageFieldType,
     ZodMessageOneOfFieldType,
 } from '#zod_converter/types/messages'
-import { ZodPassthroughType } from '#zod_converter/types/passthroughs'
-import { SomeType } from 'zod/v4/core'
+import type { WithMaybeZodPassthrough } from '#zod_converter/types/passthroughs'
+import type { SomeType } from 'zod/v4/core'
 
 export interface ZodConversionTransformer<TSchema extends SomeType, TProtoDefinition> {
     transform(schema: TSchema, protoDefinition: TProtoDefinition): TProtoDefinition
 }
 
 export type ZodMessageConversionTransformer = ZodConversionTransformer<
-    AnyZodMessage | ZodPassthroughType,
+    WithMaybeZodPassthrough<AnyZodMessage>,
     Proto3Message
 >
 
 export type ZodMessageFieldConversionTransformer = ZodConversionTransformer<
-    ZodMessageFieldType | ZodPassthroughType,
+    WithMaybeZodPassthrough<ZodMessageFieldType>,
     Proto3MessageField
 >
 
 export type ZodMessageOneOfFieldConversionTransformer = ZodConversionTransformer<
-    ZodMessageOneOfFieldType | ZodPassthroughType,
+    WithMaybeZodPassthrough<ZodMessageOneOfFieldType>,
     Proto3MessageOneOfField
 >
 
 export type ZodEnumConversionTransformer = ZodConversionTransformer<
-    AnyZodMessage | ZodPassthroughType,
+    WithMaybeZodPassthrough<AnyZodMessage>,
     Proto3Enum
 >
 
 export type ZodEnumFieldConversionTransformer = ZodConversionTransformer<
-    AnyZodMessage | ZodPassthroughType,
+    WithMaybeZodPassthrough<AnyZodMessage>,
     Proto3EnumField
 >
 

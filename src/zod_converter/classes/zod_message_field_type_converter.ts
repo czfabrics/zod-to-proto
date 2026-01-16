@@ -15,7 +15,7 @@ import {
     type ZodRepeatedInnerType,
 } from '#zod_converter/types/complex_primitifs'
 import type { AnyZodMessage, ZodMessageFieldType } from '#zod_converter/types/messages'
-import type { ZodPassthroughType } from '#zod_converter/types/passthroughs'
+import { WithMaybeZodPassthrough } from '#zod_converter/types/passthroughs'
 import { ZodPrimitifType } from '#zod_converter/types/primitifs'
 import { ZodConversionTransformers } from '#zod_converter/types/transformers'
 
@@ -24,31 +24,31 @@ export class ZodMessageFieldTypeConverter {
 
     public convert(
         key: string,
-        schema: ZodPrimitifType | ZodPassthroughType
+        schema: WithMaybeZodPassthrough<ZodPrimitifType>
     ): Proto3PrimitifType
     public convert(
         key: string,
-        schema: ZodComplexPrimitifType | ZodPassthroughType
+        schema: WithMaybeZodPassthrough<ZodComplexPrimitifType>
     ): Proto3ComplexPrimitifType
     public convert(
         key: string,
-        schema: AnyZodMessage | ZodPassthroughType
+        schema: WithMaybeZodPassthrough<AnyZodMessage>
     ): AnyProto3Message
     public convert(
         key: string,
-        schema: ZodMapValueType | ZodPassthroughType
+        schema: WithMaybeZodPassthrough<ZodMapValueType>
     ): Proto3MapValueType
     public convert(
         key: string,
-        schema: ZodRepeatedInnerType | ZodPassthroughType
+        schema: WithMaybeZodPassthrough<ZodRepeatedInnerType>
     ): Proto3RepeatedInnerType
     public convert(
         key: string,
-        schema: ZodMessageFieldType | ZodPassthroughType
+        schema: WithMaybeZodPassthrough<ZodMessageFieldType>
     ): Proto3MessageFieldType
     public convert(
         key: string,
-        schema: ZodMessageFieldType | ZodPassthroughType
+        schema: WithMaybeZodPassthrough<ZodMessageFieldType>
     ): Proto3MessageFieldType {
         if (ZodPrimitifType.is(schema)) {
             const converter = new ZodPrimitifConverter()

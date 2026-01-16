@@ -1,20 +1,19 @@
-import type { ZodCompatibleType } from '#zod_converter/types/check'
 import { SchemaError } from '#zod_converter/types/error'
-import { ZodPassthroughType } from '#zod_converter/types/passthroughs'
+import {
+    AnyZodPassthroughInner,
+    WithMaybeZodPassthrough,
+} from '#zod_converter/types/passthroughs'
 import { ZodPrimitifType, ZodPrimitifTypeTuple } from '#zod_converter/types/primitifs'
-import type { SomeType } from 'zod/v4/core'
 
-type AssertsZodPrimitifTypeFn = (
-    schema: SomeType
-) => asserts schema is ZodPrimitifType | ZodPassthroughType
+type AssertsZodPrimitifTypeFn = <TSchema extends AnyZodPassthroughInner>(
+    schema: WithMaybeZodPassthrough<TSchema>
+) => asserts schema is WithMaybeZodPassthrough<TSchema & ZodPrimitifType>
 
-export const assertsZodPrimitifType: AssertsZodPrimitifTypeFn = function (
-    schema: SomeType
-): asserts schema is ZodPrimitifType | ZodPassthroughType {
-    if (ZodPassthroughType.is(schema)) {
-        schema = ZodPassthroughType.pass(schema as unknown as ZodCompatibleType)
-    }
-
+export const assertsZodPrimitifType: AssertsZodPrimitifTypeFn = function <
+    TSchema extends AnyZodPassthroughInner,
+>(
+    schema: WithMaybeZodPassthrough<TSchema>
+): asserts schema is WithMaybeZodPassthrough<TSchema & ZodPrimitifType> {
     if (!ZodPrimitifType.is(schema)) {
         const validZodTypes = ZodPrimitifTypeTuple.get()
 

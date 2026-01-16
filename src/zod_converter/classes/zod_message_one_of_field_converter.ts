@@ -8,7 +8,10 @@ import { assertsZodMessageFieldType } from '#zod_converter/asserts/zod_message_f
 import { ZodMessageFieldConverter } from '#zod_converter/classes/zod_message_field_converter'
 import { zodTypePattern } from '#zod_converter/helpers/zod_type_pattern'
 import type { ZodMessageOneOfFieldType } from '#zod_converter/types/messages'
-import { ZodPassthroughType } from '#zod_converter/types/passthroughs'
+import {
+    WithMaybeZodPassthrough,
+    ZodPassthroughType,
+} from '#zod_converter/types/passthroughs'
 import { ZodConversionTransformers } from '#zod_converter/types/transformers'
 import { snakeCase } from 'change-case'
 import { match } from 'ts-pattern'
@@ -32,7 +35,7 @@ export class ZodMessageOneOfFieldConverter {
 
     public convert(
         key: string,
-        rootSchema: ZodMessageOneOfFieldType | ZodPassthroughType
+        rootSchema: WithMaybeZodPassthrough<ZodMessageOneOfFieldType>
     ): Proto3MessageOneOfField {
         const deepSchema = ZodPassthroughType.pass(rootSchema)
 
