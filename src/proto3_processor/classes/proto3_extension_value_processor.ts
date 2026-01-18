@@ -6,7 +6,9 @@ export class Proto3ExtensionValueProcessor {
     public constructor(private readonly content: FreshFileContentMatter) {}
 
     public process(extensionValue: AnyProto3ExtensionValue): void {
-        if (Array.isArray(extensionValue)) {
+        if (extensionValue === undefined) {
+            return
+        } else if (Array.isArray(extensionValue)) {
             const arrayContents: FreshFileContentMatter[] = []
 
             for (const arrayValue of extensionValue) {

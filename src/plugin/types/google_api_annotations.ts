@@ -95,7 +95,6 @@ export const Proto3HttpAnnotation = {
         })
     },
     useExtension: function (value: GoogleApiHttpRule) {
-        // TODO: purge undefined value...
         return Proto3Extension.new({
             key: this.useType(),
             value,
