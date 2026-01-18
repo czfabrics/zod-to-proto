@@ -1,6 +1,5 @@
 import {
     Proto3BoolType,
-    Proto3BytesType,
     Proto3DoubleType,
     Proto3FloatType,
     Proto3Int32Type,
@@ -63,7 +62,6 @@ export class ZodPrimitifConverter {
             .with(zodTypePattern('template_literal'), () =>
                 Proto3StringType.new(rootSchema)
             )
-            .with(zodTypePattern('file'), () => Proto3BytesType.new(rootSchema)) // TODO: en vrai jsp
             .exhaustive()
     }
 }

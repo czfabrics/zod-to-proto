@@ -69,7 +69,6 @@ export const ZodRepeatedInnerTypeTuple = {
             'boolean',
             'literal',
             'template_literal',
-            'file',
             'object',
             'enum',
             'set',
@@ -108,7 +107,6 @@ export const ZodMapValueTypeTuple = {
             'boolean',
             'literal',
             'template_literal',
-            'file',
             'object',
             'enum',
         ])

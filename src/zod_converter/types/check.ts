@@ -25,7 +25,6 @@ import {
     type ZodCodec,
     type ZodDefault,
     type ZodEnum,
-    type ZodFile,
     type ZodIntersection,
     type ZodLazy,
     type ZodLiteral,
@@ -75,7 +74,6 @@ export const CompatibleZodTypeTuple = {
             'literal',
             'template_literal',
             'enum',
-            'file',
             'union',
             'pipe',
             'default',
@@ -117,7 +115,6 @@ export type ZodCategoryNoChild =
     | ZodBigInt
     | ZodBigIntFormat
     | ZodBoolean
-    | ZodFile
 
 export type ZodCategoryPassthrough<TChild extends SomeType = SomeType> =
     | ZodCatch<TChild>

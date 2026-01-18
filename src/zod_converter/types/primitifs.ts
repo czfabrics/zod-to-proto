@@ -27,7 +27,6 @@ export const ZodPrimitifTypeTuple = {
             'boolean',
             'literal',
             'template_literal',
-            'file',
         ])
     },
 } as const
