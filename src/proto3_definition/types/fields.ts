@@ -32,6 +32,7 @@ export type Proto3MessageField = Proto3BaseField & {
     optionalState: Proto3OptionalState
     type: Proto3MessageFieldType
     extensions: Proto3Extension[]
+    comments: string[]
 }
 
 export const Proto3MessageField = {
@@ -79,6 +80,7 @@ export type Proto3MessageOneOfField = Proto3BaseField & {
     internalName: 'message_one_of_field'
     subFields: Proto3MessageOneOfFieldSubField[]
     extensions: Proto3Extension[]
+    comments: string[]
 }
 
 export const Proto3MessageOneOfField = {
@@ -105,6 +107,7 @@ export type Proto3EnumField = Proto3BaseField & {
     index: number
     internalName: 'enum_field'
     extensions: Proto3Extension[]
+    comments: string[]
 }
 
 export const Proto3EnumField = {

@@ -16,6 +16,7 @@ export type Proto3Message = {
     name: string
     fields: AnyProto3MessageField[]
     extensions: Proto3Extension[]
+    comments: string[]
 }
 
 export const Proto3Message = {
@@ -67,6 +68,7 @@ export type Proto3Enum = {
     name: string
     fields: Proto3EnumField[]
     extensions: Proto3Extension[]
+    comments: string[]
 }
 
 export const Proto3Enum = {

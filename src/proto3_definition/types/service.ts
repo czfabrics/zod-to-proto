@@ -13,6 +13,7 @@ export type Proto3RpcService = {
     name: string
     functions: Proto3RpcFunction[]
     extensions: Proto3Extension[]
+    comments: string[]
 }
 
 export const Proto3RpcService = {

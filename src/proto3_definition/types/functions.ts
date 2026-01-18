@@ -15,6 +15,7 @@ export type Proto3RpcFunction = {
     out: AnyProto3Message | Proto3ImportedType
     outStream: boolean
     extensions: Proto3Extension[]
+    comments: string[]
 }
 
 export const Proto3RpcFunction = {
