@@ -2,11 +2,21 @@ import { fileContentMatter } from '#file/classes/content_matter'
 import type { FileContentMatter } from '#file/types/content_matter'
 import { Proto3Extension } from '#proto3_definition/types/extension'
 import { Proto3RpcService } from '#proto3_definition/types/service'
+import { Proto3CommentProcessor } from '#proto3_processor/classes/proto3_comment_processor'
 import { Proto3FunctionProcessor } from '#proto3_processor/classes/proto3_function_processor'
 import { Proto3RecordExtensionProcessor } from '#proto3_processor/classes/proto3_record_extension_processor'
 
 export class Proto3ServiceProcessor {
     public constructor(private readonly content: FileContentMatter) {}
+
+    public getCommentContent(comments: string[]): FileContentMatter {
+        const content = fileContentMatter()
+        const processor = new Proto3CommentProcessor(content)
+
+        processor.process(comments)
+
+        return content
+    }
 
     private getRecordExtensionContent(extension: Proto3Extension): FileContentMatter {
         const extensionContent = fileContentMatter()
@@ -18,6 +28,8 @@ export class Proto3ServiceProcessor {
     }
 
     public process(service: Proto3RpcService): void {
+        const commentContent = this.getCommentContent(service.comments)
+
         const serviceContent = fileContentMatter()
 
         let isFirst = true
@@ -52,6 +64,9 @@ export class Proto3ServiceProcessor {
             isFirst = false
         }
 
-        this.content.write(`service ${service.name} `).writeBlock(serviceContent)
+        this.content
+            .write(commentContent)
+            .write(`service ${service.name} `)
+            .writeBlock(serviceContent)
     }
 }

@@ -6,12 +6,22 @@ import type {
     Proto3MessageFieldType,
 } from '#proto3_definition/types/fields'
 import type { Proto3ScalarType } from '#proto3_definition/types/scalars'
+import { Proto3CommentProcessor } from '#proto3_processor/classes/proto3_comment_processor'
 import { Proto3FieldExtensionProcessor } from '#proto3_processor/classes/proto3_field_extension_processor'
 import { Proto3RecordExtensionProcessor } from '#proto3_processor/classes/proto3_record_extension_processor'
 import { match } from 'ts-pattern'
 
 export class Proto3FieldProcessor {
     public constructor(private readonly fileContent: FileContentMatter) {}
+
+    public getCommentContent(comments: string[]): FileContentMatter {
+        const content = fileContentMatter()
+        const processor = new Proto3CommentProcessor(content)
+
+        processor.process(comments)
+
+        return content
+    }
 
     private getScalarTypeReferenceString(scalarType: Proto3ScalarType): string {
         return scalarType.name
@@ -92,6 +102,10 @@ export class Proto3FieldProcessor {
     }
 
     public process(anyField: AnyProto3Field): void {
+        const commentContent = this.getCommentContent(anyField.comments)
+
+        this.fileContent.write(commentContent)
+
         match(anyField)
             .with({ internalName: 'message_field' }, (field) => {
                 const extensionContents: FileContentMatter[] = []
