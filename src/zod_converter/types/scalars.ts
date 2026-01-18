@@ -8,19 +8,19 @@ import {
 import type { GetZodTypeValue } from '#zod_converter/types/zod_type_value'
 import type { ZodEnum } from 'zod'
 
-export type ZodPrimitifType = Exclude<ZodCategoryNoChild, ZodEnum>
+export type ZodScalarType = Exclude<ZodCategoryNoChild, ZodEnum>
 
-export type ZodPrimitifTypeValue = GetZodTypeValue<ZodPrimitifType>
-export type ZodPrimitifTypeTuple = ZodPrimitifTypeValue[]
+export type ZodScalarTypeValue = GetZodTypeValue<ZodScalarType>
+export type ZodScalarTypeTuple = ZodScalarTypeValue[]
 
-export const ZodPrimitifTypeTuple = {
+export const ZodScalarTypeTuple = {
     new: function <const TValues extends string[]>(
-        values: CheckTuple<ZodPrimitifTypeValue, TValues>
-    ): ZodPrimitifTypeTuple {
-        return values as ZodPrimitifTypeTuple
+        values: CheckTuple<ZodScalarTypeValue, TValues>
+    ): ZodScalarTypeTuple {
+        return values as ZodScalarTypeTuple
     },
-    get: (): ZodPrimitifTypeTuple => {
-        return ZodPrimitifTypeTuple.new([
+    get: (): ZodScalarTypeTuple => {
+        return ZodScalarTypeTuple.new([
             'string',
             'number',
             'bigint',
@@ -31,13 +31,13 @@ export const ZodPrimitifTypeTuple = {
     },
 } as const
 
-export const ZodPrimitifType = {
+export const ZodScalarType = {
     is: function (
         schema: WithMaybeZodPassthrough<AnyZodPassthroughInner>
-    ): schema is WithMaybeZodPassthrough<ZodPrimitifType> {
+    ): schema is WithMaybeZodPassthrough<ZodScalarType> {
         const deepSchema = ZodPassthroughType.pass(schema)
 
-        const zodTypes: string[] = ZodPrimitifTypeTuple.get()
+        const zodTypes: string[] = ZodScalarTypeTuple.get()
 
         return zodTypes.includes(deepSchema._zod.def.type)
     },

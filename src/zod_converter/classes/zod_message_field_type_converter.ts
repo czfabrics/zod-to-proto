@@ -1,22 +1,22 @@
+import type {
+    Proto3DynamicSizeType,
+    Proto3MapValueType,
+    Proto3RepeatedInnerType,
+} from '#proto3_definition/types/dynamic_size'
 import type { Proto3MessageFieldType } from '#proto3_definition/types/fields'
 import type { AnyProto3Message } from '#proto3_definition/types/messages'
-import type {
-    Proto3ComplexPrimitifType,
-    Proto3MapValueType,
-    Proto3PrimitifType,
-    Proto3RepeatedInnerType,
-} from '#proto3_definition/types/primitifs'
-import { ZodComplexPrimitifConverter } from '#zod_converter/classes/zod_complex_primitif_converter'
+import type { Proto3ScalarType } from '#proto3_definition/types/scalars'
+import { ZodDynamicSizeConverter } from '#zod_converter/classes/zod_dynamic_size_converter'
 import { ZodMessageConverter } from '#zod_converter/classes/zod_message_converter'
-import { ZodPrimitifConverter } from '#zod_converter/classes/zod_primitif_converter'
+import { ZodScalarConverter } from '#zod_converter/classes/zod_scalar_converter'
 import {
-    ZodComplexPrimitifType,
+    ZodDynamicSizeType,
     type ZodMapValueType,
     type ZodRepeatedInnerType,
-} from '#zod_converter/types/complex_primitifs'
+} from '#zod_converter/types/dynamic_size'
 import type { AnyZodMessage, ZodMessageFieldType } from '#zod_converter/types/messages'
 import { WithMaybeZodPassthrough } from '#zod_converter/types/passthroughs'
-import { ZodPrimitifType } from '#zod_converter/types/primitifs'
+import { ZodScalarType } from '#zod_converter/types/scalars'
 import { ZodConversionTransformers } from '#zod_converter/types/transformers'
 
 export class ZodMessageFieldTypeConverter {
@@ -24,12 +24,12 @@ export class ZodMessageFieldTypeConverter {
 
     public convert(
         key: string,
-        schema: WithMaybeZodPassthrough<ZodPrimitifType>
-    ): Proto3PrimitifType
+        schema: WithMaybeZodPassthrough<ZodScalarType>
+    ): Proto3ScalarType
     public convert(
         key: string,
-        schema: WithMaybeZodPassthrough<ZodComplexPrimitifType>
-    ): Proto3ComplexPrimitifType
+        schema: WithMaybeZodPassthrough<ZodDynamicSizeType>
+    ): Proto3DynamicSizeType
     public convert(
         key: string,
         schema: WithMaybeZodPassthrough<AnyZodMessage>
@@ -50,14 +50,14 @@ export class ZodMessageFieldTypeConverter {
         key: string,
         schema: WithMaybeZodPassthrough<ZodMessageFieldType>
     ): Proto3MessageFieldType {
-        if (ZodPrimitifType.is(schema)) {
-            const converter = new ZodPrimitifConverter()
+        if (ZodScalarType.is(schema)) {
+            const converter = new ZodScalarConverter()
 
             return converter.convert(schema)
         }
 
-        if (ZodComplexPrimitifType.is(schema)) {
-            const converter = new ZodComplexPrimitifConverter(this.transformers)
+        if (ZodDynamicSizeType.is(schema)) {
+            const converter = new ZodDynamicSizeConverter(this.transformers)
 
             return converter.convert(key, schema)
         }

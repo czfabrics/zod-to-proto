@@ -1,7 +1,4 @@
-import {
-    ZodMapValueType,
-    ZodMapValueTypeTuple,
-} from '#zod_converter/types/complex_primitifs'
+import { ZodMapValueType, ZodMapValueTypeTuple } from '#zod_converter/types/dynamic_size'
 import { SchemaError } from '#zod_converter/types/error'
 import {
     AnyZodPassthroughInner,

@@ -1,7 +1,7 @@
 import {
     ZodRepeatedInnerType,
     ZodRepeatedInnerTypeTuple,
-} from '#zod_converter/types/complex_primitifs'
+} from '#zod_converter/types/dynamic_size'
 import { SchemaError } from '#zod_converter/types/error'
 import {
     AnyZodPassthroughInner,

@@ -7,25 +7,23 @@ import {
     Proto3StringType,
     Proto3UInt32Type,
     Proto3UInt64Type,
-} from '#proto3_definition/types/primitif_standalone'
-import type { Proto3PrimitifType } from '#proto3_definition/types/primitifs'
+} from '#proto3_definition/types/scalar_standalones'
+import type { Proto3ScalarType } from '#proto3_definition/types/scalars'
 import { assertsZodFormat } from '#zod_converter/asserts/zod_format'
 import { zodTypePattern } from '#zod_converter/helpers/zod_type_pattern'
 import {
     WithMaybeZodPassthrough,
     ZodPassthroughType,
 } from '#zod_converter/types/passthroughs'
-import type { ZodPrimitifType } from '#zod_converter/types/primitifs'
+import type { ZodScalarType } from '#zod_converter/types/scalars'
 import { match } from 'ts-pattern'
 
-export class ZodPrimitifConverter {
-    public convert(
-        rootSchema: WithMaybeZodPassthrough<ZodPrimitifType>
-    ): Proto3PrimitifType {
+export class ZodScalarConverter {
+    public convert(rootSchema: WithMaybeZodPassthrough<ZodScalarType>): Proto3ScalarType {
         const deepSchema = ZodPassthroughType.pass(rootSchema)
 
         return match(deepSchema)
-            .returnType<Proto3PrimitifType>()
+            .returnType<Proto3ScalarType>()
             .with(zodTypePattern('string'), () => Proto3StringType.new(rootSchema))
             .with(zodTypePattern('number'), (schema) => {
                 if (schema.format === null) {

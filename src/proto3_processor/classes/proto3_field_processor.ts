@@ -5,7 +5,7 @@ import type {
     AnyProto3Field,
     Proto3MessageFieldType,
 } from '#proto3_definition/types/fields'
-import type { Proto3PrimitifType } from '#proto3_definition/types/primitifs'
+import type { Proto3ScalarType } from '#proto3_definition/types/scalars'
 import { Proto3FieldExtensionProcessor } from '#proto3_processor/classes/proto3_field_extension_processor'
 import { Proto3RecordExtensionProcessor } from '#proto3_processor/classes/proto3_record_extension_processor'
 import { match } from 'ts-pattern'
@@ -13,8 +13,8 @@ import { match } from 'ts-pattern'
 export class Proto3FieldProcessor {
     public constructor(private readonly fileContent: FreshFileContentMatter) {}
 
-    private getScalarTypeReferenceString(primitif: Proto3PrimitifType): string {
-        return primitif.name
+    private getScalarTypeReferenceString(scalarType: Proto3ScalarType): string {
+        return scalarType.name
     }
 
     private getTypeReferenceString(item: Proto3MessageFieldType): string {

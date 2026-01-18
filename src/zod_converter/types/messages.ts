@@ -1,13 +1,13 @@
 import type { CheckTuple } from '#core/types/check_tuple'
 import type { Prettify } from '#core/types/prettify'
 import type { ZodOneOfUnion } from '#zod/types/zod_one_of_union'
-import type { ZodComplexPrimitifType } from '#zod_converter/types/complex_primitifs'
+import type { ZodDynamicSizeType } from '#zod_converter/types/dynamic_size'
 import {
     type AnyZodPassthroughInner,
     type WithMaybeZodPassthrough,
     ZodPassthroughType,
 } from '#zod_converter/types/passthroughs'
-import type { ZodPrimitifType } from '#zod_converter/types/primitifs'
+import type { ZodScalarType } from '#zod_converter/types/scalars'
 import type { GetZodTypeValue } from '#zod_converter/types/zod_type_value'
 import type { ZodEnum, ZodObject } from 'zod'
 
@@ -36,7 +36,7 @@ export const AnyZodMessage = {
     },
 } as const
 
-export type ZodMessageFieldType = ZodPrimitifType | ZodComplexPrimitifType | AnyZodMessage
+export type ZodMessageFieldType = ZodScalarType | ZodDynamicSizeType | AnyZodMessage
 export type ZodMessageFieldTypeValue = GetZodTypeValue<ZodMessageFieldType>
 export type ZodMessageFieldTypeTuple = ZodMessageFieldTypeValue[]
 

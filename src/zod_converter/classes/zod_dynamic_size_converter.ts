@@ -1,14 +1,14 @@
+import type { Proto3DynamicSizeType } from '#proto3_definition/types/dynamic_size'
 import {
     Proto3MapType,
     Proto3RepeatedType,
-} from '#proto3_definition/types/primitif_standalone'
-import type { Proto3ComplexPrimitifType } from '#proto3_definition/types/primitifs'
+} from '#proto3_definition/types/scalar_standalones'
 import { assertsZodMapValueType } from '#zod_converter/asserts/zod_map_value'
-import { assertsZodPrimitifType } from '#zod_converter/asserts/zod_primitif_type'
 import { assertsZodRepeatedInnerType } from '#zod_converter/asserts/zod_repeated_inner_type'
+import { assertsZodScalarType } from '#zod_converter/asserts/zod_scalar_type'
 import { ZodMessageFieldTypeConverter } from '#zod_converter/classes/zod_message_field_type_converter'
 import { zodTypePattern } from '#zod_converter/helpers/zod_type_pattern'
-import type { ZodComplexPrimitifType } from '#zod_converter/types/complex_primitifs'
+import type { ZodDynamicSizeType } from '#zod_converter/types/dynamic_size'
 import {
     WithMaybeZodPassthrough,
     ZodPassthroughType,
@@ -16,17 +16,17 @@ import {
 import { ZodConversionTransformers } from '#zod_converter/types/transformers'
 import { match } from 'ts-pattern'
 
-export class ZodComplexPrimitifConverter {
+export class ZodDynamicSizeConverter {
     public constructor(private readonly transformers: ZodConversionTransformers) {}
 
     public convert(
         key: string,
-        rootSchema: WithMaybeZodPassthrough<ZodComplexPrimitifType>
-    ): Proto3ComplexPrimitifType {
+        rootSchema: WithMaybeZodPassthrough<ZodDynamicSizeType>
+    ): Proto3DynamicSizeType {
         const deepSchema = ZodPassthroughType.pass(rootSchema)
 
         return match(deepSchema)
-            .returnType<Proto3ComplexPrimitifType>()
+            .returnType<Proto3DynamicSizeType>()
             .with(zodTypePattern('array'), (schema) => {
                 const converter = new ZodMessageFieldTypeConverter(this.transformers)
 
@@ -54,7 +54,7 @@ export class ZodComplexPrimitifConverter {
             .with(zodTypePattern('record'), (schema) => {
                 const converter = new ZodMessageFieldTypeConverter(this.transformers)
 
-                assertsZodPrimitifType(schema._zod.def.keyType)
+                assertsZodScalarType(schema._zod.def.keyType)
 
                 const keyType = converter.convert(key, schema._zod.def.keyType)
 

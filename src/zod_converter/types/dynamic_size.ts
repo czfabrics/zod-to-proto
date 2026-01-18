@@ -7,46 +7,40 @@ import {
     type WithMaybeZodPassthrough,
     ZodPassthroughType,
 } from '#zod_converter/types/passthroughs'
-import type { ZodPrimitifType } from '#zod_converter/types/primitifs'
+import type { ZodScalarType } from '#zod_converter/types/scalars'
 import type { GetZodTypeValue } from '#zod_converter/types/zod_type_value'
 import type { ZodRecord } from 'zod'
 import type { $ZodType, SomeType } from 'zod/v4/core'
 
-export type ZodComplexPrimitifType =
+export type ZodDynamicSizeType =
     | ZodCategoryOneChildWithoutPasstrough
     | ZodRecord<$ZodType<string, string>, SomeType>
 
-export type ZodComplexPrimitifTypeValue = Prettify<
-    GetZodTypeValue<ZodComplexPrimitifType>
->
-export type ZodComplexPrimitifTypeTuple = ZodComplexPrimitifTypeValue[]
+export type ZodDynamicSizeTypeValue = Prettify<GetZodTypeValue<ZodDynamicSizeType>>
+export type ZodDynamicSizeTypeTuple = ZodDynamicSizeTypeValue[]
 
-export const ZodComplexPrimitifTypeTuple = {
+export const ZodDynamicSizeTypeTuple = {
     new: function <const TValues extends string[]>(
-        values: CheckTuple<ZodComplexPrimitifTypeValue, TValues>
-    ): ZodComplexPrimitifTypeTuple {
-        return values as ZodComplexPrimitifTypeTuple
+        values: CheckTuple<ZodDynamicSizeTypeValue, TValues>
+    ): ZodDynamicSizeTypeTuple {
+        return values as ZodDynamicSizeTypeTuple
     },
 } as const
 
-export const ZodComplexPrimitifType = {
+export const ZodDynamicSizeType = {
     is: function (
         schema: WithMaybeZodPassthrough<AnyZodPassthroughInner>
-    ): schema is WithMaybeZodPassthrough<ZodComplexPrimitifType> {
+    ): schema is WithMaybeZodPassthrough<ZodDynamicSizeType> {
         const deepSchema = ZodPassthroughType.pass(schema)
 
-        const zodTypes: string[] = ZodComplexPrimitifTypeTuple.new([
-            'array',
-            'set',
-            'record',
-        ])
+        const zodTypes: string[] = ZodDynamicSizeTypeTuple.new(['array', 'set', 'record'])
 
         return zodTypes.includes(deepSchema._zod.def.type)
     },
 } as const
 
 export type ZodRepeatedInnerType =
-    | ZodPrimitifType
+    | ZodScalarType
     | ZodCategoryOneChildWithoutPasstrough
     | AnyZodMessage
 
@@ -89,7 +83,7 @@ export const ZodRepeatedInnerType = {
     },
 } as const
 
-export type ZodMapValueType = ZodPrimitifType | AnyZodMessage
+export type ZodMapValueType = ZodScalarType | AnyZodMessage
 export type ZodMapValueTypeValue = GetZodTypeValue<ZodMapValueType>
 export type ZodMapValueTypeTuple = ZodMapValueTypeValue[]
 
