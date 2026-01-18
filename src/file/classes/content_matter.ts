@@ -1,21 +1,19 @@
 import type { DeepReadOnly } from '#core/types/deep_read_only'
-import type {
-    AnyFileContentMatter,
-    FileContentMatter,
-    FreshFileContentMatter,
-    NestedFileContentMatter,
-} from '#file/types/content_matter'
-import type { DynamicSettings } from '#file/types/settings'
+import type { FileContentMatter } from '#file/types/content_matter'
 
 export class $FileContentMatter {
-    readonly #settings: DynamicSettings = {
+    readonly #settings = {
         lineTabLevel: 0,
         blockLevel: 0,
         listLevel: 0,
     }
     readonly #sources: string[] = ['']
 
-    public get settings(): DeepReadOnly<DynamicSettings> {
+    public get settings(): DeepReadOnly<{
+        lineTabLevel: number
+        blockLevel: number
+        listLevel: number
+    }> {
         return this.#settings
     }
 
@@ -54,13 +52,13 @@ export class $FileContentMatter {
         }
     }
 
-    public indent(): FileContentMatter<DynamicSettings> {
+    public indent(): FileContentMatter {
         this.#settings.lineTabLevel += 1
 
         return this
     }
 
-    public outdent(): FileContentMatter<DynamicSettings> {
+    public outdent(): FileContentMatter {
         if (this.#settings.lineTabLevel === 0) {
             throw new Error('You should indent before calling the outdent method')
         }
@@ -70,7 +68,7 @@ export class $FileContentMatter {
         return this
     }
 
-    public openBlock(): FileContentMatter<DynamicSettings> {
+    public openBlock(): FileContentMatter {
         this.write(this.config.openingBlockCharacter)
 
         this.#settings.lineTabLevel += 1
@@ -81,7 +79,7 @@ export class $FileContentMatter {
         return this
     }
 
-    public closeBlock(): FileContentMatter<DynamicSettings> {
+    public closeBlock(): FileContentMatter {
         if (this.#settings.blockLevel === 0) {
             throw new Error('You should open a block before calling the close method')
         }
@@ -96,7 +94,7 @@ export class $FileContentMatter {
         return this
     }
 
-    public openList(): FileContentMatter<DynamicSettings> {
+    public openList(): FileContentMatter {
         this.write(this.config.openingListCharacter)
 
         this.#settings.lineTabLevel += 1
@@ -107,7 +105,7 @@ export class $FileContentMatter {
         return this
     }
 
-    public closeList(): FileContentMatter<DynamicSettings> {
+    public closeList(): FileContentMatter {
         if (this.#settings.listLevel === 0) {
             throw new Error('You should open an array before calling the close method')
         }
@@ -132,9 +130,7 @@ export class $FileContentMatter {
         return lastSource
     }
 
-    public write(
-        data: string | AnyFileContentMatter
-    ): FileContentMatter<DynamicSettings> {
+    public write(data: string | FileContentMatter): FileContentMatter {
         if (typeof data === 'string') {
             let lastSource = this.popLastSource()
 
@@ -160,8 +156,8 @@ export class $FileContentMatter {
 
     public writeIf(
         condition: boolean,
-        data: string | AnyFileContentMatter
-    ): FileContentMatter<DynamicSettings> {
+        data: string | FileContentMatter
+    ): FileContentMatter {
         if (condition) {
             return this.write(data)
         }
@@ -169,7 +165,7 @@ export class $FileContentMatter {
         return this
     }
 
-    public endLine(): FileContentMatter<DynamicSettings> {
+    public endLine(): FileContentMatter {
         let newLine = ''
 
         for (
@@ -185,11 +181,7 @@ export class $FileContentMatter {
         return this
     }
 
-    public singleNest(): NestedFileContentMatter {
-        return this
-    }
-
-    public writeBlock(content: AnyFileContentMatter): FileContentMatter<DynamicSettings> {
+    public writeBlock(content: FileContentMatter): FileContentMatter {
         if (content.isEmpty()) {
             this.write(this.config.openingBlockCharacter).write(
                 this.config.closingBlockCharacter
@@ -217,9 +209,7 @@ export class $FileContentMatter {
         return this
     }
 
-    public writeList(
-        ...contents: AnyFileContentMatter[]
-    ): FileContentMatter<DynamicSettings> {
+    public writeList(...contents: FileContentMatter[]): FileContentMatter {
         if (contents.length === 0) {
             this.write(this.config.openingListCharacter).write(
                 this.config.closingListCharacter
@@ -258,8 +248,8 @@ export class $FileContentMatter {
     }
 
     public writeRecord(
-        ...entries: { key: string; content: AnyFileContentMatter }[]
-    ): FileContentMatter<DynamicSettings> {
+        ...entries: { key: string; content: FileContentMatter }[]
+    ): FileContentMatter {
         if (entries.length === 0) {
             this.write(this.config.openingBlockCharacter).write(
                 this.config.closingBlockCharacter
@@ -312,7 +302,7 @@ export class $FileContentMatter {
     }
 }
 
-export const fileContentMatter = function (): FreshFileContentMatter {
+export const fileContentMatter = function (): FileContentMatter {
     return new $FileContentMatter({
         lineTabCharacter: '  ',
         openingBlockCharacter: '{',
@@ -322,5 +312,5 @@ export const fileContentMatter = function (): FreshFileContentMatter {
         listSeparatorCharacter: ',',
         recordKeyValueSeparatorCharacter: ': ',
         recordEntrySeparatorCharacter: ',',
-    }) as FreshFileContentMatter
+    })
 }

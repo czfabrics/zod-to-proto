@@ -1,16 +1,14 @@
 import { fileContentMatter } from '#file/classes/content_matter'
-import type { FreshFileContentMatter } from '#file/types/content_matter'
+import type { FileContentMatter } from '#file/types/content_matter'
 import { Proto3Extension } from '#proto3_definition/types/extension'
 import { Proto3RpcService } from '#proto3_definition/types/service'
 import { Proto3FunctionProcessor } from '#proto3_processor/classes/proto3_function_processor'
 import { Proto3RecordExtensionProcessor } from '#proto3_processor/classes/proto3_record_extension_processor'
 
 export class Proto3ServiceProcessor {
-    public constructor(private readonly content: FreshFileContentMatter) {}
+    public constructor(private readonly content: FileContentMatter) {}
 
-    private getRecordExtensionContent(
-        extension: Proto3Extension
-    ): FreshFileContentMatter {
+    private getRecordExtensionContent(extension: Proto3Extension): FileContentMatter {
         const extensionContent = fileContentMatter()
         const extensionProcessor = new Proto3RecordExtensionProcessor(extensionContent)
 

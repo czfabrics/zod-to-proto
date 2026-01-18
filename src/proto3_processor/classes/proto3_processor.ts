@@ -1,8 +1,5 @@
 import { fileContentMatter } from '#file/classes/content_matter'
-import type {
-    AnyFileContentMatter,
-    FreshFileContentMatter,
-} from '#file/types/content_matter'
+import type { FileContentMatter } from '#file/types/content_matter'
 import { Proto3Extension } from '#proto3_definition/types/extension'
 import { Proto3File } from '#proto3_definition/types/file'
 import { AnyProto3Message } from '#proto3_definition/types/messages'
@@ -14,9 +11,7 @@ import { Proto3RecordExtensionProcessor } from '#proto3_processor/classes/proto3
 import { Proto3ServiceProcessor } from '#proto3_processor/classes/proto3_service_processor'
 
 export class Proto3Processor {
-    private getImportContent(
-        importedTypes: Proto3ImportedType[]
-    ): FreshFileContentMatter {
+    private getImportContent(importedTypes: Proto3ImportedType[]): FileContentMatter {
         const content = fileContentMatter()
         const processor = new Proto3ImportProcessor(content)
 
@@ -25,9 +20,7 @@ export class Proto3Processor {
         return content
     }
 
-    private getRecordExtensionContent(
-        extension: Proto3Extension
-    ): FreshFileContentMatter {
+    private getRecordExtensionContent(extension: Proto3Extension): FileContentMatter {
         const extensionContent = fileContentMatter()
         const extensionProcessor = new Proto3RecordExtensionProcessor(extensionContent)
 
@@ -36,10 +29,8 @@ export class Proto3Processor {
         return extensionContent
     }
 
-    private getExtensionContents(
-        extensions: Proto3Extension[]
-    ): FreshFileContentMatter[] {
-        const contents: FreshFileContentMatter[] = []
+    private getExtensionContents(extensions: Proto3Extension[]): FileContentMatter[] {
+        const contents: FileContentMatter[] = []
 
         for (const extension of extensions) {
             const updatedExtension = Proto3Extension.simplify(extension)
@@ -56,7 +47,7 @@ export class Proto3Processor {
         return contents
     }
 
-    private getServiceContent(service: Proto3RpcService): FreshFileContentMatter {
+    private getServiceContent(service: Proto3RpcService): FileContentMatter {
         const content = fileContentMatter()
         const processor = new Proto3ServiceProcessor(content)
 
@@ -65,7 +56,7 @@ export class Proto3Processor {
         return content
     }
 
-    private getMessageContent(messages: AnyProto3Message[]): FreshFileContentMatter {
+    private getMessageContent(messages: AnyProto3Message[]): FileContentMatter {
         const content = fileContentMatter()
         const processor = new Proto3MessageProcessor(content)
 
@@ -84,7 +75,7 @@ export class Proto3Processor {
         return content
     }
 
-    public process(file: Proto3File): AnyFileContentMatter {
+    public process(file: Proto3File): FileContentMatter {
         const content = fileContentMatter()
         const importedTypes = file.getDeepImportedTypes()
         const importContent = this.getImportContent(importedTypes)

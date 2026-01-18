@@ -1,15 +1,15 @@
 import { fileContentMatter } from '#file/classes/content_matter'
-import type { FreshFileContentMatter } from '#file/types/content_matter'
+import type { FileContentMatter } from '#file/types/content_matter'
 import type { AnyProto3ExtensionValue } from '#proto3_definition/types/extension'
 
 export class Proto3ExtensionValueProcessor {
-    public constructor(private readonly content: FreshFileContentMatter) {}
+    public constructor(private readonly content: FileContentMatter) {}
 
     public process(extensionValue: AnyProto3ExtensionValue): void {
         if (extensionValue === undefined) {
             return
         } else if (Array.isArray(extensionValue)) {
-            const arrayContents: FreshFileContentMatter[] = []
+            const arrayContents: FileContentMatter[] = []
 
             for (const arrayValue of extensionValue) {
                 const arrayValueContent = fileContentMatter()
@@ -28,7 +28,7 @@ export class Proto3ExtensionValueProcessor {
         } else if (typeof extensionValue === 'object') {
             const recordContentEntries: {
                 key: string
-                content: FreshFileContentMatter
+                content: FileContentMatter
             }[] = []
 
             const messageEntries = Object.entries(extensionValue)

@@ -1,5 +1,5 @@
 import { fileContentMatter } from '#file/classes/content_matter'
-import type { FreshFileContentMatter } from '#file/types/content_matter'
+import type { FileContentMatter } from '#file/types/content_matter'
 import { Proto3Extension } from '#proto3_definition/types/extension'
 import type {
     AnyProto3Field,
@@ -11,7 +11,7 @@ import { Proto3RecordExtensionProcessor } from '#proto3_processor/classes/proto3
 import { match } from 'ts-pattern'
 
 export class Proto3FieldProcessor {
-    public constructor(private readonly fileContent: FreshFileContentMatter) {}
+    public constructor(private readonly fileContent: FileContentMatter) {}
 
     private getScalarTypeReferenceString(scalarType: Proto3ScalarType): string {
         return scalarType.name
@@ -73,7 +73,7 @@ export class Proto3FieldProcessor {
         return finalType
     }
 
-    private getFieldExtensionContent(extension: Proto3Extension): FreshFileContentMatter {
+    private getFieldExtensionContent(extension: Proto3Extension): FileContentMatter {
         const extensionContent = fileContentMatter()
         const extensionProcessor = new Proto3FieldExtensionProcessor(extensionContent)
 
@@ -82,9 +82,7 @@ export class Proto3FieldProcessor {
         return extensionContent
     }
 
-    private getRecordExtensionContent(
-        extension: Proto3Extension
-    ): FreshFileContentMatter {
+    private getRecordExtensionContent(extension: Proto3Extension): FileContentMatter {
         const extensionContent = fileContentMatter()
         const extensionProcessor = new Proto3RecordExtensionProcessor(extensionContent)
 
@@ -96,7 +94,7 @@ export class Proto3FieldProcessor {
     public process(anyField: AnyProto3Field): void {
         match(anyField)
             .with({ internalName: 'message_field' }, (field) => {
-                const extensionContents: FreshFileContentMatter[] = []
+                const extensionContents: FileContentMatter[] = []
 
                 for (const extension of field.extensions) {
                     const updatedExtension = Proto3Extension.simplify(extension)
@@ -166,7 +164,7 @@ export class Proto3FieldProcessor {
                     .writeBlock(oneOfFieldContent)
             })
             .with({ internalName: 'enum_field' }, (field) => {
-                const extensionContents: FreshFileContentMatter[] = []
+                const extensionContents: FileContentMatter[] = []
 
                 for (const extension of field.extensions) {
                     const updatedExtension = Proto3Extension.simplify(extension)

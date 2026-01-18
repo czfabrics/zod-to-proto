@@ -1,10 +1,10 @@
 import { fileContentMatter } from '#file/classes/content_matter'
-import type { FreshFileContentMatter } from '#file/types/content_matter'
+import type { FileContentMatter } from '#file/types/content_matter'
 import type { Proto3Extension } from '#proto3_definition/types/extension'
 import { Proto3ExtensionValueProcessor } from '#proto3_processor/classes/proto3_extension_value_processor'
 
 export class Proto3RecordExtensionProcessor {
-    public constructor(private readonly content: FreshFileContentMatter) {}
+    public constructor(private readonly content: FileContentMatter) {}
 
     public process(extension: Proto3Extension): void {
         const extensionValueContent = fileContentMatter()

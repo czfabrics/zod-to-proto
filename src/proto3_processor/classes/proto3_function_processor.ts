@@ -1,5 +1,5 @@
 import { fileContentMatter } from '#file/classes/content_matter'
-import type { FreshFileContentMatter } from '#file/types/content_matter'
+import type { FileContentMatter } from '#file/types/content_matter'
 import { Proto3Extension } from '#proto3_definition/types/extension'
 import { Proto3RpcFunction } from '#proto3_definition/types/functions'
 import { AnyProto3Message } from '#proto3_definition/types/messages'
@@ -8,7 +8,7 @@ import { Proto3RecordExtensionProcessor } from '#proto3_processor/classes/proto3
 import { match } from 'ts-pattern'
 
 export class Proto3FunctionProcessor {
-    public constructor(private readonly content: FreshFileContentMatter) {}
+    public constructor(private readonly content: FileContentMatter) {}
 
     private getTypeReferenceString(item: AnyProto3Message | Proto3ImportedType): string {
         return match(item)

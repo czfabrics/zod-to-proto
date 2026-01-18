@@ -1,7 +1,7 @@
-import type { AnyFileContentMatter } from '#file/types/content_matter'
+import type { FileContentMatter } from '#file/types/content_matter'
 
 export class FileBuilder {
-    public constructor(public readonly content: AnyFileContentMatter) {}
+    public constructor(public readonly content: FileContentMatter) {}
 
     public compute(): string {
         const computedSources = this.content['~sources'].join('\n')
