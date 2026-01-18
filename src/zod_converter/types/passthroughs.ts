@@ -10,8 +10,8 @@ import type {
 import type { SomeZodObject } from '#zod_converter/types/some_type'
 import type { GetZodTypeValue } from '#zod_converter/types/zod_type_value'
 import { match } from 'ts-pattern'
-import type { ZodIntersection } from 'zod'
-import type { SomeType, util } from 'zod/v4/core'
+import type { ZodIntersection, ZodObject, ZodType } from 'zod'
+import type { GlobalMeta, SomeType, util } from 'zod/v4/core'
 
 export type AnyZodPassthroughInner = SomeType | SomeZodObject
 
@@ -127,6 +127,68 @@ export const ZodPassthroughType = {
                 passthroughSchema = inner
             } else {
                 return inner as PassthroughTypeToExtractZodSchema<TSchema>
+            }
+        }
+    },
+    getMetaAsDeepAsPossible: (
+        schema: WithMaybeZodPassthrough<ZodType | ZodObject>
+    ): GlobalMeta[] => {
+        const allMeta: GlobalMeta[] = [schema.meta() ?? {}]
+
+        if (!ZodPassthroughType.is(schema)) {
+            return allMeta
+        }
+
+        let passthroughSchema: ZodPassthroughType = schema
+
+        while (true) {
+            const inner: ZodType | ZodObject = match(passthroughSchema)
+                .returnType<ZodCompatibleType>()
+                .with(
+                    zodTypePattern('catch'),
+                    zodTypePattern('readonly'),
+                    zodTypePattern('default'),
+                    zodTypePattern('prefault'),
+                    zodTypePattern('optional'),
+                    zodTypePattern('nonoptional'),
+                    (schema) => {
+                        assertsZodCompatibleType(schema._zod.def.innerType)
+
+                        return schema._zod.def.innerType
+                    }
+                )
+                .with(zodTypePattern('lazy'), (schema) => {
+                    const lazySchema = schema._zod.def.getter()
+
+                    assertsZodCompatibleType(lazySchema)
+
+                    return lazySchema
+                })
+                .with(zodTypePattern('pipe'), (schema) => {
+                    assertsZodCompatibleType(schema._zod.def.in)
+
+                    return schema._zod.def.in
+                })
+                .with(zodTypePattern('intersection'), (schema) => {
+                    assertsZodObject(schema._zod.def.right)
+                    assertsZodObject(schema._zod.def.left)
+
+                    const finalSchema = schema._zod.def.left.extend(
+                        schema._zod.def.right['shape']
+                    )
+
+                    assertsZodCompatibleType(finalSchema)
+
+                    return finalSchema
+                })
+                .exhaustive()
+
+            allMeta.push(inner.meta() ?? {})
+
+            if (ZodPassthroughType.is(inner)) {
+                passthroughSchema = inner
+            } else {
+                return allMeta
             }
         }
     },
