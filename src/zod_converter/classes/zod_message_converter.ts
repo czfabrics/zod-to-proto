@@ -11,6 +11,7 @@ import {
 import { assertsAnyZodMessageFieldType } from '#zod_converter/asserts/any_zod_message_field_type'
 import { ZodMessageFieldConverter } from '#zod_converter/classes/zod_message_field_converter'
 import { ZodMessageOneOfFieldConverter } from '#zod_converter/classes/zod_message_one_of_field_converter'
+import { getZodSchemaComments } from '#zod_converter/helpers/get_zod_schema_comments'
 import { zodTypePattern } from '#zod_converter/helpers/zod_type_pattern'
 import { ZodMessageFieldType, type AnyZodMessage } from '#zod_converter/types/messages'
 import {
@@ -37,6 +38,7 @@ export class ZodMessageConverter {
                     name: pascalCase(name),
                     fields: [],
                     extensions: [],
+                    comments: getZodSchemaComments(rootSchema),
                 })
 
                 for (const [key, entrySchema] of Object.entries(schema.shape)) {
@@ -84,6 +86,7 @@ export class ZodMessageConverter {
                         index,
                         key: value,
                         extensions: [],
+                        comments: [],
                     })
                 })
 
@@ -91,6 +94,7 @@ export class ZodMessageConverter {
                     name: pascalCase(name),
                     fields,
                     extensions: [],
+                    comments: getZodSchemaComments(rootSchema),
                 })
 
                 const updatedMessageEnum = this.transformers.enum.reduce(

@@ -5,6 +5,7 @@ import {
 } from '#proto3_definition/types/fields'
 import type { Proto3Message } from '#proto3_definition/types/messages'
 import { ZodMessageFieldTypeConverter } from '#zod_converter/classes/zod_message_field_type_converter'
+import { getZodSchemaComments } from '#zod_converter/helpers/get_zod_schema_comments'
 import { isZodSchemaOptional } from '#zod_converter/helpers/is_zod_schema_optional'
 import type { ZodMessageFieldType } from '#zod_converter/types/messages'
 import {
@@ -50,6 +51,7 @@ export class ZodMessageFieldConverter {
             optionalState: optionalState,
             type,
             extensions: [],
+            comments: getZodSchemaComments(rootSchema),
         })
 
         const updatedField = this.transformers.messageField.reduce(

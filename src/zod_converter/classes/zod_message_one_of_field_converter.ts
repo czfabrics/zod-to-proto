@@ -6,6 +6,7 @@ import {
 import type { Proto3Message } from '#proto3_definition/types/messages'
 import { assertsZodMessageFieldType } from '#zod_converter/asserts/zod_message_field_type'
 import { ZodMessageFieldConverter } from '#zod_converter/classes/zod_message_field_converter'
+import { getZodSchemaComments } from '#zod_converter/helpers/get_zod_schema_comments'
 import { zodTypePattern } from '#zod_converter/helpers/zod_type_pattern'
 import type { ZodMessageOneOfFieldType } from '#zod_converter/types/messages'
 import {
@@ -77,6 +78,7 @@ export class ZodMessageOneOfFieldConverter {
                     key: snakeCase(key),
                     subFields,
                     extensions: [],
+                    comments: getZodSchemaComments(rootSchema),
                 })
 
                 const updatedField = this.transformers.messageOneOfField.reduce(
