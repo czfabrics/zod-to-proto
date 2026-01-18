@@ -15,13 +15,21 @@ export type Proto3MessageFieldType =
     | AnyProto3Message
     | Proto3ImportedType
 
+export const Proto3OptionalState = {
+    PRESENT: 'PRESENT',
+    NONE: 'NONE',
+    NOT_NEEDED: 'NOT_NEEDED',
+} as const
+export type Proto3OptionalState =
+    (typeof Proto3OptionalState)[keyof typeof Proto3OptionalState]
+
 export type Proto3MessageField = Proto3BaseField & {
     getDeepMessages(): AnyProto3Message[]
     getDeepImportedTypes(): Proto3ImportedType[]
     getDeepOptionalMessageFields(): Proto3MessageField[]
     index: number
     internalName: 'message_field'
-    optionalState: 'PRESENT' | 'NONE' | 'NOT_NEEDED'
+    optionalState: Proto3OptionalState
     type: Proto3MessageFieldType
     extensions: Proto3Extension[]
     // TODO: faudrait être plus précis...

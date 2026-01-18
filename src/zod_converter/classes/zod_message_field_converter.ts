@@ -1,6 +1,7 @@
 import {
     Proto3MessageField,
     Proto3MessageOneOfFieldSubField,
+    type Proto3OptionalState,
 } from '#proto3_definition/types/fields'
 import type { Proto3Message } from '#proto3_definition/types/messages'
 import { ZodMessageFieldTypeConverter } from '#zod_converter/classes/zod_message_field_type_converter'
@@ -32,8 +33,7 @@ export class ZodMessageFieldConverter {
     public convert(
         key: string,
         rootSchema: WithMaybeZodPassthrough<ZodMessageFieldType>,
-        // TODO: enum
-        optionalState?: 'PRESENT' | 'NONE' | 'NOT_NEEDED'
+        optionalState?: Proto3OptionalState
     ): Proto3MessageField | Proto3MessageOneOfFieldSubField {
         const deepSchema = ZodPassthroughType.pass(rootSchema)
 
