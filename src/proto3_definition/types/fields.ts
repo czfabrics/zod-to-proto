@@ -32,7 +32,7 @@ export type Proto3MessageField = Proto3BaseField & {
     optionalState: Proto3OptionalState
     type: Proto3MessageFieldType
     extensions: Proto3Extension[]
-    // TODO: faudrait être plus précis...
+    //// TODO: be more specific
     schema: SomeType
 }
 

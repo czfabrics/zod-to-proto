@@ -27,7 +27,7 @@ export type Proto3Extension = {
 }
 
 export const Proto3Extension = {
-    new: <const TParams extends GetNewParams<Proto3Extension>>(params: TParams) => {
+    new: function <const TParams extends GetNewParams<Proto3Extension>>(params: TParams) {
         return {
             internalName: 'extension',
             getDeepImportedTypes() {
@@ -35,5 +35,28 @@ export const Proto3Extension = {
             },
             ...params,
         } as const satisfies Proto3Extension
+    },
+    simplify: function (extension: Proto3Extension): Proto3Extension {
+        if (typeof extension.value !== 'object' || Array.isArray(extension.value)) {
+            return extension
+        }
+
+        const messageEntries = Object.entries(extension.value)
+
+        if (messageEntries.length < 1 || messageEntries.length > 1) {
+            return extension
+        }
+
+        const firstKey = messageEntries[0]![0]
+        const firstValue = messageEntries[0]![1]
+
+        return this.new({
+            ...extension,
+            key: AnyProto3Type.new({
+                ...extension.key,
+                typeReference: `(${extension.key.typeReference}).${firstKey}`,
+            }),
+            value: firstValue,
+        })
     },
 } as const
