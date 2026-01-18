@@ -302,31 +302,3 @@ export type CheckZodSchemaCompatibility<
           : CheckChildConditions<TChildren, TChildConditions> extends true
             ? ContinueRecursiveForChildren<TZodType, TChildren>
             : TChildConditionError
-
-// export function cliArgument<const TInner extends $ZodType>(
-//     innerType: CheckZodSchemaCompatibility<TInner>
-// ): void {}
-
-// TODO: poubelle
-// const schema = z.intersection(z.object({ d: z.string() }), z.object({ d2: z.string() }))
-// const schema = z.intersection(z.string(), z.string())
-// const schema = pz.oneOfUnion([['test', z.object()]])
-// const schema = z.union([z.object({ t2: z.string() }), z.object({ t: z.string() })])
-// const schema = z.record(z.string(), z.array(z.string()))
-// const schema = z.record(z.string(), z.number())
-// const schema = z.string().nullable()
-// const schema = z.array(z.string())
-// const schema = z.object({
-//     hihi: z.array(z.string()),
-// })
-// const schema = z.object({ test: z.string() })
-
-// type TCHildren = GetChildZodType<typeof schema>
-// type TCond = GetChildConditions<typeof schema>
-// type TresultChekc = CheckChildConditions<TCHildren, TCond>
-
-// cliArgument(schema)
-// type child = GetChildZodType<Schema>
-
-// type allo22 = ContinueRecursiveForArray<[ZodAny]>
-// type inter = inferCorrectZod<child>
