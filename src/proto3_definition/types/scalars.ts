@@ -1,7 +1,6 @@
 import { Proto3MessageField } from '#proto3_definition/types/fields'
 import type { AnyProto3Message } from '#proto3_definition/types/messages'
 import { Proto3ImportedType } from '#proto3_definition/types/types'
-import { SomeType } from 'zod/v4/core'
 
 type Proto3ScalarRawTypes = {
     STRING: 'string'
@@ -25,7 +24,6 @@ export type Proto3ScalarType = {
     [TKey in keyof Proto3ScalarRawTypes]: {
         internalName: Lowercase<TKey>
         name: Proto3ScalarRawTypes[TKey]
-        schema: SomeType
         getDeepMessages(): AnyProto3Message[]
         getDeepImportedTypes(): Proto3ImportedType[]
         getDeepOptionalMessageFields(): Proto3MessageField[]

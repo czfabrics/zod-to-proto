@@ -36,7 +36,6 @@ export class ZodDynamicSizeConverter {
 
                 return Proto3RepeatedType.new({
                     inner,
-                    schema: rootSchema,
                 })
             })
             .with(zodTypePattern('set'), (schema) => {
@@ -48,7 +47,6 @@ export class ZodDynamicSizeConverter {
 
                 return Proto3RepeatedType.new({
                     inner,
-                    schema: rootSchema,
                 })
             })
             .with(zodTypePattern('record'), (schema) => {
@@ -65,7 +63,6 @@ export class ZodDynamicSizeConverter {
                 return Proto3MapType.new({
                     key: keyType,
                     value: valueType,
-                    schema: rootSchema,
                 })
             })
             .exhaustive()

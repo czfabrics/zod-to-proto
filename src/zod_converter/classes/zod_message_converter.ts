@@ -36,7 +36,6 @@ export class ZodMessageConverter {
                 const message = Proto3Message.new({
                     name: pascalCase(name),
                     fields: [],
-                    schema: rootSchema,
                     extensions: [],
                 })
 
@@ -91,7 +90,6 @@ export class ZodMessageConverter {
                 const messageEnum = Proto3Enum.new({
                     name: pascalCase(name),
                     fields,
-                    schema: rootSchema,
                     extensions: [],
                 })
 

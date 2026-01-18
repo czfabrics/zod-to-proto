@@ -3,14 +3,12 @@ import type { GetNewParams } from '#proto3_definition/types/get_new_params'
 import type { AnyProto3Message } from '#proto3_definition/types/messages'
 import type { Proto3ScalarType } from '#proto3_definition/types/scalars'
 import type { Proto3ImportedType } from '#proto3_definition/types/types'
-import type { SomeType } from 'zod/v4/core'
 
 export const Proto3StringType = {
-    new: (schema: SomeType): Proto3ScalarType => {
+    new: (): Proto3ScalarType => {
         return {
             internalName: 'string',
             name: 'string',
-            schema,
             getDeepMessages() {
                 return []
             },
@@ -25,11 +23,10 @@ export const Proto3StringType = {
 } as const
 
 export const Proto3BoolType = {
-    new: (schema: SomeType): Proto3ScalarType => {
+    new: (): Proto3ScalarType => {
         return {
             internalName: 'bool',
             name: 'bool',
-            schema,
             getDeepMessages() {
                 return []
             },
@@ -44,11 +41,10 @@ export const Proto3BoolType = {
 } as const
 
 export const Proto3Int32Type = {
-    new: (schema: SomeType): Proto3ScalarType => {
+    new: (): Proto3ScalarType => {
         return {
             internalName: 'int32',
             name: 'int32',
-            schema,
             getDeepMessages() {
                 return []
             },
@@ -63,11 +59,10 @@ export const Proto3Int32Type = {
 } as const
 
 export const Proto3Int64Type = {
-    new: (schema: SomeType): Proto3ScalarType => {
+    new: (): Proto3ScalarType => {
         return {
             internalName: 'int64',
             name: 'int64',
-            schema,
             getDeepMessages() {
                 return []
             },
@@ -82,11 +77,10 @@ export const Proto3Int64Type = {
 } as const
 
 export const Proto3UInt32Type = {
-    new: (schema: SomeType): Proto3ScalarType => {
+    new: (): Proto3ScalarType => {
         return {
             internalName: 'uint32',
             name: 'uint32',
-            schema,
             getDeepMessages() {
                 return []
             },
@@ -101,11 +95,10 @@ export const Proto3UInt32Type = {
 } as const
 
 export const Proto3UInt64Type = {
-    new: (schema: SomeType): Proto3ScalarType => {
+    new: (): Proto3ScalarType => {
         return {
             internalName: 'uint64',
             name: 'uint64',
-            schema,
             getDeepMessages() {
                 return []
             },
@@ -120,11 +113,10 @@ export const Proto3UInt64Type = {
 } as const
 
 export const Proto3SInt32Type = {
-    new: (schema: SomeType): Proto3ScalarType => {
+    new: (): Proto3ScalarType => {
         return {
             internalName: 'sint32',
             name: 'sint32',
-            schema,
             getDeepMessages() {
                 return []
             },
@@ -139,11 +131,10 @@ export const Proto3SInt32Type = {
 } as const
 
 export const Proto3SInt64Type = {
-    new: (schema: SomeType): Proto3ScalarType => {
+    new: (): Proto3ScalarType => {
         return {
             internalName: 'sint64',
             name: 'sint64',
-            schema,
             getDeepMessages() {
                 return []
             },
@@ -158,11 +149,10 @@ export const Proto3SInt64Type = {
 } as const
 
 export const Proto3Fixed32Type = {
-    new: (schema: SomeType): Proto3ScalarType => {
+    new: (): Proto3ScalarType => {
         return {
             internalName: 'fixed32',
             name: 'fixed32',
-            schema,
             getDeepMessages() {
                 return []
             },
@@ -177,11 +167,10 @@ export const Proto3Fixed32Type = {
 } as const
 
 export const Proto3Fixed64Type = {
-    new: (schema: SomeType): Proto3ScalarType => {
+    new: (): Proto3ScalarType => {
         return {
             internalName: 'fixed64',
             name: 'fixed64',
-            schema,
             getDeepMessages() {
                 return []
             },
@@ -196,11 +185,10 @@ export const Proto3Fixed64Type = {
 } as const
 
 export const Proto3SFixed32Type = {
-    new: (schema: SomeType): Proto3ScalarType => {
+    new: (): Proto3ScalarType => {
         return {
             internalName: 'sfixed32',
             name: 'sfixed32',
-            schema,
             getDeepMessages() {
                 return []
             },
@@ -215,11 +203,10 @@ export const Proto3SFixed32Type = {
 } as const
 
 export const Proto3SFixed64Type = {
-    new: (schema: SomeType): Proto3ScalarType => {
+    new: (): Proto3ScalarType => {
         return {
             internalName: 'sfixed64',
             name: 'sfixed64',
-            schema,
             getDeepMessages() {
                 return []
             },
@@ -234,11 +221,10 @@ export const Proto3SFixed64Type = {
 } as const
 
 export const Proto3DoubleType = {
-    new: (schema: SomeType): Proto3ScalarType => {
+    new: (): Proto3ScalarType => {
         return {
             internalName: 'double',
             name: 'double',
-            schema,
             getDeepMessages() {
                 return []
             },
@@ -253,11 +239,10 @@ export const Proto3DoubleType = {
 } as const
 
 export const Proto3FloatType = {
-    new: (schema: SomeType): Proto3ScalarType => {
+    new: (): Proto3ScalarType => {
         return {
             internalName: 'float',
             name: 'float',
-            schema,
             getDeepMessages() {
                 return []
             },
@@ -272,11 +257,10 @@ export const Proto3FloatType = {
 } as const
 
 export const Proto3BytesType = {
-    new: (schema: SomeType): Proto3ScalarType => {
+    new: (): Proto3ScalarType => {
         return {
             internalName: 'bytes',
             name: 'bytes',
-            schema,
             getDeepMessages() {
                 return []
             },

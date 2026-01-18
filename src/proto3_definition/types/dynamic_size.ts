@@ -3,7 +3,6 @@ import type { AnyProto3Message } from '#proto3_definition/types/messages'
 import type { Proto3ScalarType } from '#proto3_definition/types/scalars'
 import type { Proto3ImportedType } from '#proto3_definition/types/types'
 import type { WithInternalName } from '#proto3_definition/types/with_internal_name'
-import type { ZodType } from 'zod'
 
 export type Proto3RepeatedInnerType =
     | AnyProto3Message
@@ -20,14 +19,12 @@ type Proto3DynamicSizeTypes = {
         getDeepOptionalMessageFields(): Proto3MessageField[]
         key: Proto3ScalarType
         value: Proto3MapValueType
-        schema: ZodType
     }
     REPEATED: {
         getDeepMessages(): AnyProto3Message[]
         getDeepImportedTypes(): Proto3ImportedType[]
         getDeepOptionalMessageFields(): Proto3MessageField[]
         inner: Proto3RepeatedInnerType
-        schema: ZodType
     }
 }
 

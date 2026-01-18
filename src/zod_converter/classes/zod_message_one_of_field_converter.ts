@@ -75,7 +75,6 @@ export class ZodMessageOneOfFieldConverter {
 
                 const field = Proto3MessageOneOfField.new({
                     key: snakeCase(key),
-                    schema: rootSchema,
                     subFields,
                     extensions: [],
                 })

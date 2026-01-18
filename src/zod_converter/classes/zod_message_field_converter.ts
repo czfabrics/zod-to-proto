@@ -49,7 +49,6 @@ export class ZodMessageFieldConverter {
             key: snakeCase(key),
             optionalState: optionalState,
             type,
-            schema: rootSchema,
             extensions: [],
         })
 

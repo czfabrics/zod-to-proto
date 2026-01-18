@@ -24,11 +24,11 @@ export class ZodScalarConverter {
 
         return match(deepSchema)
             .returnType<Proto3ScalarType>()
-            .with(zodTypePattern('string'), () => Proto3StringType.new(rootSchema))
+            .with(zodTypePattern('string'), () => Proto3StringType.new())
             .with(zodTypePattern('number'), (schema) => {
                 if (schema.format === null) {
                     //// Handles `z.number()`
-                    return Proto3DoubleType.new(rootSchema)
+                    return Proto3DoubleType.new()
                 }
 
                 assertsZodFormat(
@@ -39,27 +39,25 @@ export class ZodScalarConverter {
                 return match(schema)
                     .with({ format: 'safeint' }, () => {
                         //// int64 because int can be int32 or int64
-                        return Proto3Int64Type.new(rootSchema)
+                        return Proto3Int64Type.new()
                     })
-                    .with({ format: 'int32' }, () => Proto3Int32Type.new(rootSchema))
-                    .with({ format: 'float32' }, () => Proto3FloatType.new(rootSchema))
-                    .with({ format: 'float64' }, () => Proto3DoubleType.new(rootSchema))
-                    .with({ format: 'uint32' }, () => Proto3UInt32Type.new(rootSchema))
+                    .with({ format: 'int32' }, () => Proto3Int32Type.new())
+                    .with({ format: 'float32' }, () => Proto3FloatType.new())
+                    .with({ format: 'float64' }, () => Proto3DoubleType.new())
+                    .with({ format: 'uint32' }, () => Proto3UInt32Type.new())
                     .exhaustive()
             })
             .with(zodTypePattern('bigint'), (schema) => {
                 assertsZodFormat(['int64', 'uint64'], schema)
 
                 return match(schema)
-                    .with({ format: 'int64' }, () => Proto3Int64Type.new(rootSchema))
-                    .with({ format: 'uint64' }, () => Proto3UInt64Type.new(rootSchema))
+                    .with({ format: 'int64' }, () => Proto3Int64Type.new())
+                    .with({ format: 'uint64' }, () => Proto3UInt64Type.new())
                     .exhaustive()
             })
-            .with(zodTypePattern('boolean'), () => Proto3BoolType.new(rootSchema))
-            .with(zodTypePattern('literal'), () => Proto3StringType.new(rootSchema))
-            .with(zodTypePattern('template_literal'), () =>
-                Proto3StringType.new(rootSchema)
-            )
+            .with(zodTypePattern('boolean'), () => Proto3BoolType.new())
+            .with(zodTypePattern('literal'), () => Proto3StringType.new())
+            .with(zodTypePattern('template_literal'), () => Proto3StringType.new())
             .exhaustive()
     }
 }

@@ -6,7 +6,6 @@ import type {
 } from '#proto3_definition/types/fields'
 import type { GetNewParams } from '#proto3_definition/types/get_new_params'
 import { Proto3ImportedType } from '#proto3_definition/types/types'
-import type { ZodType } from 'zod'
 
 export type Proto3Message = {
     internalName: 'message'
@@ -15,7 +14,6 @@ export type Proto3Message = {
     getDeepOptionalMessageFields(): Proto3MessageField[]
     getNextIndex(): number
     name: string
-    schema: ZodType
     fields: AnyProto3MessageField[]
     extensions: Proto3Extension[]
 }
@@ -67,7 +65,6 @@ export type Proto3Enum = {
     getDeepImportedTypes(): Proto3ImportedType[]
     getDeepOptionalMessageFields(): Proto3MessageField[]
     name: string
-    schema: ZodType
     fields: Proto3EnumField[]
     extensions: Proto3Extension[]
 }

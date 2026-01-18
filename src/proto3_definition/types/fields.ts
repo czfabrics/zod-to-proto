@@ -4,8 +4,6 @@ import type { GetNewParams } from '#proto3_definition/types/get_new_params'
 import { AnyProto3Message } from '#proto3_definition/types/messages'
 import type { Proto3ScalarType } from '#proto3_definition/types/scalars'
 import { Proto3ImportedType } from '#proto3_definition/types/types'
-import { ZodType } from 'zod'
-import { SomeType } from 'zod/v4/core'
 
 export type Proto3BaseField = {
     key: string
@@ -34,8 +32,6 @@ export type Proto3MessageField = Proto3BaseField & {
     optionalState: Proto3OptionalState
     type: Proto3MessageFieldType
     extensions: Proto3Extension[]
-    //// TODO: be more specific
-    schema: SomeType
 }
 
 export const Proto3MessageField = {
@@ -82,7 +78,6 @@ export type Proto3MessageOneOfField = Proto3BaseField & {
     getDeepOptionalMessageFields(): Proto3MessageField[]
     internalName: 'message_one_of_field'
     subFields: Proto3MessageOneOfFieldSubField[]
-    schema: ZodType
     extensions: Proto3Extension[]
 }
 
