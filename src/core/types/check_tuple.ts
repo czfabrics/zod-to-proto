@@ -1,16 +1,39 @@
 import type { TuplifyUnion } from '#core/types/tuplify_union'
 import type { TypeDebuggingError } from '#core/types/type_debugging_error'
 
-export type CheckTuple<
-    TUnion extends string,
-    TValues extends string[],
-> = TValues[number] extends TUnion
-    ? TValues['length'] extends TuplifyUnion<TUnion>['length']
-        ? TValues['length'] extends TuplifyUnion<TValues[number]>['length']
-            ? TValues
-            : TypeDebuggingError<`Duplicate values`>
-        : TypeDebuggingError<`Missing values: ${ArrayToStringDisplay<TuplifyUnion<Exclude<TUnion, TValues[number]>>>}`>
-    : TypeDebuggingError<`Unexpected values: ${ArrayToStringDisplay<RemoveFromArray<TValues, TUnion>>}`>
+type HasDuplicates<
+    TStringArray extends readonly string[],
+    TAccumulator extends readonly string[] = [],
+> = TStringArray extends readonly [
+    infer TValue extends string,
+    ...infer TRest extends readonly string[],
+]
+    ? TValue extends TAccumulator[number]
+        ? true
+        : HasDuplicates<TRest, [...TAccumulator, TValue]>
+    : false
+
+type GetDuplicates<
+    TStringArray extends readonly string[],
+    TAccumulator extends readonly string[] = [],
+    TDuplicateValues extends readonly string[] = [],
+> = TStringArray extends readonly [
+    infer TValue extends string,
+    ...infer TRest extends readonly string[],
+]
+    ? TValue extends TAccumulator[number]
+        ? GetDuplicates<TRest, [...TAccumulator, TValue], [...TDuplicateValues, TValue]>
+        : GetDuplicates<TRest, [...TAccumulator, TValue], TDuplicateValues>
+    : TDuplicateValues
+
+export type CheckTuple<TUnion extends string, TValues extends string[]> =
+    HasDuplicates<TValues> extends false
+        ? TValues[number] extends TUnion
+            ? TValues['length'] extends TuplifyUnion<TUnion>['length']
+                ? TValues
+                : TypeDebuggingError<`Missing values: ${ArrayToStringDisplay<TuplifyUnion<Exclude<TUnion, TValues[number]>>>}`>
+            : TypeDebuggingError<`Unexpected values: ${ArrayToStringDisplay<RemoveFromArray<TValues, TUnion>>}`>
+        : TypeDebuggingError<`Duplicate values: ${ArrayToStringDisplay<GetDuplicates<TValues>>}`>
 
 export type ArrayToStringDisplay<
     TValues extends unknown[],

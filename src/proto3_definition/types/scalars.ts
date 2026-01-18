@@ -31,6 +31,3 @@ export type Proto3ScalarType = {
         getDeepOptionalMessageFields(): Proto3MessageField[]
     }
 }[keyof Proto3ScalarRawTypes]
-
-// TODO: si on met 2 fois la meme value le checkTuple passe lol
-// tuple
