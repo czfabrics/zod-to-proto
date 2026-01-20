@@ -7,7 +7,6 @@ import type { Proto3Message } from '#proto3_definition/types/messages'
 import { assertsZodMessageFieldType } from '#zod_converter/asserts/zod_message_field_type'
 import { ZodMessageFieldConverter } from '#zod_converter/classes/zod_message_field_converter'
 import { getZodSchemaComments } from '#zod_converter/helpers/get_zod_schema_comments'
-import { zodTypePattern } from '#zod_converter/helpers/zod_type_pattern'
 import type { ZodMessageOneOfFieldType } from '#zod_converter/types/messages'
 import {
     WithMaybeZodPassthrough,
@@ -15,7 +14,6 @@ import {
 } from '#zod_converter/types/passthroughs'
 import { ZodConversionTransformers } from '#zod_converter/types/transformers'
 import { snakeCase } from 'change-case'
-import { match } from 'ts-pattern'
 import { SomeType } from 'zod/v4/core'
 
 export class ZodMessageOneOfFieldConverter {
@@ -40,56 +38,47 @@ export class ZodMessageOneOfFieldConverter {
     ): Proto3MessageOneOfField {
         const deepSchema = ZodPassthroughType.pass(rootSchema)
 
-        return match(deepSchema)
-            .returnType<Proto3MessageOneOfField>()
-            .with(zodTypePattern('union'), (schema) => {
-                let subFields: Proto3MessageOneOfFieldSubField[] = []
+        let subFields: Proto3MessageOneOfFieldSubField[] = []
 
-                for (
-                    let subFieldIndex = 0;
-                    subFieldIndex < schema._zod.def.options.length;
-                    subFieldIndex++
-                ) {
-                    const unionOptionSchema = schema._zod.def.options[subFieldIndex]!
+        for (
+            let subFieldIndex = 0;
+            subFieldIndex < deepSchema._zod.def.options.length;
+            subFieldIndex++
+        ) {
+            const unionOptionSchema = deepSchema._zod.def.options[subFieldIndex]!
 
-                    const caseName = unionOptionSchema.shape.$case._zod.def.values
-                    const valueSchema = unionOptionSchema.shape.value
+            const caseName = unionOptionSchema.shape.$case._zod.def.values
+            const valueSchema = unionOptionSchema.shape.value
 
-                    assertsOneElementArray(caseName)
+            assertsOneElementArray(caseName)
 
-                    const subField = this.getSubField(valueSchema, caseName[0])
+            const subField = this.getSubField(valueSchema, caseName[0])
 
-                    subFields.push(subField)
-                }
+            subFields.push(subField)
+        }
 
-                for (
-                    let subFieldIndex = 0;
-                    subFieldIndex < subFields.length;
-                    subFieldIndex++
-                ) {
-                    const subField = subFields[subFieldIndex]!
+        for (let subFieldIndex = 0; subFieldIndex < subFields.length; subFieldIndex++) {
+            const subField = subFields[subFieldIndex]!
 
-                    //// We override to take into account other sub fields
-                    //// & generated ones by literal discriminator
-                    subField.index = this.message.getNextIndex() + subFieldIndex
-                }
+            //// We override to take into account other sub fields
+            //// & generated ones by literal discriminator
+            subField.index = this.message.getNextIndex() + subFieldIndex
+        }
 
-                const field = Proto3MessageOneOfField.new({
-                    key: snakeCase(key),
-                    subFields,
-                    extensions: [],
-                    comments: getZodSchemaComments(rootSchema),
-                })
+        const field = Proto3MessageOneOfField.new({
+            key: snakeCase(key),
+            subFields,
+            extensions: [],
+            comments: getZodSchemaComments(rootSchema),
+        })
 
-                const updatedField = this.transformers.messageOneOfField.reduce(
-                    (field, transformer) => {
-                        return transformer.transform(rootSchema, field)
-                    },
-                    field
-                )
+        const updatedField = this.transformers.messageOneOfField.reduce(
+            (field, transformer) => {
+                return transformer.transform(rootSchema, field)
+            },
+            field
+        )
 
-                return updatedField
-            })
-            .exhaustive()
+        return updatedField
     }
 }

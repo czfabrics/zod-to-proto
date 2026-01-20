@@ -7,7 +7,6 @@ import { assertsZodMapValueType } from '#zod_converter/asserts/zod_map_value'
 import { assertsZodRepeatedInnerType } from '#zod_converter/asserts/zod_repeated_inner_type'
 import { assertsZodScalarType } from '#zod_converter/asserts/zod_scalar_type'
 import { ZodMessageFieldTypeConverter } from '#zod_converter/classes/zod_message_field_type_converter'
-import { zodTypePattern } from '#zod_converter/helpers/zod_type_pattern'
 import type { ZodDynamicSizeType } from '#zod_converter/types/dynamic_size'
 import {
     WithMaybeZodPassthrough,
@@ -27,44 +26,71 @@ export class ZodDynamicSizeConverter {
 
         return match(deepSchema)
             .returnType<Proto3DynamicSizeType>()
-            .with(zodTypePattern('array'), (schema) => {
-                const converter = new ZodMessageFieldTypeConverter(this.transformers)
+            .with(
+                {
+                    _zod: {
+                        def: {
+                            type: 'array',
+                        },
+                    },
+                },
+                (schema) => {
+                    const converter = new ZodMessageFieldTypeConverter(this.transformers)
 
-                assertsZodRepeatedInnerType(schema._zod.def.element)
+                    assertsZodRepeatedInnerType(schema._zod.def.element)
 
-                const inner = converter.convert(key, schema._zod.def.element)
+                    const inner = converter.convert(key, schema._zod.def.element)
 
-                return Proto3RepeatedType.new({
-                    inner,
-                })
-            })
-            .with(zodTypePattern('set'), (schema) => {
-                const converter = new ZodMessageFieldTypeConverter(this.transformers)
+                    return Proto3RepeatedType.new({
+                        inner,
+                    })
+                }
+            )
+            .with(
+                {
+                    _zod: {
+                        def: {
+                            type: 'set',
+                        },
+                    },
+                },
+                (schema) => {
+                    const converter = new ZodMessageFieldTypeConverter(this.transformers)
 
-                assertsZodRepeatedInnerType(schema._zod.def.valueType)
+                    assertsZodRepeatedInnerType(schema._zod.def.valueType)
 
-                const inner = converter.convert(key, schema._zod.def.valueType)
+                    const inner = converter.convert(key, schema._zod.def.valueType)
 
-                return Proto3RepeatedType.new({
-                    inner,
-                })
-            })
-            .with(zodTypePattern('record'), (schema) => {
-                const converter = new ZodMessageFieldTypeConverter(this.transformers)
+                    return Proto3RepeatedType.new({
+                        inner,
+                    })
+                }
+            )
+            .with(
+                {
+                    _zod: {
+                        def: {
+                            type: 'record',
+                        },
+                    },
+                },
+                (schema) => {
+                    const converter = new ZodMessageFieldTypeConverter(this.transformers)
 
-                assertsZodScalarType(schema._zod.def.keyType)
+                    assertsZodScalarType(schema._zod.def.keyType)
 
-                const keyType = converter.convert(key, schema._zod.def.keyType)
+                    const keyType = converter.convert(key, schema._zod.def.keyType as any)
 
-                assertsZodMapValueType(schema._zod.def.valueType)
+                    assertsZodMapValueType(schema._zod.def.valueType)
 
-                const valueType = converter.convert(key, schema._zod.def.valueType)
+                    const valueType = converter.convert(key, schema._zod.def.valueType)
 
-                return Proto3MapType.new({
-                    key: keyType,
-                    value: valueType,
-                })
-            })
+                    return Proto3MapType.new({
+                        key: keyType,
+                        value: valueType,
+                    })
+                }
+            )
             .exhaustive()
     }
 }

@@ -3,20 +3,16 @@ import {
     ZodMessageFieldType,
     ZodMessageFieldTypeTuple,
 } from '#zod_converter/types/messages'
-import {
-    AnyZodPassthroughInner,
-    WithMaybeZodPassthrough,
-} from '#zod_converter/types/passthroughs'
+import type { WithMaybeZodPassthrough } from '#zod_converter/types/passthroughs'
+import type { SomeType } from 'zod/v4/core'
 
-type AssertsZodMessageFieldTypeFn = <TSchema extends AnyZodPassthroughInner>(
-    schema: WithMaybeZodPassthrough<TSchema>
-) => asserts schema is WithMaybeZodPassthrough<TSchema & ZodMessageFieldType>
+type AssertsZodMessageFieldTypeFn = (
+    schema: SomeType
+) => asserts schema is WithMaybeZodPassthrough<ZodMessageFieldType>
 
-export const assertsZodMessageFieldType: AssertsZodMessageFieldTypeFn = function <
-    TSchema extends AnyZodPassthroughInner,
->(
-    schema: WithMaybeZodPassthrough<TSchema>
-): asserts schema is WithMaybeZodPassthrough<TSchema & ZodMessageFieldType> {
+export const assertsZodMessageFieldType: AssertsZodMessageFieldTypeFn = function (
+    schema: SomeType
+): asserts schema is WithMaybeZodPassthrough<ZodMessageFieldType> {
     if (!ZodMessageFieldType.is(schema)) {
         const validZodTypes = ZodMessageFieldTypeTuple.get()
 

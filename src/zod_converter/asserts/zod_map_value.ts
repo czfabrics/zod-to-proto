@@ -1,19 +1,15 @@
 import { ZodMapValueType, ZodMapValueTypeTuple } from '#zod_converter/types/dynamic_size'
 import { SchemaError } from '#zod_converter/types/error'
-import {
-    AnyZodPassthroughInner,
-    WithMaybeZodPassthrough,
-} from '#zod_converter/types/passthroughs'
+import type { WithMaybeZodPassthrough } from '#zod_converter/types/passthroughs'
+import type { SomeType } from 'zod/v4/core'
 
-type AssertsZodMapValueTypeFn = <TSchema extends AnyZodPassthroughInner>(
-    schema: WithMaybeZodPassthrough<TSchema>
-) => asserts schema is WithMaybeZodPassthrough<TSchema & ZodMapValueType>
+type AssertsZodMapValueTypeFn = (
+    schema: SomeType
+) => asserts schema is WithMaybeZodPassthrough<ZodMapValueType>
 
-export const assertsZodMapValueType: AssertsZodMapValueTypeFn = function <
-    TSchema extends AnyZodPassthroughInner,
->(
-    schema: WithMaybeZodPassthrough<TSchema>
-): asserts schema is WithMaybeZodPassthrough<TSchema & ZodMapValueType> {
+export const assertsZodMapValueType: AssertsZodMapValueTypeFn = function (
+    schema: SomeType
+): asserts schema is WithMaybeZodPassthrough<ZodMapValueType> {
     if (!ZodMapValueType.is(schema)) {
         const validZodTypes = ZodMapValueTypeTuple.get()
 

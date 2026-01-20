@@ -10,6 +10,7 @@ import {
 import type { ZodScalarType } from '#zod_converter/types/scalars'
 import type { GetZodTypeValue } from '#zod_converter/types/zod_type_value'
 import type { ZodEnum, ZodObject } from 'zod'
+import type { SomeType } from 'zod/v4/core'
 
 export type AnyZodMessage = ZodObject | ZodEnum
 
@@ -65,7 +66,7 @@ export const ZodMessageFieldTypeTuple = {
 
 export const ZodMessageFieldType = {
     is: function (
-        schema: WithMaybeZodPassthrough<AnyZodPassthroughInner>
+        schema: SomeType
     ): schema is WithMaybeZodPassthrough<ZodMessageFieldType> {
         const deepSchema = ZodPassthroughType.pass(schema)
 

@@ -73,7 +73,7 @@ export const ZodRepeatedInnerTypeTuple = {
 
 export const ZodRepeatedInnerType = {
     is: function (
-        schema: WithMaybeZodPassthrough<AnyZodPassthroughInner>
+        schema: SomeType
     ): schema is WithMaybeZodPassthrough<ZodRepeatedInnerType> {
         const deepSchema = ZodPassthroughType.pass(schema)
 
@@ -108,9 +108,7 @@ export const ZodMapValueTypeTuple = {
 } as const
 
 export const ZodMapValueType = {
-    is: function (
-        schema: WithMaybeZodPassthrough<AnyZodPassthroughInner>
-    ): schema is WithMaybeZodPassthrough<ZodMapValueType> {
+    is: function (schema: SomeType): schema is WithMaybeZodPassthrough<ZodMapValueType> {
         const deepSchema = ZodPassthroughType.pass(schema)
 
         const zodTypes: string[] = ZodMapValueTypeTuple.get()
