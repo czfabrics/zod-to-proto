@@ -9,6 +9,9 @@ export type Proto3RpcFunction = {
     getDeepMessages(): AnyProto3Message[]
     getDeepImportedTypes(): Proto3ImportedType[]
     getDeepOptionalMessageFields(): Proto3MessageField[]
+    /**
+     * @example 'GetUsers'
+     */
     name: string
     in: AnyProto3Message | Proto3ImportedType
     inStream: boolean

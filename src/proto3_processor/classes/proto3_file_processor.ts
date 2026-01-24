@@ -10,7 +10,7 @@ import { Proto3MessageProcessor } from '#proto3_processor/classes/proto3_message
 import { Proto3RecordExtensionProcessor } from '#proto3_processor/classes/proto3_record_extension_processor'
 import { Proto3ServiceProcessor } from '#proto3_processor/classes/proto3_service_processor'
 
-export class Proto3Processor {
+export class Proto3FileProcessor {
     private getImportContent(importedTypes: Proto3ImportedType[]): FileContentMatter {
         const content = fileContentMatter()
         const processor = new Proto3ImportProcessor(content)
@@ -80,7 +80,9 @@ export class Proto3Processor {
         const importedTypes = file.getDeepImportedTypes()
         const importContent = this.getImportContent(importedTypes)
         const extensionContents = this.getExtensionContents(file.extensions)
-        const serviceContent = this.getServiceContent(file.service)
+        const serviceContent = file.service
+            ? this.getServiceContent(file.service)
+            : fileContentMatter()
         const messages = file.getDeepMessages()
         const messageContent = this.getMessageContent(messages)
 

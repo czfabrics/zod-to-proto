@@ -10,6 +10,9 @@ export type Proto3RpcService = {
     getDeepMessages(): AnyProto3Message[]
     getDeepImportedTypes(): Proto3ImportedType[]
     getDeepOptionalMessageFields(): Proto3MessageField[]
+    /**
+     * @example 'UserService'
+     */
     name: string
     functions: Proto3RpcFunction[]
     extensions: Proto3Extension[]

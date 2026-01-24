@@ -10,9 +10,12 @@ export type Proto3File = {
     getDeepMessages(): AnyProto3Message[]
     getDeepImportedTypes(): Proto3ImportedType[]
     getDeepOptionalMessageFields(): Proto3MessageField[]
+    /**
+     * @example 'services.authentification.v1'
+     */
     packageName: string
     syntax: 'proto3'
-    service: Proto3RpcService
+    service?: Proto3RpcService
     extensions: Proto3Extension[]
 }
 
@@ -21,13 +24,13 @@ export const Proto3File = {
         return {
             internalName: 'file',
             getDeepMessages() {
-                return this.service.getDeepMessages()
+                return this.service?.getDeepMessages() ?? []
             },
             getDeepImportedTypes() {
-                return this.service.getDeepImportedTypes()
+                return this.service?.getDeepImportedTypes() ?? []
             },
             getDeepOptionalMessageFields() {
-                return this.service.getDeepOptionalMessageFields()
+                return this.service?.getDeepOptionalMessageFields() ?? []
             },
             ...params,
         }

@@ -13,6 +13,9 @@ export type Proto3Message = {
     getDeepImportedTypes(): Proto3ImportedType[]
     getDeepOptionalMessageFields(): Proto3MessageField[]
     getNextIndex(): number
+    /**
+     * @example 'User'
+     */
     name: string
     fields: AnyProto3MessageField[]
     extensions: Proto3Extension[]
