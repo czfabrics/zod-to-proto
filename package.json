@@ -28,7 +28,8 @@
         "prepare:index": "vscode-generate-index-standalone index.ts",
         "prepare:dist": "tsx build.ts",
         "prepare:declaration": "tsc --project ./tsconfig.declaration.json",
-        "build": "rimraf .dist && npm run prepare:index && npm run prepare:dist && npm run prepare:declaration",
+        "prepare:imports": "tsc-alias --project tsconfig.declaration.json --outDir .dist",
+        "build": "rimraf .dist && bun run prepare:index && bun run prepare:dist && bun run prepare:declaration && bun run prepare:imports",
         "generate:readme": "readme generate --config .blueprint.json"
     },
     "files": [
@@ -62,6 +63,7 @@
         "prettier": "^3.6.2",
         "rimraf": "^6.0.1",
         "ts-arithmetic": "^0.1.1",
+        "tsc-alias": "^1.8.16",
         "tsx": "^4.21.0",
         "type-fest": "^5.3.1",
         "typescript": "^5.9.2",
