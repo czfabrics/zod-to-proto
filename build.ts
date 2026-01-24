@@ -1,6 +1,8 @@
+// @ts-nocheck
+
 import { build, BuildOptions } from 'esbuild'
 
-const BUILD_CONFIGURATION: BuildOptions = {
+const ESM_BUILD_CONFIGURATION: BuildOptions = {
     entryPoints: ['index.ts'],
     entryNames: '[name]',
     outdir: '.dist',
@@ -8,16 +10,33 @@ const BUILD_CONFIGURATION: BuildOptions = {
         '.js': '.mjs',
     },
     packages: 'external',
-    platform: 'node',
+    platform: 'neutral',
     target: 'esnext',
     format: 'esm',
-    bundle: false,
-    minify: true,
+    bundle: true,
+    minify: false,
     sourcemap: false,
     tsconfig: './tsconfig.json',
 } as const
 
-build(BUILD_CONFIGURATION)
+const CJS_BUILD_CONFIGURATION: BuildOptions = {
+    entryPoints: ['index.ts'],
+    entryNames: '[name]',
+    outdir: '.dist',
+    outExtension: {
+        '.js': '.cjs',
+    },
+    packages: 'external',
+    platform: 'neutral',
+    target: 'esnext',
+    format: 'cjs',
+    bundle: true,
+    minify: false,
+    sourcemap: false,
+    tsconfig: './tsconfig.json',
+} as const
+
+Promise.all([build(ESM_BUILD_CONFIGURATION), build(CJS_BUILD_CONFIGURATION)])
     .then(() => {
         console.log('Build succeeded')
     })

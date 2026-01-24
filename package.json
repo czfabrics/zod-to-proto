@@ -24,13 +24,11 @@
     "scripts": {
         "typecheck": "tsc --project ./tsconfig.typecheck.json",
         "format:all": "prettier ./**/*.ts ./**/*.json --write",
+        "prepare:index": "vscode-generate-index-standalone index.ts",
         "prepare:dist": "tsx build.ts",
         "prepare:declaration": "tsc --project ./tsconfig.declaration.json",
-        "build": "rimraf .dist && npm run prepare:dist && npm run prepare:declaration",
+        "build": "rimraf .dist && npm run prepare:index && npm run prepare:dist && npm run prepare:declaration",
         "generate:readme": "readme generate --config .blueprint.json"
-    },
-    "bin": {
-        "zod-to-proto3": ".dist/index.mjs"
     },
     "files": [
         "package.json",
@@ -38,6 +36,17 @@
         "LICENSE",
         ".dist/**/*"
     ],
+    "types": "./.dist/index.d.cts",
+    "module": "./.dist/index.mjs",
+    "main": "./.dist/index.cjs",
+    "exports": {
+        "./package.json": "./package.json",
+        ".": {
+            "types": "./.dist/index.d.cts",
+            "import": "./.dist/index.mjs",
+            "require": "./.dist/index.cjs"
+        }
+    },
     "dependencies": {
         "change-case": "^5.4.4",
         "ts-pattern": "^5.9.0"
