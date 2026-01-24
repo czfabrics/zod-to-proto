@@ -24,6 +24,7 @@
     "scripts": {
         "typecheck": "tsc --project ./tsconfig.typecheck.json",
         "format:all": "prettier ./**/*.ts ./**/*.json --write",
+        "check:type-perf": "rimraf .tsc_traces && tsc --project ./tsconfig.typecheck.json --generateTrace .tsc_traces && analyze-trace .tsc_traces",
         "prepare:index": "vscode-generate-index-standalone index.ts",
         "prepare:dist": "tsx build.ts",
         "prepare:declaration": "tsc --project ./tsconfig.declaration.json",
