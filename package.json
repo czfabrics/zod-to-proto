@@ -40,16 +40,21 @@
     ],
     "dependencies": {
         "change-case": "^5.4.4",
-        "ts-pattern": "^5.9.0",
-        "zod": "^4.1.8"
+        "ts-pattern": "^5.9.0"
+    },
+    "peerDependencies": {
+        "zod": "^4.3.5"
     },
     "devDependencies": {
         "@appnest/readme": "^1.2.7",
+        "@typescript/analyze-trace": "^0.10.1",
         "esbuild": "^0.25.9",
         "prettier": "^3.6.2",
         "rimraf": "^6.0.1",
         "ts-arithmetic": "^0.1.1",
+        "tsx": "^4.21.0",
         "type-fest": "^5.3.1",
-        "typescript": "^5.9.2"
+        "typescript": "^5.9.2",
+        "vscode-generate-index-standalone": "^1.7.1"
     }
 }
