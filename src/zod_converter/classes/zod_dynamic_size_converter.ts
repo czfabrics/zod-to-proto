@@ -1,8 +1,5 @@
 import type { Proto3DynamicSizeType } from '#proto3_definition/types/dynamic_size'
-import {
-    Proto3MapType,
-    Proto3RepeatedType,
-} from '#proto3_definition/types/scalar_standalones'
+import { Proto3MapType, Proto3RepeatedType } from '#proto3_definition/types/dynamic_size'
 import { assertsZodMapValueType } from '#zod_converter/asserts/zod_map_value'
 import { assertsZodRepeatedInnerType } from '#zod_converter/asserts/zod_repeated_inner_type'
 import { assertsZodScalarType } from '#zod_converter/asserts/zod_scalar_type'
