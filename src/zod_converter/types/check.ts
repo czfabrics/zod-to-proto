@@ -213,7 +213,7 @@ type TwoChildConditions = readonly [
             ),
         ]
         error: TypeDebuggingError<`${GetZodTypeValue<ZodRecord>}'s key should be of these types '${ArrayToStringDisplay<
-            TuplifyUnion<GetZodTypeValue<SomeZodType<'string' | 'number'>>>
+            TuplifyUnion<'string' | 'int'>
         >}', ${GetZodTypeValue<ZodRecord>}'s value should be of these types '${ArrayToStringDisplay<
             TuplifyUnion<
                 GetZodTypeValue<

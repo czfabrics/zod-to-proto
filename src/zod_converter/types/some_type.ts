@@ -1,4 +1,4 @@
-import { GetZodTypeValue } from '#zod_converter/types/zod_type_value'
+import type { GetZodTypeValue } from '#zod_converter/types/zod_type_value'
 import type { SomeType } from 'zod/v4/core'
 
 export type SomeZodType<
