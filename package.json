@@ -27,6 +27,9 @@
         "type": "git",
         "url": "git+https://github.com/czyrok/czlab.zod-to-proto.git"
     },
+    "bugs": {
+        "url": "https://github.com/czyrok/czlab.zod-to-proto/issues"
+    },
     "license": "MIT",
     "scripts": {
         "typecheck": "tsc --project ./tsconfig.typecheck.json",
