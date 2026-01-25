@@ -15,7 +15,8 @@ export type Proto3File = {
      */
     packageName: string
     syntax: 'proto3'
-    service?: Proto3RpcService
+    service: Proto3RpcService | undefined
+    unscopedMessages: AnyProto3Message[]
     extensions: Proto3Extension[]
 }
 
@@ -24,13 +25,26 @@ export const Proto3File = {
         return {
             internalName: 'file',
             getDeepMessages() {
-                return this.service?.getDeepMessages() ?? []
+                return [
+                    ...(this.service?.getDeepMessages() ?? []),
+                    ...this.unscopedMessages.map((message) => message.getDeepMessages()),
+                ].flat()
             },
             getDeepImportedTypes() {
-                return this.service?.getDeepImportedTypes() ?? []
+                return [
+                    ...(this.service?.getDeepImportedTypes() ?? []),
+                    ...this.unscopedMessages.map((message) =>
+                        message.getDeepImportedTypes()
+                    ),
+                ].flat()
             },
             getDeepOptionalMessageFields() {
-                return this.service?.getDeepOptionalMessageFields() ?? []
+                return [
+                    ...(this.service?.getDeepOptionalMessageFields() ?? []),
+                    ...this.unscopedMessages.map((message) =>
+                        message.getDeepOptionalMessageFields()
+                    ),
+                ].flat()
             },
             ...params,
         }
