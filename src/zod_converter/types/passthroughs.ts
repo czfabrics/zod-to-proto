@@ -15,31 +15,62 @@ import { util } from 'zod/v4/core'
 
 export type AnyZodPassthroughInner = SomeType | SomeZodObject
 
-type ZodObjectIntersection<TChild extends SomeZodObject = SomeZodObject> =
+type ZodCategoryPassthroughDeep<
+    TAcc extends SomeType,
+    TDeep extends number,
+    TRawCurrentDeep extends string[] = [],
+    TCurrentDeep extends number = TRawCurrentDeep['length'],
+> = TCurrentDeep extends TDeep
+    ? TAcc
+    : ZodCategoryPassthroughDeep<
+          TAcc | ZodCategoryPassthrough<TAcc>,
+          TDeep,
+          [...TRawCurrentDeep, '+1']
+      >
+
+type ZodPassthroughTypeDeep<
+    TAcc extends SomeType,
+    TDeep extends number,
+    TRawCurrentDeep extends string[] = [],
+    TCurrentDeep extends number = TRawCurrentDeep['length'],
+> = TCurrentDeep extends TDeep
+    ? TAcc
+    : ZodPassthroughTypeDeep<
+          TAcc | ZodPassthroughType<TAcc>,
+          TDeep,
+          [...TRawCurrentDeep, '+1']
+      >
+
+type ZodObjectIntersection<TChild extends SomeType = SomeType> =
     TChild extends SomeZodObject<util.Extend<infer TPartialChild1, infer TPartialChild2>>
-        ? ZodIntersection<SomeZodObject<TPartialChild1>, SomeZodObject<TPartialChild2>>
+        ? ZodIntersection<
+              ZodCategoryPassthroughDeep<
+                  SomeZodObject<TPartialChild1['_zod']['def']['shape']>,
+                  5
+              >,
+              ZodCategoryPassthroughDeep<
+                  SomeZodObject<TPartialChild2['_zod']['def']['shape']>,
+                  5
+              >
+          >
         : never
 
-export type ZodPassthroughTypeNotRecursive<
+export type ExtractZodPassthroughInner<
     TInner extends AnyZodPassthroughInner = AnyZodPassthroughInner,
-> = TInner extends SomeZodObject
-    ? ZodObjectIntersection<TInner> | ZodCategoryPassthrough<TInner>
-    : ZodCategoryPassthrough<TInner>
+> =
+    TInner extends ZodPassthroughType<infer TNewInner>
+        ? ExtractZodPassthroughInner<TNewInner>
+        : TInner
 
 export type ZodPassthroughType<
     TInner extends AnyZodPassthroughInner = AnyZodPassthroughInner,
-> =
-    TInner extends ZodPassthroughTypeNotRecursive<infer TNewInner>
-        ? ZodPassthroughType<TNewInner>
-        : ZodPassthroughTypeNotRecursive<TInner>
+> = ZodObjectIntersection<TInner> | ZodCategoryPassthrough<TInner>
 
 export type WithMaybeZodPassthrough<TSchema extends AnyZodPassthroughInner> =
-    | ZodPassthroughType<TSchema>
+    | ZodPassthroughTypeDeep<TSchema, 5>
     | TSchema
 
-export type ZodPassthroughTypeValue = Prettify<
-    GetZodTypeValue<ZodPassthroughTypeNotRecursive>
->
+export type ZodPassthroughTypeValue = Prettify<GetZodTypeValue<ZodPassthroughType>>
 export type ZodPassthroughTypeTuple = ZodPassthroughTypeValue[]
 
 export const ZodPassthroughTypeTuple = {
@@ -53,7 +84,7 @@ export const ZodPassthroughTypeTuple = {
 export const ZodPassthroughType = {
     is: <TSchema extends AnyZodPassthroughInner>(
         schema: WithMaybeZodPassthrough<TSchema>
-    ): schema is ZodPassthroughType<TSchema> => {
+    ): schema is WithMaybeZodPassthrough<TSchema> => {
         const zodTypes: string[] = ZodPassthroughTypeTuple.new([
             'catch',
             'optional',
@@ -75,7 +106,7 @@ export const ZodPassthroughType = {
             return schema
         }
 
-        let passthroughSchema: ZodPassthroughType = schema
+        let passthroughSchema: ZodPassthroughType = schema as ZodPassthroughType
 
         while (true) {
             const inner: AnyZodPassthroughInner = match(passthroughSchema)
@@ -155,7 +186,7 @@ export const ZodPassthroughType = {
                 .exhaustive()
 
             if (ZodPassthroughType.is(inner)) {
-                passthroughSchema = inner
+                passthroughSchema = inner as ZodPassthroughType
             } else {
                 return inner as TSchema
             }
@@ -170,7 +201,7 @@ export const ZodPassthroughType = {
             return allMeta
         }
 
-        let passthroughSchema: ZodPassthroughType = schema
+        let passthroughSchema: ZodPassthroughType = schema as ZodPassthroughType
 
         while (true) {
             const inner: AnyZodPassthroughInner = match(passthroughSchema)
@@ -252,7 +283,7 @@ export const ZodPassthroughType = {
             allMeta.push((inner as ZodType).meta() ?? {})
 
             if (ZodPassthroughType.is(inner)) {
-                passthroughSchema = inner
+                passthroughSchema = inner as ZodPassthroughType
             } else {
                 return allMeta
             }

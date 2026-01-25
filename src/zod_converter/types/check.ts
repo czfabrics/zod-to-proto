@@ -2,6 +2,7 @@ import type { ArrayToStringDisplay, CheckTuple } from '#core/types/check_tuple'
 import type { TuplifyUnion } from '#core/types/tuplify_union'
 import type { TypeDebuggingError } from '#core/types/type_debugging_error'
 import type { ZodOneOfUnion } from '#zod/types/zod_one_of_union'
+import type { ExtractZodPassthroughInner } from '#zod_converter/types/passthroughs'
 import type {
     ExcludeZodType,
     IntoSomeZodType,
@@ -270,7 +271,7 @@ type CheckChildConditions<
 > = TChildren['length'] extends TIndex
     ? true
     : //// Avoid using `GetZodTypeValue` since the conditions need strict validation.
-      TChildren[TIndex] extends TChildConditions[TIndex]
+      ExtractZodPassthroughInner<TChildren[TIndex]> extends TChildConditions[TIndex]
       ? CheckChildConditions<TChildren, TChildConditions, [...TRawIndex, '+1']>
       : false
 

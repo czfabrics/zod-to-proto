@@ -14,7 +14,8 @@ import {
     type ZodMapValueType,
     type ZodRepeatedInnerType,
 } from '#zod_converter/types/dynamic_size'
-import type { AnyZodMessage, ZodMessageFieldType } from '#zod_converter/types/messages'
+import { SchemaError } from '#zod_converter/types/error'
+import { AnyZodMessage, type ZodMessageFieldType } from '#zod_converter/types/messages'
 import { WithMaybeZodPassthrough } from '#zod_converter/types/passthroughs'
 import { ZodScalarType } from '#zod_converter/types/scalars'
 import { ZodConversionTransformers } from '#zod_converter/types/transformers'
@@ -62,8 +63,12 @@ export class ZodMessageFieldTypeConverter {
             return converter.convert(key, schema)
         }
 
-        const converter = new ZodMessageConverter(this.transformers)
+        if (AnyZodMessage.is(schema)) {
+            const converter = new ZodMessageConverter(this.transformers)
 
-        return converter.convert(key, schema)
+            return converter.convert(key, schema)
+        }
+
+        throw SchemaError.new('Not possible', schema)
     }
 }
