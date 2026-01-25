@@ -10,6 +10,7 @@ import {
     ZodPassthroughType,
 } from '#zod_converter/types/passthroughs'
 import { ZodConversionTransformers } from '#zod_converter/types/transformers'
+import pluralize from 'pluralize'
 import { match } from 'ts-pattern'
 
 export class ZodDynamicSizeConverter {
@@ -36,7 +37,10 @@ export class ZodDynamicSizeConverter {
 
                     assertsZodRepeatedInnerType(schema._zod.def.element)
 
-                    const inner = converter.convert(key, schema._zod.def.element)
+                    const inner = converter.convert(
+                        pluralize(key, 1),
+                        schema._zod.def.element
+                    )
 
                     return Proto3RepeatedType.new({
                         inner,

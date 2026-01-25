@@ -51,6 +51,7 @@
     },
     "dependencies": {
         "change-case": "^5.4.4",
+        "pluralize": "^8.0.0",
         "ts-pattern": "^5.9.0"
     },
     "peerDependencies": {
@@ -58,6 +59,7 @@
     },
     "devDependencies": {
         "@appnest/readme": "^1.2.7",
+        "@types/pluralize": "^0.0.33",
         "@typescript/analyze-trace": "^0.10.1",
         "esbuild": "^0.25.9",
         "prettier": "^3.6.2",
