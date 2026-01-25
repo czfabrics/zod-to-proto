@@ -1,5 +1,4 @@
 import type {
-    Proto3EnumField,
     Proto3MessageField,
     Proto3MessageOneOfField,
 } from '#proto3_definition/types/fields'
@@ -34,11 +33,6 @@ export type ZodMessageOneOfFieldConversionTransformer = ZodConversionTransformer
 export type ZodEnumConversionTransformer = ZodConversionTransformer<
     WithMaybeZodPassthrough<AnyZodMessage>,
     Proto3Enum
->
-
-export type ZodEnumFieldConversionTransformer = ZodConversionTransformer<
-    WithMaybeZodPassthrough<AnyZodMessage>,
-    Proto3EnumField
 >
 
 export type ZodConversionTransformers = {
