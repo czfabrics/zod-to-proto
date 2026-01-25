@@ -1,15 +1,22 @@
 {
     "name": "@czlab/zod-to-proto",
-    "description": "TODO:",
+    "version": "0.1.0-beta.0",
+    "description": "A TypeScript library for seamlessly converting Zod schemas into Protocol Buffers v3 definitions, with built-in support for generating RPC services and functions from structured object definitions.",
     "keywords": [
         "zod",
         "zod4",
-        "zodv4",
+        "zod-v4",
         "proto",
         "proto3",
-        "converter"
+        "protobuf",
+        "protobuf-schema",
+        "protobuf-generator",
+        "grpc",
+        "converter",
+        "generator",
+        "builder",
+        "schema"
     ],
-    "version": "0.1.0",
     "author": {
         "name": "Dylan Valentin",
         "email": "dylan.valentin@ik.me",
