@@ -60,9 +60,9 @@ A TypeScript library for seamlessly converting Zod schemas into Protocol Buffers
 | ----------------------- | ------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Primitif Types**      |                                                                    |                                                                                                                                                                      |
 | `ZodString`             | `string`                                                           |                                                                                                                                                                      |
-| `ZodStringFormat`       | `string`                                                           | Format is ignored, but can be handled by extension (`Proto3Extension`).                                                                                              |
-| `ZodLiteral`            | `string`                                                           | Value is ignored, but can be handled by extension (`Proto3Extension`).                                                                                               |
-| `ZodTemplateLiteral`    | `string`                                                           | Template is ignored, but can be handled by extension (`Proto3Extension`).                                                                                            |
+| `ZodStringFormat`       | `string`                                                           | Format is ignored, but can be handled by a transformer.                                                                                                              |
+| `ZodLiteral`            | `string`                                                           | Value is ignored, but can be handled by a transformer.                                                                                                               |
+| `ZodTemplateLiteral`    | `string`                                                           | Template is ignored, but can be handled by a transformer.                                                                                                            |
 | `ZodNumber`             | `double`                                                           |                                                                                                                                                                      |
 | `ZodNumberFormat`       | `int32`<br>`float32`<br>`float64`<br>`uint32`                      | The conversion result depends on the format of the `ZodNumberFormat`.<br>(Format `safeint` is interpreted as `int64`)                                                |
 | `ZodBigInt`             | `int64`<br>`uint64`                                                | Depends on the format.                                                                                                                                               |
@@ -71,10 +71,10 @@ A TypeScript library for seamlessly converting Zod schemas into Protocol Buffers
 | **Structure Types**     |                                                                    |                                                                                                                                                                      |
 | `ZodObject`             | `message Some {}`                                                  |                                                                                                                                                                      |
 | `ZodEnum`               | `enum Some {}`                                                     |                                                                                                                                                                      |
-| `ZodRecord`             | `map<{key type}, {value type}>`                                    | Not all Zod types are supported due to Proto limitations.<br>**TODO**                                                                                                |
+| `ZodRecord`             | `map<{key type}, {value type}>`                                    | Not all Zod types are supported due to Proto limitations.<br>Keys can be an integer or a string.<br>Values can be any types except array or another map.             |
 | ~~`ZodMap`~~            | Not handled                                                        | Use `ZodRecord` instead.                                                                                                                                             |
-| `ZodArray`              | `repeated {}`                                                      | Not all Zod types are supported due to Proto limitations.<br>**TODO**                                                                                                |
-| `ZodSet`                | `repeated {}`                                                      | Not all Zod types are supported due to Proto limitations.<br>**TODO**                                                                                                |
+| `ZodArray`              | `repeated {}`                                                      | Not all Zod types are supported due to Proto limitations.<br>Elements can be any types except map.                                                                   |
+| `ZodSet`                | `repeated {}`                                                      | Not all Zod types are supported due to Proto limitations.<br>Elements can be any types except map.                                                                   |
 | **Other Types**         |                                                                    |                                                                                                                                                                      |
 | `ZodOptional`           | `optional {some_type} my_field = 1`                                | Internally uses Zod's `safeParse` to determine if the schema is optional.                                                                                            |
 | `ZodNonOptional`        | `{some_type} my_field = 1 [(buf.validate.field).required = true];` | Internally uses Zod's `safeParse` to determine if the schema is optional.                                                                                            |
@@ -154,13 +154,42 @@ yarn add @czlab/zod-to-proto@0.1.0-beta.0
 ## Quick Start
 
 ```ts
+import { zodToProto } from '@czlab/zod-to-proto'
+import z from 'zod'
 
+const User = z.object({
+    id: z.int64(),
+    fullName: z.string().optional(),
+    role: z.enum(['ADMIN', 'VIEWER']),
+})
+
+const result = zodToProto({
+    syntax: 'proto3',
+    packageName: 'services.authentification.v1',
+    unscopedMessages: {
+        user: User,
+    },
+})
 ```
 
 **Result:**
 
 ```proto
+syntax = "proto3";
 
+import "buf/validate/validate.proto";
+
+package services.authentification.v1;
+
+message User {
+  int64 id = 1 [
+    (buf.validate.field).required = true
+  ];
+  optional string full_name = 2;
+  Role role = 3 [
+    (buf.validate.field).required = true
+  ];
+}
 ```
 
 
