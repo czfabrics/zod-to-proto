@@ -1,5 +1,4 @@
 import { Proto3Extension } from '#proto3_definition/types/extension'
-import { Proto3MessageField } from '#proto3_definition/types/fields'
 import { Proto3RpcFunction } from '#proto3_definition/types/functions'
 import { GetNewParams } from '#proto3_definition/types/get_new_params'
 import { AnyProto3Message } from '#proto3_definition/types/messages'
@@ -9,7 +8,6 @@ export type Proto3RpcService = {
     internalName: 'rpc_service'
     getDeepMessages(): AnyProto3Message[]
     getDeepImportedTypes(): Proto3ImportedType[]
-    getDeepOptionalMessageFields(): Proto3MessageField[]
     /**
      * @example 'UserService'
      */
@@ -31,11 +29,6 @@ export const Proto3RpcService = {
             getDeepImportedTypes() {
                 return this.functions
                     .map((rpcFunction) => rpcFunction.getDeepImportedTypes())
-                    .flat()
-            },
-            getDeepOptionalMessageFields() {
-                return this.functions
-                    .map((rpcFunction) => rpcFunction.getDeepOptionalMessageFields())
                     .flat()
             },
             ...params,

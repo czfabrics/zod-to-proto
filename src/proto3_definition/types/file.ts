@@ -1,5 +1,4 @@
 import { Proto3Extension } from '#proto3_definition/types/extension'
-import { Proto3MessageField } from '#proto3_definition/types/fields'
 import { GetNewParams } from '#proto3_definition/types/get_new_params'
 import { AnyProto3Message } from '#proto3_definition/types/messages'
 import { Proto3RpcService } from '#proto3_definition/types/service'
@@ -9,7 +8,6 @@ export type Proto3File = {
     internalName: 'file'
     getDeepMessages(): AnyProto3Message[]
     getDeepImportedTypes(): Proto3ImportedType[]
-    getDeepOptionalMessageFields(): Proto3MessageField[]
     /**
      * @example 'services.authentification.v1'
      */
@@ -35,14 +33,6 @@ export const Proto3File = {
                     ...(this.service?.getDeepImportedTypes() ?? []),
                     ...this.unscopedMessages.map((message) =>
                         message.getDeepImportedTypes()
-                    ),
-                ].flat()
-            },
-            getDeepOptionalMessageFields() {
-                return [
-                    ...(this.service?.getDeepOptionalMessageFields() ?? []),
-                    ...this.unscopedMessages.map((message) =>
-                        message.getDeepOptionalMessageFields()
                     ),
                 ].flat()
             },

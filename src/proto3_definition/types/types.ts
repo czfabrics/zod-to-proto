@@ -1,4 +1,3 @@
-import { Proto3MessageField } from '#proto3_definition/types/fields'
 import { GetAnyNewParams, GetNewParams } from '#proto3_definition/types/get_new_params'
 import { AnyProto3Message } from '#proto3_definition/types/messages'
 import { match } from 'ts-pattern'
@@ -7,7 +6,6 @@ export type Proto3GlobalType = {
     internalName: 'global_type'
     getDeepMessages(): AnyProto3Message[]
     getDeepImportedTypes(): Proto3ImportedType[]
-    getDeepOptionalMessageFields(): Proto3MessageField[]
     typeReference: string
 }
 
@@ -21,9 +19,6 @@ export const Proto3GlobalType = {
             getDeepImportedTypes() {
                 return []
             },
-            getDeepOptionalMessageFields() {
-                return []
-            },
             ...params,
         } as const satisfies Proto3GlobalType
     },
@@ -33,7 +28,6 @@ export type Proto3ImportedType = {
     internalName: 'imported_type'
     getDeepMessages(): AnyProto3Message[]
     getDeepImportedTypes(): Proto3ImportedType[]
-    getDeepOptionalMessageFields(): Proto3MessageField[]
     importPath: string
     typeReference: string
 }
@@ -47,9 +41,6 @@ export const Proto3ImportedType = {
             },
             getDeepImportedTypes() {
                 return [this]
-            },
-            getDeepOptionalMessageFields() {
-                return []
             },
             ...params,
         } as const satisfies Proto3ImportedType

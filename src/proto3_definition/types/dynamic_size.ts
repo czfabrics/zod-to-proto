@@ -1,4 +1,3 @@
-import type { Proto3MessageField } from '#proto3_definition/types/fields'
 import type { GetNewParams } from '#proto3_definition/types/get_new_params'
 import type { AnyProto3Message } from '#proto3_definition/types/messages'
 import type { Proto3ScalarType } from '#proto3_definition/types/scalars'
@@ -17,14 +16,12 @@ type Proto3DynamicSizeTypes = {
     MAP: {
         getDeepMessages(): AnyProto3Message[]
         getDeepImportedTypes(): Proto3ImportedType[]
-        getDeepOptionalMessageFields(): Proto3MessageField[]
         key: Proto3ScalarType
         value: Proto3MapValueType
     }
     REPEATED: {
         getDeepMessages(): AnyProto3Message[]
         getDeepImportedTypes(): Proto3ImportedType[]
-        getDeepOptionalMessageFields(): Proto3MessageField[]
         inner: Proto3RepeatedInnerType
     }
 }
@@ -44,9 +41,6 @@ export const Proto3MapType = {
             },
             getDeepImportedTypes() {
                 return this.value.getDeepImportedTypes()
-            },
-            getDeepOptionalMessageFields() {
-                return this.value.getDeepOptionalMessageFields()
             },
             ...params,
         }
@@ -84,19 +78,6 @@ export const Proto3RepeatedType = {
                 }
 
                 return currentItem.getDeepImportedTypes()
-            },
-            getDeepOptionalMessageFields() {
-                let currentItem:
-                    | AnyProto3Message
-                    | Proto3ImportedType
-                    | Proto3DynamicSizeType
-                    | Proto3ScalarType = this
-
-                while (currentItem.internalName === 'repeated') {
-                    currentItem = currentItem.inner
-                }
-
-                return currentItem.getDeepOptionalMessageFields()
             },
             ...params,
         }

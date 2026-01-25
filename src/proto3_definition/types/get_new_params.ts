@@ -1,16 +1,9 @@
 export type GetNewParams<T> = Omit<
     T,
-    | 'internalName'
-    | 'getDeepMessages'
-    | 'getDeepImportedTypes'
-    | 'getDeepOptionalMessageFields'
-    | 'getNextIndex'
+    'internalName' | 'getDeepMessages' | 'getDeepImportedTypes' | 'getNextIndex'
 >
 
 export type GetAnyNewParams<T> = Omit<
     T,
-    | 'getDeepMessages'
-    | 'getDeepImportedTypes'
-    | 'getDeepOptionalMessageFields'
-    | 'getNextIndex'
+    'getDeepMessages' | 'getDeepImportedTypes' | 'getNextIndex'
 >

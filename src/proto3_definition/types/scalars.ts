@@ -1,4 +1,3 @@
-import { Proto3MessageField } from '#proto3_definition/types/fields'
 import type { AnyProto3Message } from '#proto3_definition/types/messages'
 import { Proto3ImportedType } from '#proto3_definition/types/types'
 
@@ -26,6 +25,5 @@ export type Proto3ScalarType = {
         name: Proto3ScalarRawTypes[TKey]
         getDeepMessages(): AnyProto3Message[]
         getDeepImportedTypes(): Proto3ImportedType[]
-        getDeepOptionalMessageFields(): Proto3MessageField[]
     }
 }[keyof Proto3ScalarRawTypes]

@@ -2,7 +2,6 @@ import { Proto3Extension } from '#proto3_definition/types/extension'
 import type {
     AnyProto3MessageField,
     Proto3EnumField,
-    Proto3MessageField,
 } from '#proto3_definition/types/fields'
 import type { GetNewParams } from '#proto3_definition/types/get_new_params'
 import { Proto3ImportedType } from '#proto3_definition/types/types'
@@ -11,7 +10,6 @@ export type Proto3Message = {
     internalName: 'message'
     getDeepMessages(): AnyProto3Message[]
     getDeepImportedTypes(): Proto3ImportedType[]
-    getDeepOptionalMessageFields(): Proto3MessageField[]
     getNextIndex(): number
     /**
      * @example 'User'
@@ -35,11 +33,6 @@ export const Proto3Message = {
             },
             getDeepImportedTypes() {
                 return this.fields.map((field) => field.getDeepImportedTypes()).flat()
-            },
-            getDeepOptionalMessageFields() {
-                return this.fields
-                    .map((field) => field.getDeepOptionalMessageFields())
-                    .flat()
             },
             getNextIndex() {
                 const normalFieldsCount = this.fields.filter(
@@ -67,7 +60,6 @@ export type Proto3Enum = {
     internalName: 'enum'
     getDeepMessages(): AnyProto3Message[]
     getDeepImportedTypes(): Proto3ImportedType[]
-    getDeepOptionalMessageFields(): Proto3MessageField[]
     name: string
     fields: Proto3EnumField[]
     extensions: Proto3Extension[]
@@ -82,9 +74,6 @@ export const Proto3Enum = {
                 return [this]
             },
             getDeepImportedTypes() {
-                return []
-            },
-            getDeepOptionalMessageFields() {
                 return []
             },
             ...params,

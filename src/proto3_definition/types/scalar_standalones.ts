@@ -11,9 +11,6 @@ export const Proto3StringType = {
             getDeepImportedTypes() {
                 return []
             },
-            getDeepOptionalMessageFields() {
-                return []
-            },
         }
     },
 } as const
@@ -27,9 +24,6 @@ export const Proto3BoolType = {
                 return []
             },
             getDeepImportedTypes() {
-                return []
-            },
-            getDeepOptionalMessageFields() {
                 return []
             },
         }
@@ -47,9 +41,6 @@ export const Proto3Int32Type = {
             getDeepImportedTypes() {
                 return []
             },
-            getDeepOptionalMessageFields() {
-                return []
-            },
         }
     },
 } as const
@@ -63,9 +54,6 @@ export const Proto3Int64Type = {
                 return []
             },
             getDeepImportedTypes() {
-                return []
-            },
-            getDeepOptionalMessageFields() {
                 return []
             },
         }
@@ -83,9 +71,6 @@ export const Proto3UInt32Type = {
             getDeepImportedTypes() {
                 return []
             },
-            getDeepOptionalMessageFields() {
-                return []
-            },
         }
     },
 } as const
@@ -99,9 +84,6 @@ export const Proto3UInt64Type = {
                 return []
             },
             getDeepImportedTypes() {
-                return []
-            },
-            getDeepOptionalMessageFields() {
                 return []
             },
         }
@@ -119,9 +101,6 @@ export const Proto3SInt32Type = {
             getDeepImportedTypes() {
                 return []
             },
-            getDeepOptionalMessageFields() {
-                return []
-            },
         }
     },
 } as const
@@ -135,9 +114,6 @@ export const Proto3SInt64Type = {
                 return []
             },
             getDeepImportedTypes() {
-                return []
-            },
-            getDeepOptionalMessageFields() {
                 return []
             },
         }
@@ -155,9 +131,6 @@ export const Proto3Fixed32Type = {
             getDeepImportedTypes() {
                 return []
             },
-            getDeepOptionalMessageFields() {
-                return []
-            },
         }
     },
 } as const
@@ -171,9 +144,6 @@ export const Proto3Fixed64Type = {
                 return []
             },
             getDeepImportedTypes() {
-                return []
-            },
-            getDeepOptionalMessageFields() {
                 return []
             },
         }
@@ -191,9 +161,6 @@ export const Proto3SFixed32Type = {
             getDeepImportedTypes() {
                 return []
             },
-            getDeepOptionalMessageFields() {
-                return []
-            },
         }
     },
 } as const
@@ -207,9 +174,6 @@ export const Proto3SFixed64Type = {
                 return []
             },
             getDeepImportedTypes() {
-                return []
-            },
-            getDeepOptionalMessageFields() {
                 return []
             },
         }
@@ -227,9 +191,6 @@ export const Proto3DoubleType = {
             getDeepImportedTypes() {
                 return []
             },
-            getDeepOptionalMessageFields() {
-                return []
-            },
         }
     },
 } as const
@@ -245,9 +206,6 @@ export const Proto3FloatType = {
             getDeepImportedTypes() {
                 return []
             },
-            getDeepOptionalMessageFields() {
-                return []
-            },
         }
     },
 } as const
@@ -261,9 +219,6 @@ export const Proto3BytesType = {
                 return []
             },
             getDeepImportedTypes() {
-                return []
-            },
-            getDeepOptionalMessageFields() {
                 return []
             },
         }

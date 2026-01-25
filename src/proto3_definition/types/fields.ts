@@ -26,7 +26,6 @@ export type Proto3OptionalState =
 export type Proto3MessageField = Proto3BaseField & {
     getDeepMessages(): AnyProto3Message[]
     getDeepImportedTypes(): Proto3ImportedType[]
-    getDeepOptionalMessageFields(): Proto3MessageField[]
     index: number
     internalName: 'message_field'
     optionalState: Proto3OptionalState
@@ -49,9 +48,6 @@ export const Proto3MessageField = {
                         extension.getDeepImportedTypes()
                     ),
                 ].flat()
-            },
-            getDeepOptionalMessageFields() {
-                return [this, ...this.type.getDeepOptionalMessageFields()]
             },
             ...params,
         }
@@ -76,7 +72,6 @@ export const Proto3MessageOneOfFieldSubField = {
 export type Proto3MessageOneOfField = Proto3BaseField & {
     getDeepMessages(): AnyProto3Message[]
     getDeepImportedTypes(): Proto3ImportedType[]
-    getDeepOptionalMessageFields(): Proto3MessageField[]
     internalName: 'message_one_of_field'
     subFields: Proto3MessageOneOfFieldSubField[]
     extensions: Proto3Extension[]
@@ -92,11 +87,6 @@ export const Proto3MessageOneOfField = {
             },
             getDeepImportedTypes() {
                 return this.subFields.map((field) => field.getDeepImportedTypes()).flat()
-            },
-            getDeepOptionalMessageFields() {
-                return this.subFields
-                    .map((field) => field.getDeepOptionalMessageFields())
-                    .flat()
             },
             ...params,
         }
