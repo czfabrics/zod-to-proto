@@ -40,7 +40,8 @@
         "prepare:declaration": "tsc --project ./tsconfig.declaration.json",
         "prepare:imports": "tsc-alias --project tsconfig.declaration.json --outDir .dist",
         "build": "rimraf .dist && bun run prepare:index && bun run prepare:dist && bun run prepare:declaration && bun run prepare:imports",
-        "generate:readme": "readme generate --config .blueprint.json"
+        "generate:readme": "readme generate --config .blueprint.json",
+        "prepare": "bun run build"
     },
     "files": [
         "package.json",
