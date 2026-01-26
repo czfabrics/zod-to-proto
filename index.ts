@@ -45,6 +45,7 @@ export * from './src/proto3_processor/classes/proto3_service_processor';
 export * from './src/usage/helpers/zodToProto';
 export * from './src/usage/types/file';
 export * from './src/usage/types/functions';
+export * from './src/usage/types/message';
 export * from './src/usage/types/services';
 export * from './src/usage/types/settings';
 export * from './src/zod_converter/asserts/any_zod_message_field_type';
