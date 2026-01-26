@@ -7,10 +7,12 @@ export type Proto3RpcFunction = {
     internalName: 'rpc_function'
     getDeepMessages(): AnyProto3Message[]
     getDeepImportedTypes(): Proto3ImportedType[]
+    applyTypePrefix(): void
     /**
      * @example 'GetUsers'
      */
     name: string
+    typePrefix: string | undefined
     in: AnyProto3Message | Proto3ImportedType
     inStream: boolean
     out: AnyProto3Message | Proto3ImportedType
@@ -34,6 +36,17 @@ export const Proto3RpcFunction = {
                         extension.getDeepImportedTypes()
                     ),
                 ].flat()
+            },
+            applyTypePrefix() {
+                if (this.typePrefix === undefined) {
+                    return
+                }
+
+                const messages = this.getDeepMessages()
+
+                for (const message of messages) {
+                    message.name = `${this.typePrefix}${message.name}`
+                }
             },
             ...params,
         }

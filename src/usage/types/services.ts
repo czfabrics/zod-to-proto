@@ -8,7 +8,7 @@ export type Proto3RpcRawService = SetOptional<
     Omit<GetNewParams<Proto3RpcService>, 'functions'> & {
         functions: Proto3RpcRawFunction[]
     },
-    'extensions' | 'comments'
+    'typePrefix' | 'extensions' | 'comments'
 >
 
 export const Proto3RpcRawService = {
@@ -19,6 +19,7 @@ export const Proto3RpcRawService = {
 
         return Proto3RpcService.new({
             ...raw,
+            typePrefix: raw.typePrefix,
             functions: convertedFunctions,
             extensions: raw.extensions ?? [],
             comments: raw.comments ?? [],

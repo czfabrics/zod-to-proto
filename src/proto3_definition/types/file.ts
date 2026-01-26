@@ -8,6 +8,7 @@ export type Proto3File = {
     internalName: 'file'
     getDeepMessages(): AnyProto3Message[]
     getDeepImportedTypes(): Proto3ImportedType[]
+    applyTypePrefix(): void
     /**
      * @example 'services.authentification.v1'
      */
@@ -35,6 +36,9 @@ export const Proto3File = {
                         message.getDeepImportedTypes()
                     ),
                 ].flat()
+            },
+            applyTypePrefix() {
+                this.service?.applyTypePrefix()
             },
             ...params,
         }

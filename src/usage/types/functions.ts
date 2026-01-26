@@ -11,18 +11,22 @@ export type Proto3RpcRawFunction = SetOptional<
         in: WithMaybeZodPassthrough<AnyZodMessage>
         out: WithMaybeZodPassthrough<AnyZodMessage>
     },
-    'in' | 'inStream' | 'out' | 'outStream' | 'extensions' | 'comments'
+    'typePrefix' | 'in' | 'inStream' | 'out' | 'outStream' | 'extensions' | 'comments'
 >
 
 export const Proto3RpcRawFunction = {
     into: function (raw: Proto3RpcRawFunction, settings: UsageSettings) {
         const converter = new ZodMessageConverter(settings.transformers)
 
-        const convertedIn = raw.in && converter.convert(`${raw.name}Input`, raw.in)
-        const convertedOut = raw.out && converter.convert(`${raw.name}Output`, raw.out)
+        const inMessageName = raw.typePrefix ? `Input` : `${raw.name}Input`
+        const outMessageName = raw.typePrefix ? `Output` : `${raw.name}Output`
+
+        const convertedIn = raw.in && converter.convert(inMessageName, raw.in)
+        const convertedOut = raw.out && converter.convert(outMessageName, raw.out)
 
         return Proto3RpcFunction.new({
             ...raw,
+            typePrefix: raw.typePrefix,
             in: convertedIn ?? settings.protoVoidType,
             inStream: raw.inStream ?? false,
             out: convertedOut ?? settings.protoVoidType,

@@ -8,10 +8,12 @@ export type Proto3RpcService = {
     internalName: 'rpc_service'
     getDeepMessages(): AnyProto3Message[]
     getDeepImportedTypes(): Proto3ImportedType[]
+    applyTypePrefix(): void
     /**
      * @example 'UserService'
      */
     name: string
+    typePrefix: string | undefined
     functions: Proto3RpcFunction[]
     extensions: Proto3Extension[]
     comments: string[]
@@ -30,6 +32,21 @@ export const Proto3RpcService = {
                 return this.functions
                     .map((rpcFunction) => rpcFunction.getDeepImportedTypes())
                     .flat()
+            },
+            applyTypePrefix() {
+                for (const rpcFunction of this.functions) {
+                    rpcFunction.applyTypePrefix()
+                }
+
+                if (this.typePrefix === undefined) {
+                    return
+                }
+
+                const messages = this.getDeepMessages()
+
+                for (const message of messages) {
+                    message.name = `${this.typePrefix}${message.name}`
+                }
             },
             ...params,
         }

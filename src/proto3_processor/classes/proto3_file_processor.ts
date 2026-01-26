@@ -76,6 +76,8 @@ export class Proto3FileProcessor {
     }
 
     public process(file: Proto3File): FileContentMatter {
+        file.applyTypePrefix()
+
         const content = fileContentMatter()
         const importedTypes = file.getDeepImportedTypes()
         const importContent = this.getImportContent(importedTypes)
