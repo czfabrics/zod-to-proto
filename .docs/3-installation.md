@@ -3,7 +3,7 @@
 ### Bun
 
 ```sh
-bun install {{ pkg.name }}@{{ pkg.version }}
+bun add {{ pkg.name }}@{{ pkg.version }}
 ```
 
 ### NPM

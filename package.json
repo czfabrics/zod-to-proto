@@ -1,6 +1,6 @@
 {
     "name": "@czlab/zod-to-proto",
-    "version": "0.1.0-beta.0",
+    "version": "0.1.0-beta.1",
     "description": "A TypeScript library for seamlessly converting Zod schemas into Protocol Buffers v3 definitions, with built-in support for generating RPC services and functions from structured object definitions.",
     "keywords": [
         "zod",
@@ -41,7 +41,7 @@
         "prepare:imports": "tsc-alias --project tsconfig.declaration.json --outDir .dist",
         "build": "rimraf .dist && bun run prepare:index && bun run prepare:dist && bun run prepare:declaration && bun run prepare:imports",
         "generate:readme": "readme generate --config .blueprint.json",
-        "prepare": "bun run build"
+        "prepare": "bun run generate:readme && bun run build"
     },
     "files": [
         "package.json",
