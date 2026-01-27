@@ -13,6 +13,8 @@ export * from './src/plugin/classes/zod_deprecated_enum_conversion_transformer';
 export * from './src/plugin/classes/zod_deprecated_field_conversion_transformer';
 export * from './src/plugin/classes/zod_deprecated_message_conversion_transformer';
 export * from './src/plugin/classes/zod_deprecated_one_of_field_conversion_transformer';
+export * from './src/plugin/classes/zod_enum_name_conversion_transformer';
+export * from './src/plugin/classes/zod_message_name_conversion_transformer';
 export * from './src/plugin/classes/zod_required_field_conversion_transformer';
 export * from './src/plugin/classes/zod_required_one_of_field_conversion_transformer';
 export * from './src/plugin/helpers/get_full_transformers';
