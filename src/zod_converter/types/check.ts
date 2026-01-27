@@ -230,9 +230,10 @@ type TwoChildConditions = readonly [
 type ChildArrayConditions = readonly [
     {
         parent: SomeZodUnion
-        childConditions: readonly [
-            SomeZodObject<{ $case: ZodLiteral<string>; value: $ZodTypeDiscriminable }>,
-        ]
+        childConditions: SomeZodObject<{
+            $case: ZodLiteral<string>
+            value: $ZodTypeDiscriminable
+        }>[]
         error: TypeDebuggingError<`You should use 'pz.oneOfUnion()' to make an union`>
     },
 ]
