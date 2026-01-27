@@ -49,13 +49,13 @@
         "LICENSE",
         ".dist/**/*"
     ],
-    "types": "./.dist/index.d.cts",
+    "types": "./.dist/index.d.ts",
     "module": "./.dist/index.mjs",
     "main": "./.dist/index.cjs",
     "exports": {
         "./package.json": "./package.json",
         ".": {
-            "types": "./.dist/index.d.cts",
+            "types": "./.dist/index.d.ts",
             "import": "./.dist/index.mjs",
             "require": "./.dist/index.cjs"
         }
