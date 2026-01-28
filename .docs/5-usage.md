@@ -39,6 +39,11 @@ message User {
     (buf.validate.field).required = true
   ];
 }
+
+enum Role {
+  ADMIN = 0;
+  VIEWER = 1;
+}
 ```
 
 ### gRPC Service

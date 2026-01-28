@@ -133,19 +133,19 @@ A TypeScript library for seamlessly converting Zod schemas into Protocol Buffers
 ### Bun
 
 ```sh
-bun add @czlab/zod-to-proto@0.1.0-beta.4
+bun add @czlab/zod-to-proto@0.1.0-beta.5
 ```
 
 ### NPM
 
 ```sh
-npm install @czlab/zod-to-proto@0.1.0-beta.4
+npm install @czlab/zod-to-proto@0.1.0-beta.5
 ```
 
 ### Yarn
 
 ```sh
-yarn add @czlab/zod-to-proto@0.1.0-beta.4
+yarn add @czlab/zod-to-proto@0.1.0-beta.5
 ```
 
 
@@ -189,6 +189,11 @@ message User {
   Role role = 3 [
     (buf.validate.field).required = true
   ];
+}
+
+enum Role {
+  ADMIN = 0;
+  VIEWER = 1;
 }
 ```
 
@@ -235,6 +240,11 @@ message User {
   Role role = 3 [
     (buf.validate.field).required = true
   ];
+}
+
+enum Role {
+  ADMIN = 0;
+  VIEWER = 1;
 }
 ```
 
