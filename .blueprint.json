@@ -9,7 +9,6 @@
     },
     "line": "dark",
     "ids": {
-        "github": "czyrok/czlab.zod-to-proto",
         "npm": "@czlab/zod-to-proto"
     }
 }
