@@ -233,8 +233,7 @@ enum AuthentificationPackageUserService2GetUsersUserRole {
 You can safely check if your schema is compatible. It will trigger a TypeScript error. Note that deeper schemas may slow down the TSC compiler.
 
 ```ts
-import { zodToProto } from '{{ pkg.name }}'
-import { Proto3RpcRawMessage } from '#usage/types/message'
+import { zodToProto, safeZodMessage } from '{{ pkg.name }}'
 import z from 'zod'
 
 const User = z.object({
@@ -248,14 +247,29 @@ const result = zodToProto({
     packageName: 'services.authentification.v1',
     services: [],
     unscopedMessages: {
-        user: Proto3RpcRawMessage.safe(User), // => No TS error because it's compatible
-        user2: Proto3RpcRawMessage.safe(
+        user: safeZodMessage(User), // => No TS error because it's compatible
+        user2: safeZodMessage(
             z.object({
                 createdAt: z.date(),
             }) // => TypeDebuggingError<"This Zod type 'date' is not supported">
         ),
     },
 })
+```
+
+_Note that you can utilize the type behind the safeZodMessage method in your own functions._
+
+**Example of usage:**
+
+```ts
+import { CheckZodSchemaCompatibility } from '{{ pkg.name }}'
+import { SomeType } from 'zod/v4/core'
+
+export const safeZodMessage = function <const T extends SomeType>(
+    schema: CheckZodSchemaCompatibility<T>
+) {
+    return schema
+}
 ```
 
 ### Extension
