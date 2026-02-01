@@ -9,11 +9,12 @@ export type Proto3File = {
     getDeepMessages(): AnyProto3Message[]
     getDeepImportedTypes(): Proto3ImportedType[]
     applyTypePrefix(): void
+    syntax: 'proto3'
     /**
      * @example 'services.authentification.v1'
      */
     packageName: string
-    syntax: 'proto3'
+    typePrefix: string | undefined
     services: Proto3RpcService[]
     unscopedMessages: AnyProto3Message[]
     extensions: Proto3Extension[]
@@ -40,6 +41,20 @@ export const Proto3File = {
             applyTypePrefix() {
                 for (const service of this.services) {
                     service.applyTypePrefix()
+                }
+
+                if (this.typePrefix === undefined) {
+                    return
+                }
+
+                const messages = this.getDeepMessages()
+
+                for (const message of messages) {
+                    message.name = `${this.typePrefix}${message.name}`
+                }
+
+                for (const service of this.services) {
+                    service.name = `${this.typePrefix}${service.name}`
                 }
             },
             ...params,

@@ -14,7 +14,7 @@ export type Proto3RawFile = SetOptional<
         services: Proto3RpcRawService[]
         unscopedMessages: Record<string, WithMaybeZodPassthrough<AnyZodMessage>>
     },
-    'syntax' | 'unscopedMessages' | 'extensions'
+    'syntax' | 'typePrefix' | 'unscopedMessages' | 'extensions'
 >
 
 export const Proto3RawFile = {
@@ -37,6 +37,7 @@ export const Proto3RawFile = {
         return Proto3File.new({
             ...raw,
             syntax: raw.syntax ?? 'proto3',
+            typePrefix: raw.typePrefix,
             services: convertedServices,
             unscopedMessages: convertedMessages,
             extensions: raw.extensions ?? [],

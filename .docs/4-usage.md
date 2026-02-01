@@ -67,7 +67,7 @@ const result = zodToProto({
             name: 'UserService',
             functions: [
                 {
-                    name: 'getUsers',
+                    name: 'GetUsers',
                     in: undefined,
                     inStream: false,
                     out: z.object({
@@ -92,7 +92,7 @@ import "buf/validate/validate.proto";
 package services.authentification.v1;
 
 service UserService {
-  rpc getUsers(google.protobuf.Empty) returns (stream GetUsersOutput) {}
+  rpc GetUsers(google.protobuf.Empty) returns (stream GetUsersOutput) {}
 }
 
 message GetUsersOutput {
@@ -112,6 +112,117 @@ message User {
 }
 
 enum Role {
+  ADMIN = 0;
+  VIEWER = 1;
+}
+```
+
+### Type prefix
+
+Three levels of type prefix: file, service, function.
+
+```ts
+import { zodToProto } from '{{ pkg.name }}'
+import z from 'zod'
+
+const User = z.object({
+    id: z.int64(),
+    fullName: z.string().optional(),
+    role: z.enum(['ADMIN', 'VIEWER']),
+})
+
+const result = zodToProto({
+    syntax: 'proto3',
+    packageName: 'services.authentification.v1',
+    typePrefix: 'AuthentificationPackage', // First level prefix
+    services: [
+        {
+            name: 'UserService',
+            typePrefix: 'UserService', // Second level prefix
+            functions: [
+                {
+                    name: 'GetUsers',
+                    typePrefix: 'GetUsers', // Third level prefix
+                    out: z.object({
+                        users: z.array(User),
+                    }),
+                },
+            ],
+        },
+        {
+            name: 'UserService2',
+            typePrefix: 'UserService2',
+            functions: [
+                {
+                    name: 'GetUsers',
+                    typePrefix: 'GetUsers',
+                    out: z.object({
+                        users: z.array(User),
+                    }),
+                },
+            ],
+        },
+    ],
+})
+```
+
+**Result:**
+
+```proto
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+import "buf/validate/validate.proto";
+
+package services.authentification.v1;
+
+service AuthentificationPackageUserService {
+  rpc GetUsers(google.protobuf.Empty) returns (AuthentificationPackageUserServiceGetUsersOutput) {}
+}
+
+service AuthentificationPackageUserService2 {
+  rpc GetUsers(google.protobuf.Empty) returns (AuthentificationPackageUserService2GetUsersOutput) {}
+}
+
+// AuthentificationPackage -> UserService -> GetUsers
+message AuthentificationPackageUserServiceGetUsersOutput {
+  repeated AuthentificationPackageUserServiceGetUsersUser users = 1 [
+    (buf.validate.field).required = true
+  ];
+}
+
+message AuthentificationPackageUserServiceGetUsersUser {
+  int64 id = 1 [
+    (buf.validate.field).required = true
+  ];
+  optional string full_name = 2;
+  AuthentificationPackageUserServiceGetUsersUserRole role = 3 [
+    (buf.validate.field).required = true
+  ];
+}
+
+enum AuthentificationPackageUserServiceGetUsersUserRole {
+  ADMIN = 0;
+  VIEWER = 1;
+}
+
+message AuthentificationPackageUserService2GetUsersOutput {
+  repeated AuthentificationPackageUserService2GetUsersUser users = 1 [
+    (buf.validate.field).required = true
+  ];
+}
+
+message AuthentificationPackageUserService2GetUsersUser {
+  int64 id = 1 [
+    (buf.validate.field).required = true
+  ];
+  optional string full_name = 2;
+  AuthentificationPackageUserService2GetUsersUserRole role = 3 [
+    (buf.validate.field).required = true
+  ];
+}
+
+enum AuthentificationPackageUserService2GetUsersUserRole {
   ADMIN = 0;
   VIEWER = 1;
 }
@@ -167,7 +278,7 @@ const result = zodToProto({
             name: 'UserService',
             functions: [
                 {
-                    name: 'getUsers',
+                    name: 'GetUsers',
                     out: z.object({
                         users: z.array(User),
                     }),
@@ -202,7 +313,7 @@ package services.authentification.v1;
 
 service UserService {
   option deprecated = true;
-  rpc getUsers(google.protobuf.Empty) returns (stream GetUsersOutput) {
+  rpc GetUsers(google.protobuf.Empty) returns (stream GetUsersOutput) {
     option (google.api.http).get = "/users";
   }
 }
