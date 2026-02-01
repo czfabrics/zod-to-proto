@@ -15,6 +15,7 @@ const User = z.object({
 const result = zodToProto({
     syntax: 'proto3',
     packageName: 'services.authentification.v1',
+    services: [],
     unscopedMessages: {
         user: User,
     },
@@ -61,20 +62,22 @@ const User = z.object({
 const result = zodToProto({
     syntax: 'proto3',
     packageName: 'services.authentification.v1',
-    service: {
-        name: 'UserService',
-        functions: [
-            {
-                name: 'getUsers',
-                in: undefined,
-                inStream: false,
-                out: z.object({
-                    users: z.array(User),
-                }),
-                outStream: true,
-            },
-        ],
-    },
+    services: [
+        {
+            name: 'UserService',
+            functions: [
+                {
+                    name: 'getUsers',
+                    in: undefined,
+                    inStream: false,
+                    out: z.object({
+                        users: z.array(User),
+                    }),
+                    outStream: true,
+                },
+            ],
+        },
+    ],
 })
 ```
 
@@ -132,6 +135,7 @@ const User = z.object({
 const result = zodToProto({
     syntax: 'proto3',
     packageName: 'services.authentification.v1',
+    services: [],
     unscopedMessages: {
         user: Proto3RpcRawMessage.safe(User), // => No TS error because it's compatible
         user2: Proto3RpcRawMessage.safe(
@@ -158,28 +162,30 @@ const User = z.object({
 const result = zodToProto({
     syntax: 'proto3',
     packageName: 'services.authentification.v1',
-    service: {
-        name: 'UserService',
-        functions: [
-            {
-                name: 'getUsers',
-                out: z.object({
-                    users: z.array(User),
-                }),
-                outStream: true,
-                extensions: [
-                    //// google.api.http option for gRPC restful gateway
-                    Proto3HttpAnnotation.useExtension({
-                        get: '/users',
+    services: [
+        {
+            name: 'UserService',
+            functions: [
+                {
+                    name: 'getUsers',
+                    out: z.object({
+                        users: z.array(User),
                     }),
-                ],
-            },
-        ],
-        extensions: [
-            //// Global option
-            Proto3Deprecated.useExtension(true),
-        ],
-    },
+                    outStream: true,
+                    extensions: [
+                        //// google.api.http option for gRPC restful gateway
+                        Proto3HttpAnnotation.useExtension({
+                            get: '/users',
+                        }),
+                    ],
+                },
+            ],
+            extensions: [
+                //// Global option
+                Proto3Deprecated.useExtension(true),
+            ],
+        },
+    ],
 })
 ```
 

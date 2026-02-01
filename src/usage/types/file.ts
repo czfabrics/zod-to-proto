@@ -10,17 +10,18 @@ import { pascalCase } from 'change-case'
 import type { SetOptional } from 'type-fest'
 
 export type Proto3RawFile = SetOptional<
-    Omit<GetNewParams<Proto3File>, 'service' | 'unscopedMessages'> & {
-        service: Proto3RpcRawService
+    Omit<GetNewParams<Proto3File>, 'services' | 'unscopedMessages'> & {
+        services: Proto3RpcRawService[]
         unscopedMessages: Record<string, WithMaybeZodPassthrough<AnyZodMessage>>
     },
-    'syntax' | 'service' | 'unscopedMessages' | 'extensions'
+    'syntax' | 'unscopedMessages' | 'extensions'
 >
 
 export const Proto3RawFile = {
     into: function (raw: Proto3RawFile, settings: UsageSettings) {
-        const convertedService =
-            raw.service && Proto3RpcRawService.into(raw.service, settings)
+        const convertedServices = raw.services.map((rawService) => {
+            return Proto3RpcRawService.into(rawService, settings)
+        })
 
         raw.unscopedMessages ??= {}
 
@@ -36,7 +37,7 @@ export const Proto3RawFile = {
         return Proto3File.new({
             ...raw,
             syntax: raw.syntax ?? 'proto3',
-            service: convertedService,
+            services: convertedServices,
             unscopedMessages: convertedMessages,
             extensions: raw.extensions ?? [],
         })

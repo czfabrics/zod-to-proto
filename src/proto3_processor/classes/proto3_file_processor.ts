@@ -47,11 +47,21 @@ export class Proto3FileProcessor {
         return contents
     }
 
-    private getServiceContent(service: Proto3RpcService): FileContentMatter {
+    private getServiceContent(services: Proto3RpcService[]): FileContentMatter {
         const content = fileContentMatter()
         const processor = new Proto3ServiceProcessor(content)
 
-        processor.process(service)
+        let isFirst = true
+
+        for (const service of services) {
+            if (!isFirst) {
+                content.endLine().endLine()
+            }
+
+            processor.process(service)
+
+            isFirst = false
+        }
 
         return content
     }
@@ -82,9 +92,7 @@ export class Proto3FileProcessor {
         const importedTypes = file.getDeepImportedTypes()
         const importContent = this.getImportContent(importedTypes)
         const extensionContents = this.getExtensionContents(file.extensions)
-        const serviceContent = file.service
-            ? this.getServiceContent(file.service)
-            : fileContentMatter()
+        const serviceContent = this.getServiceContent(file.services)
         const messages = file.getDeepMessages()
         const messageContent = this.getMessageContent(messages)
 
