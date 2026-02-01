@@ -13,11 +13,6 @@
 
 * [Overview](#overview)
 	* [Key Features](#key-features)
-* [Compatibility](#compatibility)
-	* [Zod](#zod)
-	* [Proto3](#proto3)
-	* [Protovalidate](#protovalidate)
-	* [Google](#google)
 * [Installation](#installation)
 	* [Bun](#bun)
 	* [NPM](#npm)
@@ -28,6 +23,11 @@
 	* [gRPC Service](#grpc-service)
 	* [Enforced typecheck](#enforced-typecheck)
 	* [Extension](#extension)
+* [Compatibility](#compatibility)
+	* [Zod](#zod)
+	* [Proto3](#proto3)
+	* [Protovalidate](#protovalidate)
+	* [Google](#google)
 * [Plugin](#plugin)
 	* [Custom Type](#custom-type)
 	* [Custom Extension](#custom-extension)
@@ -44,86 +44,11 @@ A TypeScript library for seamlessly converting Zod schemas into Protocol Buffers
 
 ### Key Features
 
-- **Type-safe structured objects**: Write your Protobuf definitions in a TypeScript-first way and convert them into proto3 files.
-- **gRPC support**: Define your gRPC services in a TypeScript-first way.
 - **Zod support**: Write your Zod schemas and convert them to Protobuf definitions.
+- **Typesafe Zod conversion**: If it throws a TypeScript error, it’s not supported. Simple as that.
+- **gRPC support**: Define your gRPC services in a TypeScript-first way.
+- **Type-safe structured objects**: Write your Protobuf definitions in a TypeScript-first way and convert them into proto3 files.
 - **Flexible Zod conversion**: Write custom transformers to modify Protobuf definitions after conversion.
-
-
-[![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/dark.png)](#compatibility)
-
-## Compatibility
-
-### Zod
-
-| Zod Type                | Interpreted as                                                     | Notice                                                                                                                                                               |
-| ----------------------- | ------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Primitif Types**      |                                                                    |                                                                                                                                                                      |
-| `ZodString`             | `string`                                                           |                                                                                                                                                                      |
-| `ZodStringFormat`       | `string`                                                           | Format is ignored, but can be handled by a transformer.                                                                                                              |
-| `ZodLiteral`            | `string`                                                           | Value is ignored, but can be handled by a transformer.                                                                                                               |
-| `ZodTemplateLiteral`    | `string`                                                           | Template is ignored, but can be handled by a transformer.                                                                                                            |
-| `ZodNumber`             | `double`                                                           |                                                                                                                                                                      |
-| `ZodNumberFormat`       | `int32`<br>`float32`<br>`float64`<br>`uint32`                      | The conversion result depends on the format of the `ZodNumberFormat`.<br>(Format `safeint` is interpreted as `int64`)                                                |
-| `ZodBigInt`             | `int64`<br>`uint64`                                                | Depends on the format.                                                                                                                                               |
-| `ZodBoolean`            | `bool`                                                             |                                                                                                                                                                      |
-| ~~`ZodDate`~~           | Not handled                                                        | Use a `ZodCodec` with a `string` input and convert it to a JS `Date` instead.                                                                                        |
-| **Structure Types**     |                                                                    |                                                                                                                                                                      |
-| `ZodObject`             | `message Some {}`                                                  |                                                                                                                                                                      |
-| `ZodEnum`               | `enum Some {}`                                                     |                                                                                                                                                                      |
-| `ZodRecord`             | `map<{key type}, {value type}>`                                    | Not all Zod types are supported due to Proto limitations.<br>Keys can be an integer or a string.<br>Values can be any types except array or another map.             |
-| ~~`ZodMap`~~            | Not handled                                                        | Use `ZodRecord` instead.                                                                                                                                             |
-| `ZodArray`              | `repeated {}`                                                      | Not all Zod types are supported due to Proto limitations.<br>Elements can be any types except map.                                                                   |
-| `ZodSet`                | `repeated {}`                                                      | Not all Zod types are supported due to Proto limitations.<br>Elements can be any types except map.                                                                   |
-| **Other Types**         |                                                                    |                                                                                                                                                                      |
-| `ZodOptional`           | `optional {some_type} my_field = 1`                                | Internally uses Zod's `safeParse` to determine if the schema is optional.                                                                                            |
-| `ZodNonOptional`        | `{some_type} my_field = 1 [(buf.validate.field).required = true];` | Internally uses Zod's `safeParse` to determine if the schema is optional.                                                                                            |
-| `ZodIntersection`       | `message Some {}`                                                  | **Only works with `ZodObject`**<br>Uses the left `ZodObject` to extend the right one.                                                                                |
-| `ZodPipe`               |                                                                    | The `ZodPipe` is transparent—it just passes through the input value.                                                                                                 |
-| `ZodCodec`              |                                                                    | Same as `ZodPipe`.                                                                                                                                                   |
-| `ZodTransform`          |                                                                    | Same as `ZodPipe`.                                                                                                                                                   |
-| `ZodPrefault`           |                                                                    | Same as `ZodPipe`.                                                                                                                                                   |
-| `ZodLazy`               |                                                                    | Same as `ZodPipe`.                                                                                                                                                   |
-| `ZodCatch`              |                                                                    | Same as `ZodPipe`.                                                                                                                                                   |
-| `ZodReadonly`           |                                                                    | Same as `ZodPipe`.<br>                                                                                                                                               |
-| `ZodDefault`            |                                                                    | Same as `ZodPipe`.<br>                                                                                                                                               |
-| **Special Types**       |                                                                    |                                                                                                                                                                      |
-| `ZodDiscriminatedUnion` | `oneof my_field {}`                                                | **Not all cases are handled; use `pz.oneOfUnion()`.**<br>This method builds a `ZodDiscriminatedUnion` that matches the `ts-proto` feature `oneof=unions-value` type. |
-| ~~`ZodUnion`~~          | Not handled                                                        | Use `ZodOneOfUnion` instead.                                                                                                                                         |
-
-**Note:** Other Zod types are not handled.
-
-### Proto3
-
-| Feature                           | Type                                                                                                                                                                                                                                                                                                                                   |
-| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| File                              | `Proto3File`                                                                                                                                                                                                                                                                                                                           |
-| Imports                           | `Proto3ImportedType`                                                                                                                                                                                                                                                                                                                   |
-| RPC service                       | `Proto3RpcService`                                                                                                                                                                                                                                                                                                                     |
-| RPC function                      | `Proto3RpcFunction`                                                                                                                                                                                                                                                                                                                    |
-| Message                           | `Proto3Message`                                                                                                                                                                                                                                                                                                                        |
-| Basic field                       | `Proto3MessageField`                                                                                                                                                                                                                                                                                                                   |
-| OneOf field                       | `Proto3MessageOneOfField`                                                                                                                                                                                                                                                                                                              |
-| Enum                              | `Proto3Enum`                                                                                                                                                                                                                                                                                                                           |
-| Enum field                        | `Proto3EnumField`                                                                                                                                                                                                                                                                                                                      |
-| Scalar type                       | `Proto3StringType`<br>`Proto3BoolType`<br>`Proto3Int32Type`<br>`Proto3Int64Type`<br>`Proto3UInt32Type`<br>`Proto3UInt64Type`<br>`Proto3SInt32Type`<br>`Proto3SInt64Type`<br>`Proto3Fixed32Type`<br>`Proto3Fixed64Type`<br>`Proto3SFixed32Type`<br>`Proto3SFixed64Type`<br>`Proto3DoubleType`<br>`Proto3FloatType`<br>`Proto3BytesType` |
-| Repeated                          | `Proto3RepeatedType`                                                                                                                                                                                                                                                                                                                   |
-| Map                               | `Proto3MapType`                                                                                                                                                                                                                                                                                                                        |
-| Global option (like `deprecated`) | `Proto3GlobalType`                                                                                                                                                                                                                                                                                                                     |
-
-### Protovalidate
-
-| Annotation           | Type                            | Notice                                    |
-| -------------------- | ------------------------------- | ----------------------------------------- |
-| `buf.validate.field` | `Proto3ValidateFieldAnnotation` | Only the `required` parameter is handled. |
-| `buf.validate.oneof` | `Proto3ValidateFieldAnnotation` | Only the `required` parameter is handled. |
-
-### Google
-
-| Annotation/Type         | Type                   |
-| ----------------------- | ---------------------- |
-| `google.api.http`       | `Proto3HttpAnnotation` |
-| `google.protobuf.Empty` | `Proto3Empty`          |
 
 
 [![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/dark.png)](#installation)
@@ -424,6 +349,82 @@ enum Role {
   VIEWER = 1;
 }
 ```
+
+
+[![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/dark.png)](#compatibility)
+
+## Compatibility
+
+### Zod
+
+| Zod Type                | Interpreted as                                                     | Notice                                                                                                                                                               |
+| ----------------------- | ------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Primitif Types**      |                                                                    |                                                                                                                                                                      |
+| `ZodString`             | `string`                                                           |                                                                                                                                                                      |
+| `ZodStringFormat`       | `string`                                                           | Format is ignored, but can be handled by a transformer.                                                                                                              |
+| `ZodLiteral`            | `string`                                                           | Value is ignored, but can be handled by a transformer.                                                                                                               |
+| `ZodTemplateLiteral`    | `string`                                                           | Template is ignored, but can be handled by a transformer.                                                                                                            |
+| `ZodNumber`             | `double`                                                           |                                                                                                                                                                      |
+| `ZodNumberFormat`       | `int32`<br>`float32`<br>`float64`<br>`uint32`                      | The conversion result depends on the format of the `ZodNumberFormat`.<br>(Format `safeint` is interpreted as `int64`)                                                |
+| `ZodBigInt`             | `int64`<br>`uint64`                                                | Depends on the format.                                                                                                                                               |
+| `ZodBoolean`            | `bool`                                                             |                                                                                                                                                                      |
+| ~~`ZodDate`~~           | Not handled                                                        | Use a `ZodCodec` with a `string` input and convert it to a JS `Date` instead.                                                                                        |
+| **Structure Types**     |                                                                    |                                                                                                                                                                      |
+| `ZodObject`             | `message Some {}`                                                  |                                                                                                                                                                      |
+| `ZodEnum`               | `enum Some {}`                                                     |                                                                                                                                                                      |
+| `ZodRecord`             | `map<{key type}, {value type}>`                                    | Not all Zod types are supported due to Proto limitations.<br>Keys can be an integer or a string.<br>Values can be any types except array or another map.             |
+| ~~`ZodMap`~~            | Not handled                                                        | Use `ZodRecord` instead.                                                                                                                                             |
+| `ZodArray`              | `repeated {}`                                                      | Not all Zod types are supported due to Proto limitations.<br>Elements can be any types except map.                                                                   |
+| `ZodSet`                | `repeated {}`                                                      | Not all Zod types are supported due to Proto limitations.<br>Elements can be any types except map.                                                                   |
+| **Other Types**         |                                                                    |                                                                                                                                                                      |
+| `ZodOptional`           | `optional {some_type} my_field = 1`                                | Internally uses Zod's `safeParse` to determine if the schema is optional.                                                                                            |
+| `ZodNonOptional`        | `{some_type} my_field = 1 [(buf.validate.field).required = true];` | Internally uses Zod's `safeParse` to determine if the schema is optional.                                                                                            |
+| `ZodIntersection`       | `message Some {}`                                                  | **Only works with `ZodObject`**<br>Uses the left `ZodObject` to extend the right one.                                                                                |
+| `ZodPipe`               |                                                                    | The `ZodPipe` is transparent—it just passes through the input value.                                                                                                 |
+| `ZodCodec`              |                                                                    | Same as `ZodPipe`.                                                                                                                                                   |
+| `ZodTransform`          |                                                                    | Same as `ZodPipe`.                                                                                                                                                   |
+| `ZodPrefault`           |                                                                    | Same as `ZodPipe`.                                                                                                                                                   |
+| `ZodLazy`               |                                                                    | Same as `ZodPipe`.                                                                                                                                                   |
+| `ZodCatch`              |                                                                    | Same as `ZodPipe`.                                                                                                                                                   |
+| `ZodReadonly`           |                                                                    | Same as `ZodPipe`.<br>                                                                                                                                               |
+| `ZodDefault`            |                                                                    | Same as `ZodPipe`.<br>                                                                                                                                               |
+| **Special Types**       |                                                                    |                                                                                                                                                                      |
+| `ZodDiscriminatedUnion` | `oneof my_field {}`                                                | **Not all cases are handled; use `pz.oneOfUnion()`.**<br>This method builds a `ZodDiscriminatedUnion` that matches the `ts-proto` feature `oneof=unions-value` type. |
+| ~~`ZodUnion`~~          | Not handled                                                        | Use `ZodOneOfUnion` instead.                                                                                                                                         |
+
+**Note:** Other Zod types are not handled.
+
+### Proto3
+
+| Feature                           | Type                                                                                                                                                                                                                                                                                                                                   |
+| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| File                              | `Proto3File`                                                                                                                                                                                                                                                                                                                           |
+| Imports                           | `Proto3ImportedType`                                                                                                                                                                                                                                                                                                                   |
+| RPC service                       | `Proto3RpcService`                                                                                                                                                                                                                                                                                                                     |
+| RPC function                      | `Proto3RpcFunction`                                                                                                                                                                                                                                                                                                                    |
+| Message                           | `Proto3Message`                                                                                                                                                                                                                                                                                                                        |
+| Basic field                       | `Proto3MessageField`                                                                                                                                                                                                                                                                                                                   |
+| OneOf field                       | `Proto3MessageOneOfField`                                                                                                                                                                                                                                                                                                              |
+| Enum                              | `Proto3Enum`                                                                                                                                                                                                                                                                                                                           |
+| Enum field                        | `Proto3EnumField`                                                                                                                                                                                                                                                                                                                      |
+| Scalar type                       | `Proto3StringType`<br>`Proto3BoolType`<br>`Proto3Int32Type`<br>`Proto3Int64Type`<br>`Proto3UInt32Type`<br>`Proto3UInt64Type`<br>`Proto3SInt32Type`<br>`Proto3SInt64Type`<br>`Proto3Fixed32Type`<br>`Proto3Fixed64Type`<br>`Proto3SFixed32Type`<br>`Proto3SFixed64Type`<br>`Proto3DoubleType`<br>`Proto3FloatType`<br>`Proto3BytesType` |
+| Repeated                          | `Proto3RepeatedType`                                                                                                                                                                                                                                                                                                                   |
+| Map                               | `Proto3MapType`                                                                                                                                                                                                                                                                                                                        |
+| Global option (like `deprecated`) | `Proto3GlobalType`                                                                                                                                                                                                                                                                                                                     |
+
+### Protovalidate
+
+| Annotation           | Type                            | Notice                                    |
+| -------------------- | ------------------------------- | ----------------------------------------- |
+| `buf.validate.field` | `Proto3ValidateFieldAnnotation` | Only the `required` parameter is handled. |
+| `buf.validate.oneof` | `Proto3ValidateFieldAnnotation` | Only the `required` parameter is handled. |
+
+### Google
+
+| Annotation/Type         | Type                   |
+| ----------------------- | ---------------------- |
+| `google.api.http`       | `Proto3HttpAnnotation` |
+| `google.protobuf.Empty` | `Proto3Empty`          |
 
 
 [![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/dark.png)](#plugin)
