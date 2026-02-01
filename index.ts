@@ -44,6 +44,7 @@ export * from './src/proto3_processor/classes/proto3_import_processor';
 export * from './src/proto3_processor/classes/proto3_message_processor';
 export * from './src/proto3_processor/classes/proto3_record_extension_processor';
 export * from './src/proto3_processor/classes/proto3_service_processor';
+export * from './src/usage/helpers/safeZodMessage';
 export * from './src/usage/helpers/zodToProto';
 export * from './src/usage/types/file';
 export * from './src/usage/types/functions';
