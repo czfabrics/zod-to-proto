@@ -1,3 +1,4 @@
+import type { DeepReadOnly } from '#proto3_definition/types/deep_read_only'
 import type { GetNewParams } from '#proto3_definition/types/get_new_params'
 import type { AnyProto3Message } from '#proto3_definition/types/messages'
 import type { Proto3ScalarType } from '#proto3_definition/types/scalars'
@@ -31,9 +32,11 @@ export type Proto3DynamicSizeType = {
 }[keyof Proto3DynamicSizeTypes]
 
 export const Proto3MapType = {
-    new: (
-        params: GetNewParams<Extract<Proto3DynamicSizeType, { internalName: 'map' }>>
-    ): Proto3DynamicSizeType => {
+    new: function <
+        const TParams extends DeepReadOnly<
+            GetNewParams<Extract<Proto3DynamicSizeType, { internalName: 'map' }>>
+        >,
+    >(params: TParams) {
         return {
             internalName: 'map',
             getDeepMessages() {
@@ -43,22 +46,25 @@ export const Proto3MapType = {
                 return this.value.getDeepImportedTypes()
             },
             ...params,
-        }
+        } as const satisfies DeepReadOnly<Proto3DynamicSizeType>
     },
 } as const
 
 export const Proto3RepeatedType = {
-    new: (
-        params: GetNewParams<Extract<Proto3DynamicSizeType, { internalName: 'repeated' }>>
-    ): Proto3DynamicSizeType => {
+    new: function <
+        const TParams extends DeepReadOnly<
+            GetNewParams<Extract<Proto3DynamicSizeType, { internalName: 'repeated' }>>
+        >,
+    >(params: TParams) {
         return {
             internalName: 'repeated',
             getDeepMessages() {
-                let currentItem:
+                let currentItem: DeepReadOnly<
                     | AnyProto3Message
                     | Proto3ImportedType
                     | Proto3DynamicSizeType
-                    | Proto3ScalarType = this
+                    | Proto3ScalarType
+                > = this
 
                 while (currentItem.internalName === 'repeated') {
                     currentItem = currentItem.inner
@@ -67,11 +73,12 @@ export const Proto3RepeatedType = {
                 return currentItem.getDeepMessages()
             },
             getDeepImportedTypes() {
-                let currentItem:
+                let currentItem: DeepReadOnly<
                     | AnyProto3Message
                     | Proto3ImportedType
                     | Proto3DynamicSizeType
-                    | Proto3ScalarType = this
+                    | Proto3ScalarType
+                > = this
 
                 while (currentItem.internalName === 'repeated') {
                     currentItem = currentItem.inner
@@ -80,6 +87,6 @@ export const Proto3RepeatedType = {
                 return currentItem.getDeepImportedTypes()
             },
             ...params,
-        }
+        } as const satisfies DeepReadOnly<Proto3DynamicSizeType>
     },
 } as const

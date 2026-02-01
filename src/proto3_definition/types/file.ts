@@ -1,8 +1,9 @@
-import { Proto3Extension } from '#proto3_definition/types/extension'
-import { GetNewParams } from '#proto3_definition/types/get_new_params'
-import { AnyProto3Message } from '#proto3_definition/types/messages'
-import { Proto3RpcService } from '#proto3_definition/types/service'
-import { Proto3ImportedType } from '#proto3_definition/types/types'
+import type { DeepReadOnly } from '#proto3_definition/types/deep_read_only'
+import type { Proto3Extension } from '#proto3_definition/types/extension'
+import type { GetNewParams } from '#proto3_definition/types/get_new_params'
+import type { AnyProto3Message } from '#proto3_definition/types/messages'
+import type { Proto3RpcService } from '#proto3_definition/types/service'
+import type { Proto3ImportedType } from '#proto3_definition/types/types'
 
 export type Proto3File = {
     internalName: 'file'
@@ -21,7 +22,9 @@ export type Proto3File = {
 }
 
 export const Proto3File = {
-    new: (params: GetNewParams<Proto3File>): Proto3File => {
+    new: function <const TParams extends DeepReadOnly<GetNewParams<Proto3File>>>(
+        params: TParams
+    ) {
         return {
             internalName: 'file',
             getDeepMessages() {
@@ -71,6 +74,6 @@ export const Proto3File = {
                 }
             },
             ...params,
-        }
+        } as const satisfies DeepReadOnly<Proto3File>
     },
 } as const

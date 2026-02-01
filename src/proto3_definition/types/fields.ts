@@ -1,9 +1,10 @@
+import type { DeepReadOnly } from '#proto3_definition/types/deep_read_only'
 import type { Proto3DynamicSizeType } from '#proto3_definition/types/dynamic_size'
-import { Proto3Extension } from '#proto3_definition/types/extension'
+import type { Proto3Extension } from '#proto3_definition/types/extension'
 import type { GetNewParams } from '#proto3_definition/types/get_new_params'
-import { AnyProto3Message } from '#proto3_definition/types/messages'
+import type { AnyProto3Message } from '#proto3_definition/types/messages'
 import type { Proto3ScalarType } from '#proto3_definition/types/scalars'
-import { Proto3ImportedType } from '#proto3_definition/types/types'
+import type { Proto3ImportedType } from '#proto3_definition/types/types'
 
 export type Proto3BaseField = {
     key: string
@@ -35,7 +36,9 @@ export type Proto3MessageField = Proto3BaseField & {
 }
 
 export const Proto3MessageField = {
-    new: (params: GetNewParams<Proto3MessageField>): Proto3MessageField => {
+    new: function <const TParams extends DeepReadOnly<GetNewParams<Proto3MessageField>>>(
+        params: TParams
+    ) {
         return {
             internalName: 'message_field',
             getDeepMessages() {
@@ -50,7 +53,7 @@ export const Proto3MessageField = {
                 ].flat()
             },
             ...params,
-        }
+        } as const satisfies DeepReadOnly<Proto3MessageField>
     },
 } as const
 
@@ -59,13 +62,13 @@ export type Proto3MessageOneOfFieldSubField = Proto3MessageField & {
 }
 
 export const Proto3MessageOneOfFieldSubField = {
-    new: (
-        params: GetNewParams<Proto3MessageOneOfFieldSubField>
-    ): Proto3MessageOneOfFieldSubField => {
+    new: function <
+        const TParams extends DeepReadOnly<GetNewParams<Proto3MessageOneOfFieldSubField>>,
+    >(params: TParams) {
         return {
             ...Proto3MessageField.new(params),
             optionalState: 'NOT_NEEDED',
-        }
+        } as const satisfies DeepReadOnly<Proto3MessageOneOfFieldSubField>
     },
 } as const
 
@@ -79,7 +82,9 @@ export type Proto3MessageOneOfField = Proto3BaseField & {
 }
 
 export const Proto3MessageOneOfField = {
-    new: (params: GetNewParams<Proto3MessageOneOfField>): Proto3MessageOneOfField => {
+    new: function <
+        const TParams extends DeepReadOnly<GetNewParams<Proto3MessageOneOfField>>,
+    >(params: TParams) {
         return {
             internalName: 'message_one_of_field',
             getDeepMessages() {
@@ -89,7 +94,7 @@ export const Proto3MessageOneOfField = {
                 return this.subFields.map((field) => field.getDeepImportedTypes()).flat()
             },
             ...params,
-        }
+        } as const satisfies DeepReadOnly<Proto3MessageOneOfField>
     },
 } as const
 
@@ -101,11 +106,13 @@ export type Proto3EnumField = Proto3BaseField & {
 }
 
 export const Proto3EnumField = {
-    new: (params: GetNewParams<Proto3EnumField>): Proto3EnumField => {
+    new: function <const TParams extends DeepReadOnly<GetNewParams<Proto3EnumField>>>(
+        params: TParams
+    ) {
         return {
             internalName: 'enum_field',
             ...params,
-        }
+        } as const satisfies DeepReadOnly<Proto3EnumField>
     },
 } as const
 

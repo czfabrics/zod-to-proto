@@ -1,3 +1,4 @@
+import { DeepReadOnly } from '#proto3_definition/types/deep_read_only'
 import { GetAnyNewParams, GetNewParams } from '#proto3_definition/types/get_new_params'
 import { AnyProto3Message } from '#proto3_definition/types/messages'
 import { match } from 'ts-pattern'
@@ -10,7 +11,9 @@ export type Proto3GlobalType = {
 }
 
 export const Proto3GlobalType = {
-    new: <const TParams extends GetNewParams<Proto3GlobalType>>(params: TParams) => {
+    new: function <const TParams extends DeepReadOnly<GetNewParams<Proto3GlobalType>>>(
+        params: TParams
+    ) {
         return {
             internalName: 'global_type',
             getDeepMessages() {
@@ -20,7 +23,7 @@ export const Proto3GlobalType = {
                 return []
             },
             ...params,
-        } as const satisfies Proto3GlobalType
+        } as const satisfies DeepReadOnly<Proto3GlobalType>
     },
 } as const
 
@@ -33,7 +36,9 @@ export type Proto3ImportedType = {
 }
 
 export const Proto3ImportedType = {
-    new: <const TParams extends GetNewParams<Proto3ImportedType>>(params: TParams) => {
+    new: function <const TParams extends DeepReadOnly<GetNewParams<Proto3ImportedType>>>(
+        params: TParams
+    ) {
         return {
             internalName: 'imported_type',
             getDeepMessages() {
@@ -43,16 +48,18 @@ export const Proto3ImportedType = {
                 return [this]
             },
             ...params,
-        } as const satisfies Proto3ImportedType
+        } as const satisfies DeepReadOnly<Proto3ImportedType>
     },
 } as const
 
 export type AnyProto3Type = Proto3GlobalType | Proto3ImportedType
 
 export const AnyProto3Type = {
-    new: (
-        params: GetAnyNewParams<Proto3GlobalType> | GetAnyNewParams<Proto3ImportedType>
-    ) => {
+    new: function (
+        params:
+            | DeepReadOnly<GetAnyNewParams<Proto3GlobalType>>
+            | DeepReadOnly<GetAnyNewParams<Proto3ImportedType>>
+    ) {
         return match(params)
             .with({ internalName: 'global_type' }, (params) =>
                 Proto3GlobalType.new(params)

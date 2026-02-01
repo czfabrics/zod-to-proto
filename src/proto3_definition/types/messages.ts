@@ -1,11 +1,12 @@
 import { getRandomId } from '#core/helpers/get_random_id'
-import { Proto3Extension } from '#proto3_definition/types/extension'
+import type { DeepReadOnly } from '#proto3_definition/types/deep_read_only'
+import type { Proto3Extension } from '#proto3_definition/types/extension'
 import type {
     AnyProto3MessageField,
     Proto3EnumField,
 } from '#proto3_definition/types/fields'
 import type { GetNewParams } from '#proto3_definition/types/get_new_params'
-import { Proto3ImportedType } from '#proto3_definition/types/types'
+import type { Proto3ImportedType } from '#proto3_definition/types/types'
 
 export type Proto3Message = {
     id: string
@@ -24,6 +25,9 @@ export type Proto3Message = {
 
 export const Proto3Message = {
     new: (params: GetNewParams<Proto3Message>): Proto3Message => {
+    new: function <const TParams extends DeepReadOnly<GetNewParams<Proto3Message>>>(
+        params: TParams
+    ) {
         return {
             id: getRandomId(),
             internalName: 'message',
@@ -55,7 +59,7 @@ export const Proto3Message = {
                 return fieldsCount + 1
             },
             ...params,
-        }
+        } as const satisfies DeepReadOnly<Proto3Message>
     },
 } as const
 
@@ -71,7 +75,9 @@ export type Proto3Enum = {
 }
 
 export const Proto3Enum = {
-    new: (params: GetNewParams<Proto3Enum>): Proto3Enum => {
+    new: function <const TParams extends DeepReadOnly<GetNewParams<Proto3Enum>>>(
+        params: TParams
+    ) {
         return {
             id: getRandomId(),
             internalName: 'enum',
@@ -82,7 +88,7 @@ export const Proto3Enum = {
                 return []
             },
             ...params,
-        }
+        } as const satisfies DeepReadOnly<Proto3Enum>
     },
 } as const
 

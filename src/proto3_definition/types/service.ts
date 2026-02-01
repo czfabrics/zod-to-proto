@@ -1,8 +1,9 @@
-import { Proto3Extension } from '#proto3_definition/types/extension'
-import { Proto3RpcFunction } from '#proto3_definition/types/functions'
-import { GetNewParams } from '#proto3_definition/types/get_new_params'
-import { AnyProto3Message } from '#proto3_definition/types/messages'
-import { Proto3ImportedType } from '#proto3_definition/types/types'
+import type { DeepReadOnly } from '#proto3_definition/types/deep_read_only'
+import type { Proto3Extension } from '#proto3_definition/types/extension'
+import type { Proto3RpcFunction } from '#proto3_definition/types/functions'
+import type { GetNewParams } from '#proto3_definition/types/get_new_params'
+import type { AnyProto3Message } from '#proto3_definition/types/messages'
+import type { Proto3ImportedType } from '#proto3_definition/types/types'
 
 export type Proto3RpcService = {
     internalName: 'rpc_service'
@@ -20,7 +21,9 @@ export type Proto3RpcService = {
 }
 
 export const Proto3RpcService = {
-    new: (params: GetNewParams<Proto3RpcService>): Proto3RpcService => {
+    new: function <const TParams extends DeepReadOnly<GetNewParams<Proto3RpcService>>>(
+        params: TParams
+    ) {
         return {
             internalName: 'rpc_service',
             getDeepMessages() {
@@ -62,6 +65,6 @@ export const Proto3RpcService = {
                 }
             },
             ...params,
-        }
+        } as const satisfies DeepReadOnly<Proto3RpcService>
     },
 } as const
