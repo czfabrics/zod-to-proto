@@ -1,5 +1,12 @@
 <!-- ⚠️ This README has been generated from the file(s) ".blueprint.md" ⚠️--><h1 align="center">@czlab/zod-to-proto</h1>
 <p align="center">
+		<a href="https://npmcharts.com/compare/@czlab/zod-to-proto?minimal=true"><img alt="Downloads per month" src="https://img.shields.io/npm/dm/@czlab/zod-to-proto.svg" height="20"/></a>
+<a href="https://www.npmjs.com/package/@czlab/zod-to-proto"><img alt="NPM Version" src="https://img.shields.io/npm/v/@czlab/zod-to-proto.svg" height="20"/></a>
+<a href="https://david-dm.org/czyrok/czlab.zod-to-proto"><img alt="Dependencies" src="https://img.shields.io/david/czyrok/czlab.zod-to-proto.svg" height="20"/></a>
+<a href="https://github.com/czyrok/czlab.zod-to-proto/graphs/contributors"><img alt="Contributors" src="https://img.shields.io/github/contributors/czyrok/czlab.zod-to-proto.svg" height="20"/></a>
+	</p>
+
+<p align="center">
   <b>A TypeScript library for seamlessly converting Zod schemas into Protocol Buffers v3 definitions, with built-in support for generating RPC services and functions from structured object definitions.</b></br>
   <sub><sub>
 </p>
@@ -15,8 +22,8 @@
 	* [Key Features](#key-features)
 * [Installation](#installation)
 	* [Bun](#bun)
-	* [NPM](#npm)
 	* [Yarn](#yarn)
+	* [NPM](#npm)
 * [Quick Start](#quick-start)
 * [Usage](#usage)
 	* [Basic](#basic)
@@ -62,16 +69,16 @@ A TypeScript library for seamlessly converting Zod schemas into Protocol Buffers
 bun add @czlab/zod-to-proto@0.1.0-beta.5
 ```
 
-### NPM
-
-```sh
-npm install @czlab/zod-to-proto@0.1.0-beta.5
-```
-
 ### Yarn
 
 ```sh
 yarn add @czlab/zod-to-proto@0.1.0-beta.5
+```
+
+### NPM
+
+```sh
+npm install @czlab/zod-to-proto@0.1.0-beta.5
 ```
 
 
