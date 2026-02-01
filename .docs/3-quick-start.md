@@ -13,6 +13,7 @@ const User = z.object({
 const result = zodToProto({
     syntax: 'proto3',
     packageName: 'services.authentification.v1',
+    services: [],
     unscopedMessages: {
         user: User,
     },
