@@ -2,6 +2,7 @@
 <p align="center">
 		<a href="https://npmcharts.com/compare/@czlab/zod-to-proto?minimal=true"><img alt="Downloads per month" src="https://img.shields.io/npm/dm/@czlab/zod-to-proto.svg" height="20"/></a>
 <a href="https://www.npmjs.com/package/@czlab/zod-to-proto"><img alt="NPM Version" src="https://img.shields.io/npm/v/@czlab/zod-to-proto.svg" height="20"/></a>
+<a href="https://github.com/czyrok/czlab.zod-to-proto/graphs/commit-activity"><img alt="Maintained" src="https://img.shields.io/badge/Maintained%3F-yes-green.svg" height="20"/></a>
 	</p>
 
 <p align="center">

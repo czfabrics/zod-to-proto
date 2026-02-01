@@ -10,5 +10,12 @@
     "line": "dark",
     "ids": {
         "npm": "@czlab/zod-to-proto"
-    }
+    },
+    "badges": [
+        {
+            "alt": "Maintained",
+            "img": "https://img.shields.io/badge/Maintained%3F-yes-green.svg",
+            "url": "https://github.com/czyrok/czlab.zod-to-proto/graphs/commit-activity"
+        }
+    ]
 }
