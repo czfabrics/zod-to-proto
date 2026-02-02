@@ -2,6 +2,8 @@ export type GetNewParams<T> = Omit<
     T,
     | 'id'
     | 'internalName'
+    | 'clone'
+    | 'addPrefix'
     | 'getDeepMessages'
     | 'getDeepImportedTypes'
     | 'applyTypePrefix'
@@ -10,5 +12,11 @@ export type GetNewParams<T> = Omit<
 
 export type GetAnyNewParams<T> = Omit<
     T,
-    'id' | 'getDeepMessages' | 'getDeepImportedTypes' | 'applyTypePrefix' | 'getNextIndex'
+    | 'id'
+    | 'clone'
+    | 'addPrefix'
+    | 'getDeepMessages'
+    | 'getDeepImportedTypes'
+    | 'applyTypePrefix'
+    | 'getNextIndex'
 >
