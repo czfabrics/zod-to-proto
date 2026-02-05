@@ -1,5 +1,5 @@
 import type { ZodDiscriminatedUnion, ZodLiteral, ZodObject } from 'zod'
-import { $ZodTypeDiscriminable } from 'zod/v4/core'
+import type { $ZodType } from 'zod/v4/core'
 
 /**
  * This type represents the result of `github.com/stephenh/ts-proto`
@@ -8,9 +8,9 @@ import { $ZodTypeDiscriminable } from 'zod/v4/core'
 export type ZodOneOfUnion<
     TOptions extends readonly ZodObject<{
         $case: ZodLiteral<string>
-        value: $ZodTypeDiscriminable
+        value: $ZodType
     }>[] = readonly ZodObject<{
         $case: ZodLiteral<string>
-        value: $ZodTypeDiscriminable
+        value: $ZodType
     }>[],
 > = ZodDiscriminatedUnion<TOptions, '$case'>

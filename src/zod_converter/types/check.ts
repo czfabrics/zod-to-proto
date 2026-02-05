@@ -43,7 +43,7 @@ import {
     type ZodStringFormat,
     type ZodTemplateLiteral,
 } from 'zod'
-import type { $ZodTypeDiscriminable, SomeType } from 'zod/v4/core'
+import type { $ZodType, SomeType } from 'zod/v4/core'
 
 type ZodChildRecordIntoTuple<TChildRecord extends SomeZodShape> = TuplifyUnion<
     TChildRecord[keyof TChildRecord]
@@ -232,7 +232,7 @@ type ChildArrayConditions = readonly [
         parent: SomeZodUnion
         childConditions: SomeZodObject<{
             $case: ZodLiteral<string>
-            value: $ZodTypeDiscriminable
+            value: $ZodType
         }>[]
         error: TypeDebuggingError<`You should use 'pz.oneOfUnion()' to make an union`>
     },

@@ -1,9 +1,9 @@
 import { assertsNotEmptyArray } from '#core/asserts/not_empty_array'
 import { ZodOneOfUnion } from '#zod/types/zod_one_of_union'
 import z, { ZodDiscriminatedUnion, ZodLiteral, ZodObject } from 'zod'
-import type { $ZodTypeDiscriminable } from 'zod/v4/core'
+import type { $ZodType } from 'zod/v4/core'
 
-type OneOfCase = [string, $ZodTypeDiscriminable]
+type OneOfCase = [string, $ZodType]
 
 type OneOfCasesIntoUnionOptions<
     TCases extends [OneOfCase, ...OneOfCase[]],
