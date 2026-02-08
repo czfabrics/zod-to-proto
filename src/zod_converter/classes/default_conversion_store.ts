@@ -23,7 +23,11 @@ export class DefaultConversionStore<
     }
 
     storeConversion(schema: TSchema, protoMessage: TProtoDef): void {
-        const conversionId = getRandomId()
+        const conversionId: string = getProtoConversionId(schema) ?? getRandomId()
+
+        if (this.store[conversionId]) {
+            return
+        }
 
         setProtoConversionId(schema, conversionId)
 
