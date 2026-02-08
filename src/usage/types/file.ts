@@ -25,7 +25,10 @@ export const Proto3RawFile = {
 
         raw.unscopedMessages ??= {}
 
-        const converter = new ZodMessageConverter(settings.transformers)
+        const converter = new ZodMessageConverter(
+            settings.reuseStrategies,
+            settings.transformers
+        )
         const convertedMessages: AnyProto3Message[] = []
 
         for (const [name, schema] of Object.entries(raw.unscopedMessages)) {

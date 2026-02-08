@@ -12,12 +12,14 @@ import {
     WithMaybeZodPassthrough,
     ZodPassthroughType,
 } from '#zod_converter/types/passthroughs'
-import { ZodConversionTransformers } from '#zod_converter/types/transformers'
+import type { ConversionReuseStrategies } from '#zod_converter/types/reuse_strategy'
+import type { ZodConversionTransformers } from '#zod_converter/types/transformers'
 import { snakeCase } from 'change-case'
 
 export class ZodMessageFieldConverter {
     public constructor(
         private readonly message: Proto3Message,
+        private readonly reuseStrategies: ConversionReuseStrategies,
         private readonly transformers: ZodConversionTransformers
     ) {}
 
@@ -38,7 +40,10 @@ export class ZodMessageFieldConverter {
     ): Proto3MessageField | Proto3MessageOneOfFieldSubField {
         const deepSchema = ZodPassthroughType.pass(rootSchema)
 
-        const converter = new ZodMessageFieldTypeConverter(this.transformers)
+        const converter = new ZodMessageFieldTypeConverter(
+            this.reuseStrategies,
+            this.transformers
+        )
 
         optionalState ??= isZodSchemaOptional(rootSchema) ? 'PRESENT' : 'NONE'
 

@@ -1,3 +1,4 @@
+import { getRandomId } from '#core/helpers/get_random_id'
 import { Proto3Extension } from '#proto3_definition/types/extension'
 import type {
     AnyProto3MessageField,
@@ -7,6 +8,7 @@ import type { GetNewParams } from '#proto3_definition/types/get_new_params'
 import { Proto3ImportedType } from '#proto3_definition/types/types'
 
 export type Proto3Message = {
+    id: string
     internalName: 'message'
     getDeepMessages(): AnyProto3Message[]
     getDeepImportedTypes(): Proto3ImportedType[]
@@ -23,6 +25,7 @@ export type Proto3Message = {
 export const Proto3Message = {
     new: (params: GetNewParams<Proto3Message>): Proto3Message => {
         return {
+            id: getRandomId(),
             internalName: 'message',
             getDeepMessages() {
                 const deepMessages = this.fields
@@ -57,6 +60,7 @@ export const Proto3Message = {
 } as const
 
 export type Proto3Enum = {
+    id: string
     internalName: 'enum'
     getDeepMessages(): AnyProto3Message[]
     getDeepImportedTypes(): Proto3ImportedType[]
@@ -69,6 +73,7 @@ export type Proto3Enum = {
 export const Proto3Enum = {
     new: (params: GetNewParams<Proto3Enum>): Proto3Enum => {
         return {
+            id: getRandomId(),
             internalName: 'enum',
             getDeepMessages() {
                 return [this]
