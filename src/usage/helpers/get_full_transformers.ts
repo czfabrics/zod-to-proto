@@ -4,16 +4,16 @@ import { ZodDeprecatedEnumConversionTransformer } from '#zod_converter/classes/t
 import { ZodDeprecatedFieldConversionTransformer } from '#zod_converter/classes/transformers/deprecated_field'
 import { ZodDeprecatedMessageConversionTransformer } from '#zod_converter/classes/transformers/deprecated_messager'
 import { ZodDeprecatedOneOfFieldConversionTransformer } from '#zod_converter/classes/transformers/deprecated_one_of_field'
-import { ZodEnumNameConversionTransformer } from '#zod_converter/classes/transformers/enum_name'
-import { ZodMessageNameConversionTransformer } from '#zod_converter/classes/transformers/message_name'
+import { ZodEnumNameIncludedInFieldConversionTransformer } from '#zod_converter/classes/transformers/enum_name_included_in_field'
+import { ZodMessageNameIncludedInFieldConversionTransformer } from '#zod_converter/classes/transformers/message_name_included_in_field'
 import { ZodConversionTransformers } from '#zod_converter/types/transformers'
 
 export const getFullTransformers = function (): ZodConversionTransformers {
     return {
         message: [
             new ZodDeprecatedMessageConversionTransformer(),
-            new ZodMessageNameConversionTransformer(),
-            new ZodEnumNameConversionTransformer(),
+            new ZodMessageNameIncludedInFieldConversionTransformer(),
+            new ZodEnumNameIncludedInFieldConversionTransformer(),
         ],
         messageField: [
             new ZodDeprecatedFieldConversionTransformer(),
