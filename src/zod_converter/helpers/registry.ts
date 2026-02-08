@@ -31,3 +31,7 @@ export const setProtoConversionId = function <TMessage extends AnyZodMessage>(
 export const getProtoConversionId = function (schema: AnyZodMessage): string | undefined {
     return protoSchemaRegistry.get(schema)?.protoConversionId
 }
+
+export const getProtoMeta = function (schema: AnyZodMessage): ProtoMessageMeta {
+    return protoSchemaRegistry.get(schema) ?? {}
+}
