@@ -67,6 +67,18 @@ export class Proto3FileProcessor {
     }
 
     private getMessageContent(messages: AnyProto3Message[]): FileContentMatter {
+        messages = messages.reduceRight((accumulator, message) => {
+            const isMessageAlreadyPresent = accumulator.findIndex(
+                (accMessage) => accMessage.id === message.id
+            )
+
+            if (isMessageAlreadyPresent >= 0) {
+                return accumulator
+            }
+
+            return [...accumulator, message]
+        }, [] as AnyProto3Message[])
+
         const content = fileContentMatter()
         const processor = new Proto3MessageProcessor(content)
 
