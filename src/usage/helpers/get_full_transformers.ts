@@ -1,11 +1,11 @@
-import { ZodDeprecatedEnumConversionTransformer } from '#plugin/classes/zod_deprecated_enum_conversion_transformer'
-import { ZodDeprecatedFieldConversionTransformer } from '#plugin/classes/zod_deprecated_field_conversion_transformer'
-import { ZodDeprecatedMessageConversionTransformer } from '#plugin/classes/zod_deprecated_message_conversion_transformer'
-import { ZodDeprecatedOneOfFieldConversionTransformer } from '#plugin/classes/zod_deprecated_one_of_field_conversion_transformer'
-import { ZodEnumNameConversionTransformer } from '#plugin/classes/zod_enum_name_conversion_transformer'
-import { ZodMessageNameConversionTransformer } from '#plugin/classes/zod_message_name_conversion_transformer'
 import { ZodRequiredFieldConversionTransformer } from '#plugin/classes/zod_required_field_conversion_transformer'
 import { ZodRequiredOneOfFieldConversionTransformer } from '#plugin/classes/zod_required_one_of_field_conversion_transformer'
+import { ZodDeprecatedEnumConversionTransformer } from '#zod_converter/classes/transformers/deprecated_enum'
+import { ZodDeprecatedFieldConversionTransformer } from '#zod_converter/classes/transformers/deprecated_field'
+import { ZodDeprecatedMessageConversionTransformer } from '#zod_converter/classes/transformers/deprecated_messager'
+import { ZodDeprecatedOneOfFieldConversionTransformer } from '#zod_converter/classes/transformers/deprecated_one_of_field'
+import { ZodEnumNameConversionTransformer } from '#zod_converter/classes/transformers/enum_name'
+import { ZodMessageNameConversionTransformer } from '#zod_converter/classes/transformers/message_name'
 import { ZodConversionTransformers } from '#zod_converter/types/transformers'
 
 export const getFullTransformers = function (): ZodConversionTransformers {
