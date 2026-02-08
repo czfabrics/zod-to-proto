@@ -62,6 +62,7 @@
     },
     "dependencies": {
         "change-case": "^5.4.4",
+        "crypto-random-string": "^5.0.0",
         "pluralize": "^8.0.0",
         "ts-pattern": "^5.9.0"
     },
