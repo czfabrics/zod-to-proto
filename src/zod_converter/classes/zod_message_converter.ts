@@ -17,12 +17,102 @@ import {
     WithMaybeZodPassthrough,
     ZodPassthroughType,
 } from '#zod_converter/types/passthroughs'
+import type { ConversionReuseStrategies } from '#zod_converter/types/reuse_strategy'
 import { ZodConversionTransformers } from '#zod_converter/types/transformers'
 import { pascalCase } from 'change-case'
 import { match } from 'ts-pattern'
+import { ZodEnum, ZodObject } from 'zod'
 
 export class ZodMessageConverter {
-    public constructor(private readonly transformers: ZodConversionTransformers) {}
+    public constructor(
+        private readonly reuseStrategies: ConversionReuseStrategies,
+        private readonly transformers: ZodConversionTransformers
+    ) {}
+
+    private makeMessageFromSchema(
+        name: string,
+        rootSchema: WithMaybeZodPassthrough<AnyZodMessage>,
+        schema: ZodObject
+    ): Proto3Message {
+        const message = Proto3Message.new({
+            name: pascalCase(name),
+            fields: [],
+            extensions: [],
+            comments: getZodSchemaComments(rootSchema),
+        })
+
+        for (const [key, entrySchema] of Object.entries(schema.shape)) {
+            assertsAnyZodMessageFieldType(entrySchema)
+
+            let field: Proto3MessageField | Proto3MessageOneOfField
+
+            if (ZodMessageFieldType.is(entrySchema)) {
+                const converter = new ZodMessageFieldConverter(
+                    message,
+                    this.reuseStrategies,
+                    this.transformers
+                )
+
+                field = converter.convert(key, entrySchema)
+            } else {
+                const converter = new ZodMessageOneOfFieldConverter(
+                    message,
+                    this.reuseStrategies,
+                    this.transformers
+                )
+
+                field = converter.convert(key, entrySchema)
+            }
+
+            message.fields.push(field)
+        }
+
+        const updatedMessage = this.transformers.message.reduce(
+            (message, transformer) => {
+                return transformer.transform(rootSchema, message)
+            },
+            message
+        )
+
+        return updatedMessage
+    }
+
+    private makeEnumFromSchema(
+        name: string,
+        rootSchema: WithMaybeZodPassthrough<AnyZodMessage>,
+        schema: ZodEnum
+    ): Proto3Enum {
+        const fields = Array.from(schema._zod.values).map((value, index) => {
+            if (typeof value !== 'string') {
+                throw new Error(
+                    'This `ZodEnum` contains a value that is not a string, this is impossible depending one the `z.enum()` method type'
+                )
+            }
+
+            return Proto3EnumField.new({
+                index,
+                key: value,
+                extensions: [],
+                comments: [],
+            })
+        })
+
+        const messageEnum = Proto3Enum.new({
+            name: pascalCase(name),
+            fields,
+            extensions: [],
+            comments: getZodSchemaComments(rootSchema),
+        })
+
+        const updatedMessageEnum = this.transformers.enum.reduce(
+            (messageEnum, transformer) => {
+                return transformer.transform(rootSchema, messageEnum)
+            },
+            messageEnum
+        )
+
+        return updatedMessageEnum
+    }
 
     public convert(
         name: string,
@@ -41,45 +131,22 @@ export class ZodMessageConverter {
                     },
                 },
                 (schema) => {
-                    const message = Proto3Message.new({
-                        name: pascalCase(name),
-                        fields: [],
-                        extensions: [],
-                        comments: getZodSchemaComments(rootSchema),
-                    })
+                    const storedConversion =
+                        this.reuseStrategies.message.reuseConversion(deepSchema)
 
-                    for (const [key, entrySchema] of Object.entries(schema.shape)) {
-                        assertsAnyZodMessageFieldType(entrySchema)
-
-                        let field: Proto3MessageField | Proto3MessageOneOfField
-
-                        if (ZodMessageFieldType.is(entrySchema)) {
-                            const converter = new ZodMessageFieldConverter(
-                                message,
-                                this.transformers
-                            )
-
-                            field = converter.convert(key, entrySchema)
-                        } else {
-                            const converter = new ZodMessageOneOfFieldConverter(
-                                message,
-                                this.transformers
-                            )
-
-                            field = converter.convert(key, entrySchema)
-                        }
-
-                        message.fields.push(field)
+                    if (storedConversion !== undefined) {
+                        return storedConversion
                     }
 
-                    const updatedMessage = this.transformers.message.reduce(
-                        (message, transformer) => {
-                            return transformer.transform(rootSchema, message)
-                        },
-                        message
+                    const conversion = this.makeMessageFromSchema(
+                        name,
+                        rootSchema,
+                        schema
                     )
 
-                    return updatedMessage
+                    this.reuseStrategies.message.storeConversion(deepSchema, conversion)
+
+                    return conversion
                 }
             )
             .with(
@@ -91,36 +158,18 @@ export class ZodMessageConverter {
                     },
                 },
                 (schema) => {
-                    const fields = Array.from(schema._zod.values).map((value, index) => {
-                        if (typeof value !== 'string') {
-                            throw new Error(
-                                'This `ZodEnum` contains a value that is not a string, this is impossible depending one the `z.enum()` method type'
-                            )
-                        }
+                    const storedConversion =
+                        this.reuseStrategies.enum.reuseConversion(deepSchema)
 
-                        return Proto3EnumField.new({
-                            index,
-                            key: value,
-                            extensions: [],
-                            comments: [],
-                        })
-                    })
+                    if (storedConversion !== undefined) {
+                        return storedConversion
+                    }
 
-                    const messageEnum = Proto3Enum.new({
-                        name: pascalCase(name),
-                        fields,
-                        extensions: [],
-                        comments: getZodSchemaComments(rootSchema),
-                    })
+                    const conversion = this.makeEnumFromSchema(name, rootSchema, schema)
 
-                    const updatedMessageEnum = this.transformers.enum.reduce(
-                        (messageEnum, transformer) => {
-                            return transformer.transform(rootSchema, messageEnum)
-                        },
-                        messageEnum
-                    )
+                    this.reuseStrategies.enum.storeConversion(deepSchema, conversion)
 
-                    return updatedMessageEnum
+                    return conversion
                 }
             )
             .exhaustive()

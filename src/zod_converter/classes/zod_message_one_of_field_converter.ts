@@ -12,18 +12,24 @@ import {
     WithMaybeZodPassthrough,
     ZodPassthroughType,
 } from '#zod_converter/types/passthroughs'
-import { ZodConversionTransformers } from '#zod_converter/types/transformers'
+import type { ConversionReuseStrategies } from '#zod_converter/types/reuse_strategy'
+import type { ZodConversionTransformers } from '#zod_converter/types/transformers'
 import { snakeCase } from 'change-case'
 import { SomeType } from 'zod/v4/core'
 
 export class ZodMessageOneOfFieldConverter {
     public constructor(
         private readonly message: Proto3Message,
+        private readonly reuseStrategies: ConversionReuseStrategies,
         private readonly transformers: ZodConversionTransformers
     ) {}
 
     private getSubField(schema: SomeType, key: string): Proto3MessageOneOfFieldSubField {
-        const converter = new ZodMessageFieldConverter(this.message, this.transformers)
+        const converter = new ZodMessageFieldConverter(
+            this.message,
+            this.reuseStrategies,
+            this.transformers
+        )
 
         assertsZodMessageFieldType(schema)
 
