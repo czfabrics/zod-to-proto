@@ -5,23 +5,34 @@ import type { ZodMessageConversionTransformer } from '#zod_converter/types/trans
 import { pascalCase } from 'change-case'
 
 export class ZodMessageNameIncludedInFieldConversionTransformer implements ZodMessageConversionTransformer {
+    private readonly alreadyTransformedIds: Set<string> = new Set()
+
     transform(
         _schema: WithMaybeZodPassthrough<AnyZodMessage>,
         protoDefinition: Proto3Message
     ): Proto3Message {
         for (const field of protoDefinition.fields) {
             if (field.internalName === 'message_field') {
-                if (field.type.internalName === 'message') {
+                if (
+                    field.type.internalName === 'message' &&
+                    !this.alreadyTransformedIds.has(field.type.id)
+                ) {
                     field.type.name = pascalCase(
                         `${protoDefinition.name}_${field.type.name}`
                     )
+
+                    this.alreadyTransformedIds.add(field.type.id)
                 }
             } else {
                 for (const subField of field.subFields) {
-                    if (subField.type.internalName === 'message') {
+                    if (
+                        subField.type.internalName === 'message' &&
+                        !this.alreadyTransformedIds.has(subField.type.id)
+                    ) {
                         subField.type.name = pascalCase(
-                            `${protoDefinition.name}_${subField.type.name}`
+                            `${subField.type.name}_${field.key}`
                         )
+                        this.alreadyTransformedIds.add(subField.type.id)
                     }
                 }
             }
