@@ -65,19 +65,19 @@ A TypeScript library for seamlessly converting Zod schemas into Protocol Buffers
 ### Bun
 
 ```sh
-bun add @czlab/zod-to-proto@0.1.0-beta.8
+bun add @czlab/zod-to-proto@0.1.0-beta.9
 ```
 
 ### Yarn
 
 ```sh
-yarn add @czlab/zod-to-proto@0.1.0-beta.8
+yarn add @czlab/zod-to-proto@0.1.0-beta.9
 ```
 
 ### NPM
 
 ```sh
-npm install @czlab/zod-to-proto@0.1.0-beta.8
+npm install @czlab/zod-to-proto@0.1.0-beta.9
 ```
 
 
