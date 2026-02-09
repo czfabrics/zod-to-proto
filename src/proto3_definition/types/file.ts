@@ -47,7 +47,20 @@ export const Proto3File = {
                     return
                 }
 
-                const messages = this.getDeepMessages()
+                const messages = this.getDeepMessages().reduceRight(
+                    (accumulator, message) => {
+                        const isMessageAlreadyPresent = accumulator.findIndex(
+                            (accMessage) => accMessage.id === message.id
+                        )
+
+                        if (isMessageAlreadyPresent >= 0) {
+                            return accumulator
+                        }
+
+                        return [...accumulator, message]
+                    },
+                    [] as AnyProto3Message[]
+                )
 
                 for (const message of messages) {
                     message.name = `${this.typePrefix}${message.name}`
