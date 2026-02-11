@@ -29,8 +29,8 @@ export type Proto3OptionalState =
     (typeof Proto3OptionalState)[keyof typeof Proto3OptionalState]
 
 export type Proto3MessageField = Proto3BaseField & {
-    clone(params: CloneParams<Proto3MessageField>): Proto3MessageField
-    propagateTypePrefix(prefix: string): Proto3MessageField
+    clone(params: CloneParams<Proto3MessageField>): ReadOnlyProto3MessageField
+    propagateTypePrefix(prefix: string): ReadOnlyProto3MessageField
     getDeepMessages(): AnyProto3Message[]
     getDeepImportedTypes(): Proto3ImportedType[]
     index: number
@@ -102,9 +102,8 @@ export type Proto3MessageOneOfFieldSubField = Omit<
 > & {
     clone(
         params: CloneParams<Proto3MessageOneOfFieldSubField>
-    ): Proto3MessageOneOfFieldSubField
-    propagateTypePrefix(prefix: string): Proto3MessageOneOfFieldSubField
-    optionalState: 'NOT_NEEDED'
+    ): ReadOnlyProto3MessageOneOfFieldSubField
+    propagateTypePrefix(prefix: string): ReadOnlyProto3MessageOneOfFieldSubField
 }
 export type ReadOnlyProto3MessageOneOfFieldSubField =
     DeepReadOnly<Proto3MessageOneOfFieldSubField>
@@ -155,8 +154,8 @@ export const Proto3MessageOneOfFieldSubField = {
 } as const
 
 export type Proto3MessageOneOfField = Proto3BaseField & {
-    clone(params: CloneParams<Proto3MessageOneOfField>): Proto3MessageOneOfField
-    propagateTypePrefix(prefix: string): Proto3MessageOneOfField
+    clone(params: CloneParams<Proto3MessageOneOfField>): ReadOnlyProto3MessageOneOfField
+    propagateTypePrefix(prefix: string): ReadOnlyProto3MessageOneOfField
     getDeepMessages(): AnyProto3Message[]
     getDeepImportedTypes(): Proto3ImportedType[]
     internalName: 'message_one_of_field'
@@ -211,20 +210,26 @@ export type Proto3EnumField = Proto3BaseField & {
     comments: string[]
 }
 
+export type ReadOnlyProto3EnumField = DeepReadOnly<Proto3EnumField>
+
 export const Proto3EnumField = {
-    new: function <const TParams extends DeepReadOnly<GetNewParams<Proto3EnumField>>>(
-        params: TParams
-    ) {
+    new: function (params: GetNewParams<Proto3EnumField>): ReadOnlyProto3EnumField {
         return {
             internalName: 'enum_field',
             ...params,
-        } as const satisfies DeepReadOnly<Proto3EnumField>
+        }
     },
 } as const
 
 export type AnyProto3MessageField = Proto3MessageField | Proto3MessageOneOfField
+export type ReadOnlyAnyProto3MessageField =
+    | ReadOnlyProto3MessageField
+    | ReadOnlyProto3MessageOneOfField
 export type AnyProto3Field =
     | Proto3MessageField
     | Proto3MessageOneOfField
     | Proto3EnumField
-export type ReadOnlyAnyProto3Field = DeepReadOnly<AnyProto3Field>
+export type ReadOnlyAnyProto3Field =
+    | ReadOnlyProto3MessageField
+    | ReadOnlyProto3MessageOneOfField
+    | ReadOnlyProto3EnumField

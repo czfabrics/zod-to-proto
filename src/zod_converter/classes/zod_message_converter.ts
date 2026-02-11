@@ -1,5 +1,6 @@
 import {
     Proto3EnumField,
+    ReadOnlyAnyProto3MessageField,
     ReadOnlyProto3MessageField,
     ReadOnlyProto3MessageOneOfField,
 } from '#proto3_definition/types/fields'

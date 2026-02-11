@@ -9,8 +9,8 @@ import type { Proto3ImportedType } from '#proto3_definition/types/types'
 
 export type Proto3RpcService = {
     internalName: 'rpc_service'
-    clone(params: CloneParams<Proto3RpcService>): Proto3RpcService
-    propagateTypePrefix(prefix: string): Proto3RpcService
+    clone(params: CloneParams<Proto3RpcService>): ReadOnlyProto3RpcService
+    propagateTypePrefix(prefix: string): ReadOnlyProto3RpcService
     getDeepMessages(): AnyProto3Message[]
     getDeepImportedTypes(): Proto3ImportedType[]
     /**

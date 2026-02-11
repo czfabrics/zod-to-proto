@@ -4,7 +4,7 @@ import { ReadOnlyProto3ImportedType } from '#proto3_definition/types/types'
 export class Proto3ImportProcessor {
     public constructor(private readonly content: FileContentMatter) {}
 
-    public process(importedTypes: ReadOnlyProto3ImportedType[]): void {
+    public process(importedTypes: readonly ReadOnlyProto3ImportedType[]): void {
         let isFirst = true
 
         const importPaths = importedTypes.map((importedType) => importedType.importPath)

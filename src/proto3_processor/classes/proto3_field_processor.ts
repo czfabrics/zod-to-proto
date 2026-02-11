@@ -5,10 +5,10 @@ import {
     ReadOnlyProto3Extension,
 } from '#proto3_definition/types/extension'
 import type {
-    Proto3MessageFieldType,
     ReadOnlyAnyProto3Field,
+    ReadOnlyProto3MessageFieldType,
 } from '#proto3_definition/types/fields'
-import type { Proto3ScalarType } from '#proto3_definition/types/scalars'
+import type { ReadOnlyProto3ScalarType } from '#proto3_definition/types/scalars'
 import { Proto3CommentProcessor } from '#proto3_processor/classes/proto3_comment_processor'
 import { Proto3FieldExtensionProcessor } from '#proto3_processor/classes/proto3_field_extension_processor'
 import { Proto3RecordExtensionProcessor } from '#proto3_processor/classes/proto3_record_extension_processor'
@@ -26,13 +26,13 @@ export class Proto3FieldProcessor {
         return content
     }
 
-    private getScalarTypeReferenceString(scalarType: Proto3ScalarType): string {
+    private getScalarTypeReferenceString(scalarType: ReadOnlyProto3ScalarType): string {
         return scalarType.name
     }
 
-    private getTypeReferenceString(item: Proto3MessageFieldType): string {
+    private getTypeReferenceString(item: ReadOnlyProto3MessageFieldType): string {
         let finalType = ''
-        let currentItem: Proto3MessageFieldType | undefined = item
+        let currentItem: ReadOnlyProto3MessageFieldType | undefined = item
 
         while (currentItem) {
             let currentType = match(currentItem)

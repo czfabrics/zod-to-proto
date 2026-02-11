@@ -13,8 +13,8 @@ import type { Proto3ImportedType } from '#proto3_definition/types/types'
 export type Proto3Message = {
     id: string
     internalName: 'message'
-    clone(params: CloneParams<Proto3Message>): Proto3Message
-    addPrefix(prefix: string): Proto3Message
+    clone(params: CloneParams<Proto3Message>): ReadOnlyProto3Message
+    addPrefix(prefix: string): ReadOnlyProto3Message
     getDeepMessages(): AnyProto3Message[]
     getDeepImportedTypes(): Proto3ImportedType[]
     getNextIndex(): number
@@ -91,8 +91,8 @@ export const Proto3Message = {
 export type Proto3Enum = {
     id: string
     internalName: 'enum'
-    clone(params: CloneParams<Proto3Enum>): Proto3Enum
-    addPrefix(prefix: string): Proto3Enum
+    clone(params: CloneParams<Proto3Enum>): ReadOnlyProto3Enum
+    addPrefix(prefix: string): ReadOnlyProto3Enum
     getDeepMessages(): AnyProto3Message[]
     getDeepImportedTypes(): Proto3ImportedType[]
     name: string

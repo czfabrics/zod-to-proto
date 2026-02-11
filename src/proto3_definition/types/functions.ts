@@ -9,8 +9,8 @@ import { match } from 'ts-pattern'
 
 export type Proto3RpcFunction = {
     internalName: 'rpc_function'
-    clone(params: CloneParams<Proto3RpcFunction>): Proto3RpcFunction
-    propagateTypePrefix(prefix: string): Proto3RpcFunction
+    clone(params: CloneParams<Proto3RpcFunction>): ReadOnlyProto3RpcFunction
+    propagateTypePrefix(prefix: string): ReadOnlyProto3RpcFunction
     getDeepMessages(): AnyProto3Message[]
     getDeepImportedTypes(): Proto3ImportedType[]
     /**

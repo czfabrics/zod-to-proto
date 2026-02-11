@@ -15,7 +15,7 @@ import { Proto3ServiceProcessor } from '#proto3_processor/classes/proto3_service
 
 export class Proto3FileProcessor {
     private getImportContent(
-        importedTypes: ReadOnlyProto3ImportedType[]
+        importedTypes: readonly ReadOnlyProto3ImportedType[]
     ): FileContentMatter {
         const content = fileContentMatter()
         const processor = new Proto3ImportProcessor(content)
@@ -37,7 +37,7 @@ export class Proto3FileProcessor {
     }
 
     private getExtensionContents(
-        extensions: ReadOnlyProto3Extension[]
+        extensions: readonly ReadOnlyProto3Extension[]
     ): FileContentMatter[] {
         const contents: FileContentMatter[] = []
 
@@ -54,7 +54,9 @@ export class Proto3FileProcessor {
         return contents
     }
 
-    private getServiceContent(services: ReadOnlyProto3RpcService[]): FileContentMatter {
+    private getServiceContent(
+        services: readonly ReadOnlyProto3RpcService[]
+    ): FileContentMatter {
         const content = fileContentMatter()
         const processor = new Proto3ServiceProcessor(content)
 
@@ -73,7 +75,9 @@ export class Proto3FileProcessor {
         return content
     }
 
-    private getMessageContent(messages: ReadOnlyAnyProto3Message[]): FileContentMatter {
+    private getMessageContent(
+        messages: readonly ReadOnlyAnyProto3Message[]
+    ): FileContentMatter {
         messages = messages.reduceRight((accumulator, message) => {
             const isMessageAlreadyPresent = accumulator.findIndex(
                 (accMessage) => accMessage.id === message.id

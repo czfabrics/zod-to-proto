@@ -9,8 +9,8 @@ import type { Proto3ImportedType } from '#proto3_definition/types/types'
 
 export type Proto3File = {
     internalName: 'file'
-    clone(params: CloneParams<Proto3File>): Proto3File
-    propagateTypePrefix(prefix: string): Proto3File
+    clone(params: CloneParams<Proto3File>): ReadOnlyProto3File
+    propagateTypePrefix(prefix: string): ReadOnlyProto3File
     getDeepMessages(): AnyProto3Message[]
     getDeepImportedTypes(): Proto3ImportedType[]
     syntax: 'proto3'

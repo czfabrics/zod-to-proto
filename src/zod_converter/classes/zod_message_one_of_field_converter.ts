@@ -68,7 +68,11 @@ export class ZodMessageOneOfFieldConverter {
 
             //// We override to take into account other sub fields
             //// & generated ones by literal discriminator
-            subField.index = this.message.getNextIndex() + subFieldIndex
+            const newSubField = subField.clone({
+                index: this.message.getNextIndex() + subFieldIndex,
+            })
+
+            subFields.splice(subFieldIndex, 1, newSubField)
         }
 
         const field = Proto3MessageOneOfField.new({

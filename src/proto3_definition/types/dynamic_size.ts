@@ -20,16 +20,16 @@ export type ReadOnlyProto3MapValueType = DeepReadOnly<Proto3MapValueType>
 
 type Proto3DynamicSizeTypes = {
     MAP: {
-        clone(params: CloneParams<Proto3MapType>): Proto3MapType
-        propagateTypePrefix(prefix: string): Proto3MapType
+        clone(params: CloneParams<Proto3MapType>): ReadOnlyProto3MapType
+        propagateTypePrefix(prefix: string): ReadOnlyProto3MapType
         getDeepMessages(): AnyProto3Message[]
         getDeepImportedTypes(): Proto3ImportedType[]
         key: Proto3ScalarType
         value: Proto3MapValueType
     }
     REPEATED: {
-        clone(params: CloneParams<Proto3RepeatedType>): Proto3RepeatedType
-        propagateTypePrefix(prefix: string): Proto3RepeatedType
+        clone(params: CloneParams<Proto3RepeatedType>): ReadOnlyProto3RepeatedType
+        propagateTypePrefix(prefix: string): ReadOnlyProto3RepeatedType
         getDeepMessages(): AnyProto3Message[]
         getDeepImportedTypes(): Proto3ImportedType[]
         inner: Proto3RepeatedInnerType
