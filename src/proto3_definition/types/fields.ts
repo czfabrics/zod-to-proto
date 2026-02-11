@@ -30,7 +30,7 @@ export type Proto3OptionalState =
 
 export type Proto3MessageField = Proto3BaseField & {
     clone(params: CloneParams<Proto3MessageField>): ReadOnlyProto3MessageField
-    propagateTypePrefix(prefix: string): ReadOnlyProto3MessageField
+    propagateTypePrefix(prefixList: string[]): ReadOnlyProto3MessageField
     getDeepMessages(): AnyProto3Message[]
     getDeepImportedTypes(): Proto3ImportedType[]
     index: number
@@ -57,21 +57,21 @@ export const Proto3MessageField = {
             },
             propagateTypePrefix(
                 this: ReadOnlyProto3MessageField,
-                prefix: string
+                prefixList: string[]
             ): ReadOnlyProto3MessageField {
                 const newType = match(this.type)
                     .with(
                         { internalName: 'message' },
                         { internalName: 'enum' },
                         (type) => {
-                            return type.addPrefix(prefix)
+                            return type.addPrefix(prefixList)
                         }
                     )
                     .with(
                         { internalName: 'repeated' },
                         { internalName: 'map' },
                         (type) => {
-                            return type.propagateTypePrefix(prefix)
+                            return type.propagateTypePrefix(prefixList)
                         }
                     )
                     .otherwise((type) => type)
@@ -103,7 +103,7 @@ export type Proto3MessageOneOfFieldSubField = Omit<
     clone(
         params: CloneParams<Proto3MessageOneOfFieldSubField>
     ): ReadOnlyProto3MessageOneOfFieldSubField
-    propagateTypePrefix(prefix: string): ReadOnlyProto3MessageOneOfFieldSubField
+    propagateTypePrefix(prefixList: string[]): ReadOnlyProto3MessageOneOfFieldSubField
 }
 export type ReadOnlyProto3MessageOneOfFieldSubField =
     DeepReadOnly<Proto3MessageOneOfFieldSubField>
@@ -125,21 +125,21 @@ export const Proto3MessageOneOfFieldSubField = {
             },
             propagateTypePrefix(
                 this: ReadOnlyProto3MessageOneOfFieldSubField,
-                prefix: string
+                prefixList: string[]
             ): ReadOnlyProto3MessageOneOfFieldSubField {
                 const newType = match(this.type)
                     .with(
                         { internalName: 'message' },
                         { internalName: 'enum' },
                         (type) => {
-                            return type.addPrefix(prefix)
+                            return type.addPrefix(prefixList)
                         }
                     )
                     .with(
                         { internalName: 'repeated' },
                         { internalName: 'map' },
                         (type) => {
-                            return type.propagateTypePrefix(prefix)
+                            return type.propagateTypePrefix(prefixList)
                         }
                     )
                     .otherwise((type) => type)
@@ -155,7 +155,7 @@ export const Proto3MessageOneOfFieldSubField = {
 
 export type Proto3MessageOneOfField = Proto3BaseField & {
     clone(params: CloneParams<Proto3MessageOneOfField>): ReadOnlyProto3MessageOneOfField
-    propagateTypePrefix(prefix: string): ReadOnlyProto3MessageOneOfField
+    propagateTypePrefix(prefixList: string[]): ReadOnlyProto3MessageOneOfField
     getDeepMessages(): AnyProto3Message[]
     getDeepImportedTypes(): Proto3ImportedType[]
     internalName: 'message_one_of_field'
@@ -182,10 +182,10 @@ export const Proto3MessageOneOfField = {
             },
             propagateTypePrefix(
                 this: ReadOnlyProto3MessageOneOfField,
-                prefix: string
+                prefixList: string[]
             ): ReadOnlyProto3MessageOneOfField {
                 const subFields = this.subFields.map((subField) =>
-                    subField.propagateTypePrefix(prefix)
+                    subField.propagateTypePrefix(prefixList)
                 )
 
                 return this.clone({

@@ -10,7 +10,7 @@ import { match } from 'ts-pattern'
 export type Proto3RpcFunction = {
     internalName: 'rpc_function'
     clone(params: CloneParams<Proto3RpcFunction>): ReadOnlyProto3RpcFunction
-    propagateTypePrefix(prefix: string): ReadOnlyProto3RpcFunction
+    propagateTypePrefix(prefixList: string[]): ReadOnlyProto3RpcFunction
     getDeepMessages(): AnyProto3Message[]
     getDeepImportedTypes(): Proto3ImportedType[]
     /**
@@ -42,7 +42,7 @@ export const Proto3RpcFunction = {
             },
             propagateTypePrefix(
                 this: ReadOnlyProto3RpcFunction,
-                prefix: string
+                prefixList: string[]
             ): ReadOnlyProto3RpcFunction {
                 const newIn = match(params.in)
                     .with(
@@ -50,10 +50,10 @@ export const Proto3RpcFunction = {
                         { internalName: 'enum' },
                         (message) => {
                             if (this.typePrefix === null) {
-                                return message.addPrefix(prefix)
+                                return message.addPrefix(prefixList)
                             }
 
-                            return message.addPrefix(this.typePrefix).addPrefix(prefix)
+                            return message.addPrefix([...prefixList, this.typePrefix])
                         }
                     )
                     .with({ internalName: 'imported_type' }, (type) => type)
@@ -65,10 +65,10 @@ export const Proto3RpcFunction = {
                         { internalName: 'enum' },
                         (message) => {
                             if (this.typePrefix === null) {
-                                return message.addPrefix(prefix)
+                                return message.addPrefix(prefixList)
                             }
 
-                            return message.addPrefix(this.typePrefix).addPrefix(prefix)
+                            return message.addPrefix([...prefixList, this.typePrefix])
                         }
                     )
                     .with({ internalName: 'imported_type' }, (type) => type)

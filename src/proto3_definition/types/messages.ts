@@ -12,12 +12,13 @@ import {
 } from '#proto3_definition/types/fields'
 import type { GetNewParams } from '#proto3_definition/types/get_new_params'
 import type { Proto3ImportedType } from '#proto3_definition/types/types'
+import { pascalCase } from 'change-case'
 
 export type Proto3Message = {
     id: string
     internalName: 'message'
     clone(params: CloneParams<Proto3Message>): ReadOnlyProto3Message
-    addPrefix(prefix: string): ReadOnlyProto3Message
+    addPrefix(prefixList: string[]): ReadOnlyProto3Message
     computeNewIndexForFields(
         fields: readonly ReadOnlyAnyProto3MessageField[]
     ): readonly ReadOnlyAnyProto3MessageField[]
@@ -62,15 +63,17 @@ export const Proto3Message = {
             },
             addPrefix(
                 this: ReadOnlyProto3Message,
-                prefix: string
+                prefixList: string[]
             ): ReadOnlyProto3Message {
                 const fields = this.fields.map((field) =>
-                    field.propagateTypePrefix(prefix)
+                    field.propagateTypePrefix(prefixList)
                 )
+
+                const finalName = pascalCase([...prefixList, this.name].join('_'))
 
                 return {
                     ...this,
-                    name: `${prefix}${this.name}`,
+                    name: finalName,
                     fields: fields,
                 }
             },
@@ -149,7 +152,7 @@ export type Proto3Enum = {
     id: string
     internalName: 'enum'
     clone(params: CloneParams<Proto3Enum>): ReadOnlyProto3Enum
-    addPrefix(prefix: string): ReadOnlyProto3Enum
+    addPrefix(prefixList: string[]): ReadOnlyProto3Enum
     computeNewIndexForFields(
         fields: readonly ReadOnlyProto3EnumField[]
     ): readonly ReadOnlyProto3EnumField[]
@@ -188,10 +191,15 @@ export const Proto3Enum = {
                     id: params?.id ?? getRandomId(),
                 }
             },
-            addPrefix(this: ReadOnlyProto3Enum, prefix: string): ReadOnlyProto3Enum {
+            addPrefix(
+                this: ReadOnlyProto3Enum,
+                prefixList: string[]
+            ): ReadOnlyProto3Enum {
+                const finalName = pascalCase([...prefixList, this.name].join('_'))
+
                 return {
                     ...this,
-                    name: `${prefix}${this.name}`,
+                    name: finalName,
                 }
             },
             computeNewIndexForFields(

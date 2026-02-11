@@ -228,37 +228,37 @@ import "buf/validate/validate.proto";
 
 package services.authentification.v1;
 
-service AuthentificationPackageUserService {
+service UserService {
   rpc GetUsers(google.protobuf.Empty) returns (AuthentificationPackageUserServiceGetUsersOutput) {}
 }
 
-service AuthentificationPackageUserService2 {
+service UserService2 {
   rpc GetUsers(google.protobuf.Empty) returns (AuthentificationPackageUserService2GetUsersOutput) {}
 }
 
-enum AuthentificationPackageUserService2GetUsersUserServiceGetUsersUserRole {
+enum AuthentificationPackageUserService2GetUsersUserRole {
   ADMIN = 0;
   VIEWER = 1;
 }
 
-message AuthentificationPackageUserService2GetUsersUserServiceGetUsersUser {
+message AuthentificationPackageUserService2GetUsersUser {
   int64 id = 1 [
     (buf.validate.field).required = true
   ];
   optional string full_name = 2;
-  AuthentificationPackageUserService2GetUsersUserServiceGetUsersUserRole role = 3 [
+  AuthentificationPackageUserService2GetUsersUserRole role = 3 [
     (buf.validate.field).required = true
   ];
 }
 
 message AuthentificationPackageUserService2GetUsersOutput {
-  repeated AuthentificationPackageUserService2GetUsersUserServiceGetUsersUser users = 1 [
+  repeated AuthentificationPackageUserService2GetUsersUser users = 1 [
     (buf.validate.field).required = true
   ];
 }
 
 message AuthentificationPackageUserServiceGetUsersOutput {
-  repeated AuthentificationPackageUserService2GetUsersUserServiceGetUsersUser users = 1 [
+  repeated AuthentificationPackageUserServiceGetUsersUser users = 1 [
     (buf.validate.field).required = true
   ];
 }"

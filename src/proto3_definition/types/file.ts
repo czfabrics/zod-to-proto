@@ -46,7 +46,7 @@ export const Proto3File = {
                 }
 
                 const newServices = this.services.map((service) => {
-                    return service.propagateTypePrefix(typePrefix)
+                    return service.propagateTypePrefix([typePrefix])
                 })
 
                 return this.clone({

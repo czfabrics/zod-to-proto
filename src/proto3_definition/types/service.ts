@@ -10,7 +10,7 @@ import type { Proto3ImportedType } from '#proto3_definition/types/types'
 export type Proto3RpcService = {
     internalName: 'rpc_service'
     clone(params: CloneParams<Proto3RpcService>): ReadOnlyProto3RpcService
-    propagateTypePrefix(prefix: string): ReadOnlyProto3RpcService
+    propagateTypePrefix(prefixList: string[]): ReadOnlyProto3RpcService
     getDeepMessages(): AnyProto3Message[]
     getDeepImportedTypes(): Proto3ImportedType[]
     /**
@@ -39,16 +39,17 @@ export const Proto3RpcService = {
             },
             propagateTypePrefix(
                 this: ReadOnlyProto3RpcService,
-                prefix: string
+                prefixList: string[]
             ): ReadOnlyProto3RpcService {
                 const newFunctions = this.functions.map((rpcFunction) => {
                     if (this.typePrefix !== null) {
-                        return rpcFunction
-                            .propagateTypePrefix(this.typePrefix)
-                            .propagateTypePrefix(prefix)
+                        return rpcFunction.propagateTypePrefix([
+                            ...prefixList,
+                            this.typePrefix,
+                        ])
                     }
 
-                    return rpcFunction.propagateTypePrefix(prefix)
+                    return rpcFunction.propagateTypePrefix(prefixList)
                 })
 
                 return this.clone({

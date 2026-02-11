@@ -21,7 +21,7 @@ export type ReadOnlyProto3MapValueType = DeepReadOnly<Proto3MapValueType>
 type Proto3DynamicSizeTypes = {
     MAP: {
         clone(params: CloneParams<Proto3MapType>): ReadOnlyProto3MapType
-        propagateTypePrefix(prefix: string): ReadOnlyProto3MapType
+        propagateTypePrefix(prefixList: string[]): ReadOnlyProto3MapType
         getDeepMessages(): AnyProto3Message[]
         getDeepImportedTypes(): Proto3ImportedType[]
         key: Proto3ScalarType
@@ -29,7 +29,7 @@ type Proto3DynamicSizeTypes = {
     }
     REPEATED: {
         clone(params: CloneParams<Proto3RepeatedType>): ReadOnlyProto3RepeatedType
-        propagateTypePrefix(prefix: string): ReadOnlyProto3RepeatedType
+        propagateTypePrefix(prefixList: string[]): ReadOnlyProto3RepeatedType
         getDeepMessages(): AnyProto3Message[]
         getDeepImportedTypes(): Proto3ImportedType[]
         inner: Proto3RepeatedInnerType
@@ -59,14 +59,14 @@ export const Proto3MapType = {
             },
             propagateTypePrefix(
                 this: ReadOnlyProto3MapType,
-                prefix: string
+                prefixList: string[]
             ): ReadOnlyProto3MapType {
                 const newValue = match(this.value)
                     .with(
                         { internalName: 'message' },
                         { internalName: 'enum' },
                         (type) => {
-                            return type.addPrefix(prefix)
+                            return type.addPrefix(prefixList)
                         }
                     )
                     .otherwise((type) => type)
@@ -107,18 +107,18 @@ export const Proto3RepeatedType = {
             },
             propagateTypePrefix(
                 this: ReadOnlyProto3RepeatedType,
-                prefix: string
+                prefixList: string[]
             ): ReadOnlyProto3RepeatedType {
                 const newInner = match(this.inner)
                     .with(
                         { internalName: 'message' },
                         { internalName: 'enum' },
                         (type) => {
-                            return type.addPrefix(prefix)
+                            return type.addPrefix(prefixList)
                         }
                     )
                     .with({ internalName: 'repeated' }, (type) => {
-                        return type.propagateTypePrefix(prefix)
+                        return type.propagateTypePrefix(prefixList)
                     })
                     .otherwise((type) => type)
 
