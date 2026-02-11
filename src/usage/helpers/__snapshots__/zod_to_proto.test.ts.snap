@@ -1,0 +1,223 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`\`zodToProto\` test suite > Testing basic usage (unscoped message) > result 1`] = `
+"syntax = "proto3";
+
+import "buf/validate/validate.proto";
+
+package services.authentification.v1;
+
+enum UserRole {
+  ADMIN = 0;
+  VIEWER = 1;
+}
+
+message User {
+  int64 id = 1 [
+    (buf.validate.field).required = true
+  ];
+  optional string full_name = 2;
+  UserRole role = 3 [
+    (buf.validate.field).required = true
+  ];
+}"
+`;
+
+exports[`\`zodToProto\` test suite > Testing basic usage (unscoped message) > result 2`] = `
+"syntax = "proto3";
+
+import "buf/validate/validate.proto";
+
+package services.authentification.v1;
+
+enum UserRole {
+  ADMIN = 0;
+  VIEWER = 1;
+}
+
+message User {
+  int64 id = 1 [
+    (buf.validate.field).required = true
+  ];
+  optional string full_name = 2;
+  UserRole role = 3 [
+    (buf.validate.field).required = true
+  ];
+}"
+`;
+
+exports[`\`zodToProto\` test suite > Testing basic usage (unscoped message) > result 3`] = `
+"syntax = "proto3";
+
+import "buf/validate/validate.proto";
+
+package services.authentification.v1;
+
+enum UserRole {
+  ADMIN = 0;
+  VIEWER = 1;
+}
+
+message User {
+  int64 id = 1 [
+    (buf.validate.field).required = true
+  ];
+  optional string full_name = 2;
+  UserRole role = 3 [
+    (buf.validate.field).required = true
+  ];
+}"
+`;
+
+exports[`\`zodToProto\` test suite > Testing extension usage > result 1`] = `
+"syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+import "buf/validate/validate.proto";
+import "google/api/annotations.proto";
+
+package services.authentification.v1;
+
+service UserService {
+  option (deprecated) = true;
+  rpc GetUsers(google.protobuf.Empty) returns (stream GetUsersOutput) {
+    option (google.api.http).get = "/users";
+  }
+}
+
+enum UserRole {
+  ADMIN = 0;
+  VIEWER = 1;
+}
+
+message User {
+  int64 id = 1 [
+    (buf.validate.field).required = true
+  ];
+  optional string full_name = 2;
+  UserRole role = 3 [
+    (buf.validate.field).required = true
+  ];
+}
+
+message GetUsersOutput {
+  repeated User users = 1 [
+    (buf.validate.field).required = true
+  ];
+}"
+`;
+
+exports[`\`zodToProto\` test suite > Testing gRPC Service usage > result 1`] = `
+"syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+import "buf/validate/validate.proto";
+
+package services.authentification.v1;
+
+service UserService {
+  rpc GetUsers(google.protobuf.Empty) returns (stream GetUsersOutput) {}
+}
+
+enum UserRole {
+  ADMIN = 0;
+  VIEWER = 1;
+}
+
+message User {
+  int64 id = 1 [
+    (buf.validate.field).required = true
+  ];
+  optional string full_name = 2;
+  UserRole role = 3 [
+    (buf.validate.field).required = true
+  ];
+}
+
+message GetUsersOutput {
+  repeated User users = 1 [
+    (buf.validate.field).required = true
+  ];
+}"
+`;
+
+exports[`\`zodToProto\` test suite > Testing gRPC Service with gRPC gateway annotations usage > result 1`] = `
+"syntax = "proto3";
+
+import "buf/validate/validate.proto";
+import "google/protobuf/empty.proto";
+import "google/api/annotations.proto";
+
+package services.authentification.v1;
+
+service UserService {
+  rpc AddUser(AddUserInput) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/users",
+      body: "*"
+    };
+  }
+}
+
+enum UserRole {
+  ADMIN = 0;
+  VIEWER = 1;
+}
+
+message AddUserInputUser {
+  optional string full_name = 1;
+  UserRole role = 2 [
+    (buf.validate.field).required = true
+  ];
+}
+
+message AddUserInput {
+  AddUserInputUser user = 1 [
+    (buf.validate.field).required = true
+  ];
+}"
+`;
+
+exports[`\`zodToProto\` test suite > Testing type prefix usage > result 1`] = `
+"syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+import "buf/validate/validate.proto";
+
+package services.authentification.v1;
+
+service AuthentificationPackageUserService {
+  rpc GetUsers(google.protobuf.Empty) returns (AuthentificationPackageUserServiceGetUsersOutput) {}
+}
+
+service AuthentificationPackageUserService2 {
+  rpc GetUsers(google.protobuf.Empty) returns (AuthentificationPackageUserService2GetUsersOutput) {}
+}
+
+enum AuthentificationPackageUserService2GetUsersUserServiceGetUsersUserRole {
+  ADMIN = 0;
+  VIEWER = 1;
+}
+
+message AuthentificationPackageUserService2GetUsersUserServiceGetUsersUser {
+  int64 id = 1 [
+    (buf.validate.field).required = true
+  ];
+  optional string full_name = 2;
+  AuthentificationPackageUserService2GetUsersUserServiceGetUsersUserRole role = 3 [
+    (buf.validate.field).required = true
+  ];
+}
+
+message AuthentificationPackageUserService2GetUsersOutput {
+  repeated AuthentificationPackageUserService2GetUsersUserServiceGetUsersUser users = 1 [
+    (buf.validate.field).required = true
+  ];
+}
+
+message AuthentificationPackageUserServiceGetUsersOutput {
+  repeated AuthentificationPackageUserService2GetUsersUserServiceGetUsersUser users = 1 [
+    (buf.validate.field).required = true
+  ];
+}"
+`;

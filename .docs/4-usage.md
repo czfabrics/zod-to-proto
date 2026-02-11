@@ -138,7 +138,9 @@ const result = zodToProto({
             functions: [
                 {
                     name: 'AddUser',
-                    in: User.omit({ id: true }),
+                    in: z.object({
+                        user: User.omit({ id: true }),
+                    }),
                     extensions: [
                         Proto3HttpAnnotation.useExtension({
                             post: '/users',
@@ -172,14 +174,20 @@ service UserService {
   }
 }
 
-enum AddUserInputRole {
+enum UserRole {
   ADMIN = 0;
   VIEWER = 1;
 }
 
-message AddUserInput {
+message AddUserInputUser {
   optional string full_name = 1;
-  AddUserInputRole role = 2 [
+  UserRole role = 2 [
+    (buf.validate.field).required = true
+  ];
+}
+
+message AddUserInput {
+  AddUserInputUser user = 1 [
     (buf.validate.field).required = true
   ];
 }
