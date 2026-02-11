@@ -106,8 +106,7 @@ export class Proto3FileProcessor {
     }
 
     public process(file: ReadOnlyProto3File): FileContentMatter {
-        // TODOD:
-        // file.applyTypePrefix()
+        file = file.propagateTypePrefix()
 
         const content = fileContentMatter()
         const importedTypes = file.getDeepImportedTypes()

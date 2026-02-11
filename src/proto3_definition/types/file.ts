@@ -10,7 +10,7 @@ import type { Proto3ImportedType } from '#proto3_definition/types/types'
 export type Proto3File = {
     internalName: 'file'
     clone(params: CloneParams<Proto3File>): ReadOnlyProto3File
-    propagateTypePrefix(prefix: string): ReadOnlyProto3File
+    propagateTypePrefix(): ReadOnlyProto3File
     getDeepMessages(): AnyProto3Message[]
     getDeepImportedTypes(): Proto3ImportedType[]
     syntax: 'proto3'
@@ -38,18 +38,15 @@ export const Proto3File = {
                     ...params,
                 }
             },
-            propagateTypePrefix(
-                this: ReadOnlyProto3File,
-                prefix: string
-            ): ReadOnlyProto3File {
-                const newServices = this.services.map((service) => {
-                    if (this.typePrefix !== null) {
-                        return service
-                            .propagateTypePrefix(this.typePrefix)
-                            .propagateTypePrefix(prefix)
-                    }
+            propagateTypePrefix(this: ReadOnlyProto3File): ReadOnlyProto3File {
+                const typePrefix = this.typePrefix
 
-                    return service.propagateTypePrefix(prefix)
+                if (typePrefix === null) {
+                    return this
+                }
+
+                const newServices = this.services.map((service) => {
+                    return service.propagateTypePrefix(typePrefix)
                 })
 
                 return this.clone({
