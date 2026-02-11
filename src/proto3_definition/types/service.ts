@@ -17,7 +17,7 @@ export type Proto3RpcService = {
      * @example 'UserService'
      */
     name: string
-    typePrefix: string | undefined
+    typePrefix: string | null
     functions: Proto3RpcFunction[]
     extensions: Proto3Extension[]
     comments: string[]
@@ -42,7 +42,7 @@ export const Proto3RpcService = {
                 prefix: string
             ): ReadOnlyProto3RpcService {
                 const newFunctions = this.functions.map((rpcFunction) => {
-                    if (this.typePrefix !== undefined) {
+                    if (this.typePrefix !== null) {
                         return rpcFunction
                             .propagateTypePrefix(this.typePrefix)
                             .propagateTypePrefix(prefix)

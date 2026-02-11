@@ -17,9 +17,7 @@ export type Proto3RpcFunction = {
      * @example 'GetUsers'
      */
     name: string
-    // TODO: remplacer undefined par null car sinon on ne peut pas
-    // distinguer le undefined du partial ou de ce type là
-    typePrefix: string | undefined
+    typePrefix: string | null
     in: AnyProto3Message | Proto3ImportedType
     inStream: boolean
     out: AnyProto3Message | Proto3ImportedType
@@ -51,7 +49,7 @@ export const Proto3RpcFunction = {
                         { internalName: 'message' },
                         { internalName: 'enum' },
                         (message) => {
-                            if (this.typePrefix === undefined) {
+                            if (this.typePrefix === null) {
                                 return message.addPrefix(prefix)
                             }
 
@@ -66,7 +64,7 @@ export const Proto3RpcFunction = {
                         { internalName: 'message' },
                         { internalName: 'enum' },
                         (message) => {
-                            if (this.typePrefix === undefined) {
+                            if (this.typePrefix === null) {
                                 return message.addPrefix(prefix)
                             }
 

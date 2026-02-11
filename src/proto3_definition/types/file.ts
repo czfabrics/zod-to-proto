@@ -18,7 +18,7 @@ export type Proto3File = {
      * @example 'services.authentification.v1'
      */
     packageName: string
-    typePrefix: string | undefined
+    typePrefix: string | null
     services: Proto3RpcService[]
     unscopedMessages: AnyProto3Message[]
     extensions: Proto3Extension[]
@@ -43,7 +43,7 @@ export const Proto3File = {
                 prefix: string
             ): ReadOnlyProto3File {
                 const newServices = this.services.map((service) => {
-                    if (this.typePrefix !== undefined) {
+                    if (this.typePrefix !== null) {
                         return service
                             .propagateTypePrefix(this.typePrefix)
                             .propagateTypePrefix(prefix)

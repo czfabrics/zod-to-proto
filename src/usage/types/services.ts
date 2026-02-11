@@ -19,7 +19,7 @@ export const Proto3RpcRawService = {
 
         return Proto3RpcService.new({
             ...raw,
-            typePrefix: raw.typePrefix,
+            typePrefix: raw.typePrefix ?? null,
             functions: convertedFunctions,
             extensions: raw.extensions ?? [],
             comments: raw.comments ?? [],

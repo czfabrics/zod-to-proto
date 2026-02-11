@@ -29,7 +29,7 @@ export const Proto3RpcRawFunction = {
 
         return Proto3RpcFunction.new({
             ...raw,
-            typePrefix: raw.typePrefix,
+            typePrefix: raw.typePrefix ?? null,
             in: convertedIn ?? settings.protoVoidType,
             inStream: raw.inStream ?? false,
             out: convertedOut ?? settings.protoVoidType,

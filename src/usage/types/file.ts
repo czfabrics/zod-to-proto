@@ -40,7 +40,7 @@ export const Proto3RawFile = {
         return Proto3File.new({
             ...raw,
             syntax: raw.syntax ?? 'proto3',
-            typePrefix: raw.typePrefix,
+            typePrefix: raw.typePrefix ?? null,
             services: convertedServices,
             unscopedMessages: convertedMessages,
             extensions: raw.extensions ?? [],
