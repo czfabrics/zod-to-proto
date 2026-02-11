@@ -6,11 +6,13 @@ export type GetNewParams<T> =
           | 'id'
           | 'internalName'
           | 'clone'
+          | 'updateDeepInnerType'
           | 'addPrefix'
           | 'propagateTypePrefix'
           | 'computeNewIndexForFields'
           | 'getDeepMessages'
           | 'getDeepImportedTypes'
+          | 'getDeepInnerType'
           | 'getNextIndex'
       >
     | DeepReadOnly<
@@ -19,11 +21,13 @@ export type GetNewParams<T> =
               | 'id'
               | 'internalName'
               | 'clone'
+              | 'updateDeepInnerType'
               | 'addPrefix'
               | 'propagateTypePrefix'
               | 'computeNewIndexForFields'
               | 'getDeepMessages'
               | 'getDeepImportedTypes'
+              | 'getDeepInnerType'
               | 'getNextIndex'
           >
       >
@@ -33,11 +37,13 @@ export type GetOverrideParams<T> =
           T,
           | 'internalName'
           | 'clone'
+          | 'updateDeepInnerType'
           | 'addPrefix'
           | 'propagateTypePrefix'
           | 'computeNewIndexForFields'
           | 'getDeepMessages'
           | 'getDeepImportedTypes'
+          | 'getDeepInnerType'
           | 'getNextIndex'
       >
     | DeepReadOnly<
@@ -45,11 +51,13 @@ export type GetOverrideParams<T> =
               T,
               | 'internalName'
               | 'clone'
+              | 'updateDeepInnerType'
               | 'addPrefix'
               | 'propagateTypePrefix'
               | 'computeNewIndexForFields'
               | 'getDeepMessages'
               | 'getDeepImportedTypes'
+              | 'getDeepInnerType'
               | 'getNextIndex'
           >
       >
@@ -58,10 +66,12 @@ export type GetAnyNewParams<T> = Omit<
     T,
     | 'id'
     | 'clone'
+    | 'updateDeepInnerType'
     | 'addPrefix'
     | 'propagateTypePrefix'
     | 'computeNewIndexForFields'
     | 'getDeepMessages'
     | 'getDeepImportedTypes'
+    | 'getDeepInnerType'
     | 'getNextIndex'
 >

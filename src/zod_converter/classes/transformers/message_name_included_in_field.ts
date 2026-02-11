@@ -1,5 +1,6 @@
 import type {
     ReadOnlyAnyProto3MessageField,
+    ReadOnlyProto3MessageField,
     ReadOnlyProto3MessageOneOfFieldSubField,
 } from '#proto3_definition/types/fields'
 import type {
@@ -15,6 +16,75 @@ export class ZodMessageNameIncludedInFieldConversionTransformer implements ZodMe
     private readonly alreadyTransformedMessages: Map<string, ReadOnlyAnyProto3Message> =
         new Map()
 
+    myfunc<
+        TField extends
+            | ReadOnlyProto3MessageField
+            | ReadOnlyProto3MessageOneOfFieldSubField,
+    >(parentName: string, isNameInversed: boolean, field: TField): TField {
+        if (field.type.internalName === 'repeated') {
+            const deepInner = field.type.getDeepInnerType()
+
+            if (deepInner.internalName !== 'message') {
+                return field
+            }
+
+            const alreadyTransformed = this.alreadyTransformedMessages.get(deepInner.id)
+
+            if (alreadyTransformed !== undefined) {
+                return field.clone({
+                    type: field.type.updateDeepInnerType(alreadyTransformed),
+                }) as TField
+            }
+
+            const updatedDeepInner = deepInner.clone({
+                name: isNameInversed
+                    ? pascalCase(`${deepInner.name}_${parentName}`)
+                    : pascalCase(`${parentName}_${deepInner.name}`),
+            })
+
+            const newField = field.clone({
+                type: field.type.updateDeepInnerType(updatedDeepInner),
+            })
+
+            if (newField.type.internalName === 'message') {
+                this.alreadyTransformedMessages.set(deepInner.id, updatedDeepInner)
+            }
+
+            return newField as TField
+        }
+
+        if (
+            field.type.internalName === 'message' &&
+            !this.alreadyTransformedMessages.has(field.type.id)
+        ) {
+            const newField = field.clone({
+                type: field.type.clone({
+                    name: isNameInversed
+                        ? pascalCase(`${field.type.name}_${parentName}`)
+                        : pascalCase(`${parentName}_${field.type.name}`),
+                }),
+            })
+
+            if (newField.type.internalName === 'message') {
+                this.alreadyTransformedMessages.set(field.type.id, newField.type)
+            }
+
+            return newField as TField
+        } else if (field.type.internalName === 'message') {
+            const alreadyTransformed = this.alreadyTransformedMessages.get(field.type.id)
+
+            return field.clone({
+                //// We keep the same ID after clone for the processor
+                type:
+                    alreadyTransformed?.clone({
+                        id: alreadyTransformed.id,
+                    }) ?? field.type,
+            }) as TField
+        } else {
+            return field
+        }
+    }
+
     transform(
         _schema: WithMaybeZodPassthrough<AnyZodMessage>,
         protoDefinition: ReadOnlyProto3Message
@@ -23,79 +93,16 @@ export class ZodMessageNameIncludedInFieldConversionTransformer implements ZodMe
 
         for (const field of protoDefinition.fields) {
             if (field.internalName === 'message_field') {
-                if (
-                    field.type.internalName === 'message' &&
-                    !this.alreadyTransformedMessages.has(field.type.id)
-                ) {
-                    const newField = field.clone({
-                        type: field.type.clone({
-                            name: pascalCase(
-                                `${protoDefinition.name}_${field.type.name}`
-                            ),
-                        }),
-                    })
+                const newField = this.myfunc(protoDefinition.name, false, field)
 
-                    newFields.push(newField)
-
-                    if (newField.type.internalName === 'message') {
-                        this.alreadyTransformedMessages.set(field.type.id, newField.type)
-                    }
-                } else if (field.type.internalName === 'message') {
-                    const alreadyTransformed = this.alreadyTransformedMessages.get(
-                        field.type.id
-                    )
-
-                    newFields.push(
-                        field.clone({
-                            //// We keep the same ID after clone for the processor
-                            type:
-                                alreadyTransformed?.clone({
-                                    id: alreadyTransformed.id,
-                                }) ?? field.type,
-                        })
-                    )
-                } else {
-                    newFields.push(field)
-                }
+                newFields.push(newField)
             } else {
                 const newSubFields: ReadOnlyProto3MessageOneOfFieldSubField[] = []
 
                 for (const subField of field.subFields) {
-                    if (
-                        subField.type.internalName === 'message' &&
-                        !this.alreadyTransformedMessages.has(subField.type.id)
-                    ) {
-                        const newSubField = subField.clone({
-                            type: subField.type.clone({
-                                name: pascalCase(`${subField.type.name}_${field.key}`),
-                            }),
-                        })
+                    const newSubField = this.myfunc(field.key, true, subField)
 
-                        newSubFields.push(newSubField)
-
-                        if (newSubField.type.internalName === 'message') {
-                            this.alreadyTransformedMessages.set(
-                                subField.type.id,
-                                newSubField.type
-                            )
-                        }
-                    } else if (subField.type.internalName === 'message') {
-                        const alreadyTransformed = this.alreadyTransformedMessages.get(
-                            subField.type.id
-                        )
-
-                        newSubFields.push(
-                            subField.clone({
-                                //// We keep the same ID after clone for the processor
-                                type:
-                                    alreadyTransformed?.clone({
-                                        id: alreadyTransformed.id,
-                                    }) ?? subField.type,
-                            })
-                        )
-                    } else {
-                        newSubFields.push(subField)
-                    }
+                    newSubFields.push(newSubField)
                 }
 
                 const newField = field.clone({

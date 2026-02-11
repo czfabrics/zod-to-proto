@@ -2,9 +2,18 @@ import type { PurgeUndefinedValues } from '#core/types/purge_undefined_values'
 import type { CloneParams } from '#proto3_definition/types/clone'
 import type { DeepReadOnly } from '#proto3_definition/types/deep_read_only'
 import type { GetNewParams } from '#proto3_definition/types/get_new_params'
-import type { AnyProto3Message } from '#proto3_definition/types/messages'
-import type { Proto3ScalarType } from '#proto3_definition/types/scalars'
-import type { Proto3ImportedType } from '#proto3_definition/types/types'
+import type {
+    AnyProto3Message,
+    ReadOnlyAnyProto3Message,
+} from '#proto3_definition/types/messages'
+import type {
+    Proto3ScalarType,
+    ReadOnlyProto3ScalarType,
+} from '#proto3_definition/types/scalars'
+import type {
+    Proto3ImportedType,
+    ReadOnlyProto3ImportedType,
+} from '#proto3_definition/types/types'
 import type { WithInternalName } from '#proto3_definition/types/with_internal_name'
 import { match } from 'ts-pattern'
 
@@ -29,9 +38,13 @@ type Proto3DynamicSizeTypes = {
     }
     REPEATED: {
         clone(params: CloneParams<Proto3RepeatedType>): ReadOnlyProto3RepeatedType
+        updateDeepInnerType(
+            newInner: Proto3RepeatedInnerType | ReadOnlyProto3RepeatedInnerType
+        ): ReadOnlyProto3RepeatedType
         propagateTypePrefix(prefixList: string[]): ReadOnlyProto3RepeatedType
         getDeepMessages(): AnyProto3Message[]
         getDeepImportedTypes(): Proto3ImportedType[]
+        getDeepInnerType(): Exclude<Proto3RepeatedInnerType, { internalName: 'repeated' }>
         inner: Proto3RepeatedInnerType
     }
 }
@@ -105,6 +118,45 @@ export const Proto3RepeatedType = {
                     ...params,
                 }
             },
+            updateDeepInnerType(
+                newInner: Proto3RepeatedInnerType | ReadOnlyProto3RepeatedInnerType
+            ): ReadOnlyProto3RepeatedType {
+                let currentItem: ReadOnlyProto3RepeatedInnerType = this
+
+                const repeatedLayers: ReadOnlyProto3RepeatedType[] = []
+
+                while (currentItem.internalName === 'repeated') {
+                    repeatedLayers.push(currentItem)
+
+                    currentItem = currentItem.inner
+                }
+
+                repeatedLayers.shift()
+
+                if (repeatedLayers.length === 0) {
+                    return this.clone({
+                        inner: newInner,
+                    })
+                }
+
+                let previous: ReadOnlyProto3RepeatedType | undefined = repeatedLayers
+                    .pop()
+                    ?.clone({
+                        inner: newInner,
+                    })
+
+                while (repeatedLayers.length > 0) {
+                    const current = repeatedLayers.pop()!
+
+                    previous = current.clone({
+                        inner: previous,
+                    })
+                }
+
+                return this.clone({
+                    inner: previous,
+                })
+            },
             propagateTypePrefix(
                 this: ReadOnlyProto3RepeatedType,
                 prefixList: string[]
@@ -127,12 +179,11 @@ export const Proto3RepeatedType = {
                 })
             },
             getDeepMessages() {
-                let currentItem: DeepReadOnly<
-                    | AnyProto3Message
-                    | Proto3ImportedType
-                    | Proto3DynamicSizeType
-                    | Proto3ScalarType
-                > = this
+                let currentItem:
+                    | ReadOnlyAnyProto3Message
+                    | ReadOnlyProto3ImportedType
+                    | ReadOnlyProto3DynamicSizeType
+                    | ReadOnlyProto3ScalarType = this
 
                 while (currentItem.internalName === 'repeated') {
                     currentItem = currentItem.inner
@@ -141,18 +192,30 @@ export const Proto3RepeatedType = {
                 return currentItem.getDeepMessages()
             },
             getDeepImportedTypes() {
-                let currentItem: DeepReadOnly<
-                    | AnyProto3Message
-                    | Proto3ImportedType
-                    | Proto3DynamicSizeType
-                    | Proto3ScalarType
-                > = this
+                let currentItem:
+                    | ReadOnlyAnyProto3Message
+                    | ReadOnlyProto3ImportedType
+                    | ReadOnlyProto3DynamicSizeType
+                    | ReadOnlyProto3ScalarType = this
 
                 while (currentItem.internalName === 'repeated') {
                     currentItem = currentItem.inner
                 }
 
                 return currentItem.getDeepImportedTypes()
+            },
+            getDeepInnerType() {
+                let currentItem:
+                    | ReadOnlyAnyProto3Message
+                    | ReadOnlyProto3ImportedType
+                    | ReadOnlyProto3DynamicSizeType
+                    | ReadOnlyProto3ScalarType = this
+
+                while (currentItem.internalName === 'repeated') {
+                    currentItem = currentItem.inner
+                }
+
+                return currentItem
             },
             ...params,
         }

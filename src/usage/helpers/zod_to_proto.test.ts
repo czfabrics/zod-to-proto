@@ -6,12 +6,6 @@ import { setProtoMeta } from '#zod_converter/helpers/registry'
 import { describe, test } from 'vitest'
 import z from 'zod'
 
-const User = z.object({
-    id: z.int64(),
-    fullName: z.string().optional(),
-    role: z.enum(['ADMIN', 'VIEWER']),
-})
-
 type TaskSchemaParams = {
     name: string
     target: readonly string[]
@@ -79,6 +73,12 @@ export const SynchronizationTaskOrGroupExternalUnionWithGroupSchema = pz.oneOfUn
 
 describe('`zodToProto` test suite', () => {
     test('Testing basic usage (unscoped message)', async ({ expect }) => {
+        const User = z.object({
+            id: z.int64(),
+            fullName: z.string().optional(),
+            role: z.enum(['ADMIN', 'VIEWER']),
+        })
+
         const result = zodToProto({
             syntax: 'proto3',
             packageName: 'services.authentification.v1',
@@ -92,6 +92,12 @@ describe('`zodToProto` test suite', () => {
     })
 
     test('Testing gRPC Service usage', async ({ expect }) => {
+        const User = z.object({
+            id: z.int64(),
+            fullName: z.string().optional(),
+            role: z.enum(['ADMIN', 'VIEWER']),
+        })
+
         const result = zodToProto({
             syntax: 'proto3',
             packageName: 'services.authentification.v1',
@@ -119,6 +125,12 @@ describe('`zodToProto` test suite', () => {
     test('Testing gRPC Service with gRPC gateway annotations usage', async ({
         expect,
     }) => {
+        const User = z.object({
+            id: z.int64(),
+            fullName: z.string().optional(),
+            role: z.enum(['ADMIN', 'VIEWER']),
+        })
+
         const result = zodToProto({
             syntax: 'proto3',
             packageName: 'services.authentification.v1',
@@ -147,6 +159,17 @@ describe('`zodToProto` test suite', () => {
     })
 
     test('Testing type prefix usage', async ({ expect }) => {
+        const User = z.object({
+            id: z.int64(),
+            fullName: z.string().optional(),
+            role: z.enum(['ADMIN', 'VIEWER']),
+        })
+        const User2 = z.object({
+            id: z.int64(),
+            fullName: z.string().optional(),
+            role: z.enum(['ADMIN', 'VIEWER']),
+        })
+
         const result = zodToProto({
             syntax: 'proto3',
             packageName: 'services.authentification.v1',
@@ -173,7 +196,7 @@ describe('`zodToProto` test suite', () => {
                             name: 'GetUsers',
                             typePrefix: 'GetUsers',
                             out: z.object({
-                                users: z.array(User),
+                                users: z.array(User2),
                             }),
                         },
                     ],
@@ -185,6 +208,12 @@ describe('`zodToProto` test suite', () => {
     })
 
     test('Testing extension usage', async ({ expect }) => {
+        const User = z.object({
+            id: z.int64(),
+            fullName: z.string().optional(),
+            role: z.enum(['ADMIN', 'VIEWER']),
+        })
+
         const result = zodToProto({
             syntax: 'proto3',
             packageName: 'services.authentification.v1',
@@ -230,13 +259,13 @@ describe('`zodToProto` test suite', () => {
 
         const result = zodToProto({
             syntax: 'proto3',
-            packageName: 'services.authentification.v1',
+            packageName: 'services.synchronization.v1',
             services: [
                 {
-                    name: 'UserService',
+                    name: 'SynchronizationService',
                     functions: [
                         {
-                            name: 'getUsers',
+                            name: 'PostAsyncTasks',
                             in: PostAsyncTasksInputDtoSchema,
                             inStream: false,
                         },
