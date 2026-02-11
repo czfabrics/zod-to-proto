@@ -8,6 +8,7 @@ export type GetNewParams<T> =
           | 'clone'
           | 'addPrefix'
           | 'propagateTypePrefix'
+          | 'computeNewIndexForFields'
           | 'getDeepMessages'
           | 'getDeepImportedTypes'
           | 'getNextIndex'
@@ -20,6 +21,33 @@ export type GetNewParams<T> =
               | 'clone'
               | 'addPrefix'
               | 'propagateTypePrefix'
+              | 'computeNewIndexForFields'
+              | 'getDeepMessages'
+              | 'getDeepImportedTypes'
+              | 'getNextIndex'
+          >
+      >
+
+export type GetOverrideParams<T> =
+    | Omit<
+          T,
+          | 'internalName'
+          | 'clone'
+          | 'addPrefix'
+          | 'propagateTypePrefix'
+          | 'computeNewIndexForFields'
+          | 'getDeepMessages'
+          | 'getDeepImportedTypes'
+          | 'getNextIndex'
+      >
+    | DeepReadOnly<
+          Omit<
+              T,
+              | 'internalName'
+              | 'clone'
+              | 'addPrefix'
+              | 'propagateTypePrefix'
+              | 'computeNewIndexForFields'
               | 'getDeepMessages'
               | 'getDeepImportedTypes'
               | 'getNextIndex'
@@ -32,6 +60,7 @@ export type GetAnyNewParams<T> = Omit<
     | 'clone'
     | 'addPrefix'
     | 'propagateTypePrefix'
+    | 'computeNewIndexForFields'
     | 'getDeepMessages'
     | 'getDeepImportedTypes'
     | 'getNextIndex'

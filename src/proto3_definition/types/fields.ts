@@ -206,6 +206,7 @@ export const Proto3MessageOneOfField = {
 export type Proto3EnumField = Proto3BaseField & {
     index: number
     internalName: 'enum_field'
+    clone(params: CloneParams<Proto3EnumField>): ReadOnlyProto3EnumField
     extensions: Proto3Extension[]
     comments: string[]
 }
@@ -216,6 +217,15 @@ export const Proto3EnumField = {
     new: function (params: GetNewParams<Proto3EnumField>): ReadOnlyProto3EnumField {
         return {
             internalName: 'enum_field',
+            clone(
+                this: ReadOnlyProto3EnumField,
+                params: PurgeUndefinedValues<CloneParams<Proto3EnumField>>
+            ): ReadOnlyProto3EnumField {
+                return {
+                    ...this,
+                    ...params,
+                }
+            },
             ...params,
         }
     },

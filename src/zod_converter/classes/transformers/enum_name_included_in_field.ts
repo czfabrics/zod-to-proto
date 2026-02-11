@@ -2,14 +2,18 @@ import type {
     ReadOnlyAnyProto3MessageField,
     ReadOnlyProto3MessageOneOfFieldSubField,
 } from '#proto3_definition/types/fields'
-import type { ReadOnlyProto3Message } from '#proto3_definition/types/messages'
+import type {
+    ReadOnlyAnyProto3Message,
+    ReadOnlyProto3Message,
+} from '#proto3_definition/types/messages'
 import type { AnyZodMessage } from '#zod_converter/types/messages'
 import type { WithMaybeZodPassthrough } from '#zod_converter/types/passthroughs'
 import type { ZodMessageConversionTransformer } from '#zod_converter/types/transformers'
 import { pascalCase } from 'change-case'
 
 export class ZodEnumNameIncludedInFieldConversionTransformer implements ZodMessageConversionTransformer {
-    private readonly alreadyTransformedIds: Set<string> = new Set()
+    private readonly alreadyTransformedMessages: Map<string, ReadOnlyAnyProto3Message> =
+        new Map()
 
     transform(
         _schema: WithMaybeZodPassthrough<AnyZodMessage>,
@@ -21,7 +25,7 @@ export class ZodEnumNameIncludedInFieldConversionTransformer implements ZodMessa
             if (field.internalName === 'message_field') {
                 if (
                     field.type.internalName === 'enum' &&
-                    !this.alreadyTransformedIds.has(field.type.id)
+                    !this.alreadyTransformedMessages.has(field.type.id)
                 ) {
                     const newField = field.clone({
                         type: field.type.clone({
@@ -33,7 +37,23 @@ export class ZodEnumNameIncludedInFieldConversionTransformer implements ZodMessa
 
                     newFields.push(newField)
 
-                    this.alreadyTransformedIds.add(field.type.id)
+                    if (newField.type.internalName === 'enum') {
+                        this.alreadyTransformedMessages.set(field.type.id, newField.type)
+                    }
+                } else if (field.type.internalName === 'enum') {
+                    const alreadyTransformed = this.alreadyTransformedMessages.get(
+                        field.type.id
+                    )
+
+                    newFields.push(
+                        field.clone({
+                            //// We keep the same ID after clone for the processor
+                            type:
+                                alreadyTransformed?.clone({
+                                    id: alreadyTransformed.id,
+                                }) ?? field.type,
+                        })
+                    )
                 } else {
                     newFields.push(field)
                 }
@@ -43,7 +63,7 @@ export class ZodEnumNameIncludedInFieldConversionTransformer implements ZodMessa
                 for (const subField of field.subFields) {
                     if (
                         subField.type.internalName === 'enum' &&
-                        !this.alreadyTransformedIds.has(subField.type.id)
+                        !this.alreadyTransformedMessages.has(subField.type.id)
                     ) {
                         const newSubField = subField.clone({
                             type: subField.type.clone({
@@ -53,7 +73,26 @@ export class ZodEnumNameIncludedInFieldConversionTransformer implements ZodMessa
 
                         newSubFields.push(newSubField)
 
-                        this.alreadyTransformedIds.add(subField.type.id)
+                        if (newSubField.type.internalName === 'enum') {
+                            this.alreadyTransformedMessages.set(
+                                subField.type.id,
+                                newSubField.type
+                            )
+                        }
+                    } else if (subField.type.internalName === 'enum') {
+                        const alreadyTransformed = this.alreadyTransformedMessages.get(
+                            subField.type.id
+                        )
+
+                        newSubFields.push(
+                            subField.clone({
+                                //// We keep the same ID after clone for the processor
+                                type:
+                                    alreadyTransformed?.clone({
+                                        id: alreadyTransformed.id,
+                                    }) ?? subField.type,
+                            })
+                        )
                     } else {
                         newSubFields.push(subField)
                     }
