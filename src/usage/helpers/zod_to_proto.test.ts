@@ -1,6 +1,8 @@
 import { Proto3Deprecated } from '#plugin/types/global'
 import { Proto3HttpAnnotation } from '#plugin/types/google_api_annotations'
 import { zodToProto } from '#usage/helpers/zod_to_proto'
+import { pz } from '#zod/helpers/zod_one_of_union'
+import { setProtoMeta } from '#zod_converter/helpers/registry'
 import { describe, test } from 'vitest'
 import z from 'zod'
 
@@ -9,6 +11,71 @@ const User = z.object({
     fullName: z.string().optional(),
     role: z.enum(['ADMIN', 'VIEWER']),
 })
+
+type TaskSchemaParams = {
+    name: string
+    target: readonly string[]
+}
+
+const getTaskSchema = function <const TParams extends TaskSchemaParams>(params: TParams) {
+    const entries = params.target.map((entityName) => {
+        return [
+            entityName,
+            setProtoMeta(
+                z.object({
+                    externalId: z.string().nonempty(),
+                }),
+                {
+                    protoConversionId: `task_external_entity_${entityName}_schema`,
+                }
+            ),
+        ]
+    })
+
+    const shape = Object.fromEntries(entries)
+    const target = z.object(shape)
+
+    return z.object({
+        name: z.literal(params.name),
+        target,
+    })
+}
+
+export const SynchronizationTaskEnum = {
+    SYNCHRONIZE_USERS: 'synchronizeUsers',
+    CREATE_WORKSPACE: 'createWorkspace',
+    UPDATE_WORKSPACE: 'updateWorkspace',
+} as const
+
+export const SynchronizeUsersTaskSchema = getTaskSchema({
+    name: SynchronizationTaskEnum.SYNCHRONIZE_USERS,
+    target: ['workspace'],
+})
+
+export const CreateWorkspaceTaskSchema = getTaskSchema({
+    name: SynchronizationTaskEnum.CREATE_WORKSPACE,
+    target: ['credential', 'workspace'],
+})
+
+export const UpdateWorkspaceTaskSchema = getTaskSchema({
+    name: SynchronizationTaskEnum.UPDATE_WORKSPACE,
+    target: ['credential', 'workspace'],
+})
+
+export const SynchronizationTaskOrGroupExternalUnionWithGroupSchema = pz.oneOfUnion([
+    [
+        SynchronizationTaskEnum.SYNCHRONIZE_USERS,
+        SynchronizeUsersTaskSchema.omit({ name: true }),
+    ],
+    [
+        SynchronizationTaskEnum.CREATE_WORKSPACE,
+        CreateWorkspaceTaskSchema.omit({ name: true }),
+    ],
+    [
+        SynchronizationTaskEnum.UPDATE_WORKSPACE,
+        UpdateWorkspaceTaskSchema.omit({ name: true }),
+    ],
+])
 
 describe('`zodToProto` test suite', () => {
     test('Testing basic usage (unscoped message)', async ({ expect }) => {
@@ -142,6 +209,37 @@ describe('`zodToProto` test suite', () => {
                     extensions: [
                         //// Global option
                         Proto3Deprecated.useExtension(true),
+                    ],
+                },
+            ],
+        })
+
+        expect(result).toMatchSnapshot('result')
+    })
+
+    test('Testing complex usage', async ({ expect }) => {
+        const PostAsyncTasksInputDtoSchema = z.object({
+            tasks: z
+                .array(
+                    z.object({
+                        task: SynchronizationTaskOrGroupExternalUnionWithGroupSchema,
+                    })
+                )
+                .min(1),
+        })
+
+        const result = zodToProto({
+            syntax: 'proto3',
+            packageName: 'services.authentification.v1',
+            services: [
+                {
+                    name: 'UserService',
+                    functions: [
+                        {
+                            name: 'getUsers',
+                            in: PostAsyncTasksInputDtoSchema,
+                            inStream: false,
+                        },
                     ],
                 },
             ],

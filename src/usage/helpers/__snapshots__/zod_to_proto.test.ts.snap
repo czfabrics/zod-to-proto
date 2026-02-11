@@ -23,47 +23,89 @@ message User {
 }"
 `;
 
-exports[`\`zodToProto\` test suite > Testing basic usage (unscoped message) > result 2`] = `
+exports[`\`zodToProto\` test suite > Testing complex usage > result 1`] = `
 "syntax = "proto3";
 
 import "buf/validate/validate.proto";
+import "google/protobuf/empty.proto";
 
 package services.authentification.v1;
 
-enum UserRole {
-  ADMIN = 0;
-  VIEWER = 1;
+service UserService {
+  rpc getUsers(GetUsersInput) returns (google.protobuf.Empty) {}
 }
 
-message User {
-  int64 id = 1 [
+message TargetWorkspace {
+  string external_id = 1 [
     (buf.validate.field).required = true
   ];
-  optional string full_name = 2;
-  UserRole role = 3 [
-    (buf.validate.field).required = true
-  ];
-}"
-`;
-
-exports[`\`zodToProto\` test suite > Testing basic usage (unscoped message) > result 3`] = `
-"syntax = "proto3";
-
-import "buf/validate/validate.proto";
-
-package services.authentification.v1;
-
-enum UserRole {
-  ADMIN = 0;
-  VIEWER = 1;
 }
 
-message User {
-  int64 id = 1 [
+message TargetCredential {
+  string external_id = 1 [
     (buf.validate.field).required = true
   ];
-  optional string full_name = 2;
-  UserRole role = 3 [
+}
+
+message UpdateWorkspaceTarget {
+  TargetCredential credential = 1 [
+    (buf.validate.field).required = true
+  ];
+  TargetWorkspace workspace = 2 [
+    (buf.validate.field).required = true
+  ];
+}
+
+message UpdateWorkspaceTask {
+  UpdateWorkspaceTarget target = 1 [
+    (buf.validate.field).required = true
+  ];
+}
+
+message CreateWorkspaceTarget {
+  TargetCredential credential = 1 [
+    (buf.validate.field).required = true
+  ];
+  TargetWorkspace workspace = 2 [
+    (buf.validate.field).required = true
+  ];
+}
+
+message CreateWorkspaceTask {
+  CreateWorkspaceTarget target = 1 [
+    (buf.validate.field).required = true
+  ];
+}
+
+message SynchronizeUsersTarget {
+  TargetWorkspace workspace = 1 [
+    (buf.validate.field).required = true
+  ];
+}
+
+message SynchronizeUsersTask {
+  SynchronizeUsersTarget target = 1 [
+    (buf.validate.field).required = true
+  ];
+}
+
+message Task {
+  oneof task {
+    option (buf.validate.oneof).required = true;
+    SynchronizeUsersTask synchronize_users = 1 [
+      (buf.validate.field).required = true
+    ];
+    CreateWorkspaceTask create_workspace = 2 [
+      (buf.validate.field).required = true
+    ];
+    UpdateWorkspaceTask update_workspace = 3 [
+      (buf.validate.field).required = true
+    ];
+  }
+}
+
+message GetUsersInput {
+  repeated Task tasks = 1 [
     (buf.validate.field).required = true
   ];
 }"
