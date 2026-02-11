@@ -1,13 +1,15 @@
 import {
     Proto3EnumField,
-    ReadOnlyAnyProto3MessageField,
-    ReadOnlyProto3MessageField,
-    ReadOnlyProto3MessageOneOfField,
+    type ReadOnlyAnyProto3MessageField,
+    type ReadOnlyProto3MessageField,
+    type ReadOnlyProto3MessageOneOfField,
 } from '#proto3_definition/types/fields'
 import {
     Proto3Enum,
     Proto3Message,
-    ReadOnlyAnyProto3Message,
+    type ReadOnlyAnyProto3Message,
+    type ReadOnlyProto3Enum,
+    type ReadOnlyProto3Message,
 } from '#proto3_definition/types/messages'
 import { assertsAnyZodMessageFieldType } from '#zod_converter/asserts/any_zod_message_field_type'
 import { ZodMessageFieldConverter } from '#zod_converter/classes/zod_message_field_converter'
@@ -34,18 +36,20 @@ export class ZodMessageConverter {
         name: string,
         rootSchema: WithMaybeZodPassthrough<AnyZodMessage>,
         schema: ZodObject
-    ): Proto3Message {
-        const message = Proto3Message.new({
+    ): ReadOnlyProto3Message {
+        let message = Proto3Message.new({
             name: pascalCase(name),
             fields: [],
             extensions: [],
             comments: getZodSchemaComments(rootSchema),
         })
 
+        const fields: ReadOnlyAnyProto3MessageField[] = []
+
         for (const [key, entrySchema] of Object.entries(schema.shape)) {
             assertsAnyZodMessageFieldType(entrySchema)
 
-            let field: Proto3MessageField | Proto3MessageOneOfField
+            let field: ReadOnlyProto3MessageField | ReadOnlyProto3MessageOneOfField
 
             if (ZodMessageFieldType.is(entrySchema)) {
                 const converter = new ZodMessageFieldConverter(
@@ -65,24 +69,25 @@ export class ZodMessageConverter {
                 field = converter.convert(key, entrySchema)
             }
 
-            message.fields.push(field)
+            fields.push(field)
         }
 
-        const updatedMessage = this.transformers.message.reduce(
-            (message, transformer) => {
-                return transformer.transform(rootSchema, message)
-            },
-            message
-        )
+        message = message.clone({
+            fields,
+        })
 
-        return updatedMessage
+        message = this.transformers.message.reduce((message, transformer) => {
+            return transformer.transform(rootSchema, message)
+        }, message)
+
+        return message
     }
 
     private makeEnumFromSchema(
         name: string,
         rootSchema: WithMaybeZodPassthrough<AnyZodMessage>,
         schema: ZodEnum
-    ): Proto3Enum {
+    ): ReadOnlyProto3Enum {
         const fields = Array.from(schema._zod.values).map((value, index) => {
             if (typeof value !== 'string') {
                 throw new Error(

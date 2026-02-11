@@ -1,5 +1,5 @@
 import type { FileContentMatter } from '#file/types/content_matter'
-import { ReadOnlyProto3ImportedType } from '#proto3_definition/types/types'
+import type { ReadOnlyProto3ImportedType } from '#proto3_definition/types/types'
 
 export class Proto3ImportProcessor {
     public constructor(private readonly content: FileContentMatter) {}

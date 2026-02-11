@@ -1,5 +1,8 @@
 import { Proto3Deprecated } from '#plugin/types/global'
-import { Proto3MessageOneOfField } from '#proto3_definition/types/fields'
+import {
+    Proto3MessageOneOfField,
+    type ReadOnlyProto3MessageOneOfField,
+} from '#proto3_definition/types/fields'
 import { isZodSchemaDeprecated } from '#zod_converter/helpers/is_zod_schema_deprecated'
 import type { ZodMessageOneOfFieldType } from '#zod_converter/types/messages'
 import type { WithMaybeZodPassthrough } from '#zod_converter/types/passthroughs'
@@ -8,8 +11,8 @@ import type { ZodMessageOneOfFieldConversionTransformer } from '#zod_converter/t
 export class ZodDeprecatedOneOfFieldConversionTransformer implements ZodMessageOneOfFieldConversionTransformer {
     transform(
         schema: WithMaybeZodPassthrough<ZodMessageOneOfFieldType>,
-        protoDefinition: Proto3MessageOneOfField
-    ): Proto3MessageOneOfField {
+        protoDefinition: ReadOnlyProto3MessageOneOfField
+    ): ReadOnlyProto3MessageOneOfField {
         const isDeprecated = isZodSchemaDeprecated(schema)
 
         if (!isDeprecated) {

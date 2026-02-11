@@ -1,4 +1,5 @@
 import { getRandomId } from '#core/helpers/get_random_id'
+import { DeepReadOnly } from '#proto3_definition/types/deep_read_only'
 import {
     getProtoConversionId,
     setProtoConversionId,
@@ -10,9 +11,9 @@ export class DefaultConversionStore<
     TSchema extends AnyZodMessage,
     TProtoDef,
 > implements ConversionReuseStrategy<TSchema, TProtoDef> {
-    private readonly store: Record<string, TProtoDef> = {}
+    private readonly store: Record<string, DeepReadOnly<TProtoDef>> = {}
 
-    reuseConversion(schema: TSchema): TProtoDef | undefined {
+    reuseConversion(schema: TSchema): DeepReadOnly<TProtoDef> | undefined {
         const conversionId: string | undefined = getProtoConversionId(schema)
 
         if (conversionId === undefined) {
@@ -22,7 +23,7 @@ export class DefaultConversionStore<
         return this.store[conversionId]
     }
 
-    storeConversion(schema: TSchema, protoMessage: TProtoDef): void {
+    storeConversion(schema: TSchema, protoMessage: DeepReadOnly<TProtoDef>): void {
         const conversionId: string = getProtoConversionId(schema) ?? getRandomId()
 
         if (this.store[conversionId]) {

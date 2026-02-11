@@ -1,9 +1,6 @@
 import { fileContentMatter } from '#file/classes/content_matter'
 import type { FileContentMatter } from '#file/types/content_matter'
-import {
-    Proto3Extension,
-    ReadOnlyProto3Extension,
-} from '#proto3_definition/types/extension'
+import { ReadOnlyProto3Extension } from '#proto3_definition/types/extension'
 import { ReadOnlyProto3File } from '#proto3_definition/types/file'
 import { ReadOnlyAnyProto3Message } from '#proto3_definition/types/messages'
 import { ReadOnlyProto3RpcService } from '#proto3_definition/types/service'
@@ -88,7 +85,7 @@ export class Proto3FileProcessor {
             }
 
             return [...accumulator, message]
-        }, [] as AnyProto3Message[])
+        }, [] as ReadOnlyAnyProto3Message[])
 
         const content = fileContentMatter()
         const processor = new Proto3MessageProcessor(content)

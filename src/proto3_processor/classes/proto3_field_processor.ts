@@ -1,9 +1,6 @@
 import { fileContentMatter } from '#file/classes/content_matter'
 import type { FileContentMatter } from '#file/types/content_matter'
-import {
-    Proto3Extension,
-    ReadOnlyProto3Extension,
-} from '#proto3_definition/types/extension'
+import type { ReadOnlyProto3Extension } from '#proto3_definition/types/extension'
 import type {
     ReadOnlyAnyProto3Field,
     ReadOnlyProto3MessageFieldType,

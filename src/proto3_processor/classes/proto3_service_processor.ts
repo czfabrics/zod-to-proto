@@ -1,10 +1,7 @@
 import { fileContentMatter } from '#file/classes/content_matter'
 import type { FileContentMatter } from '#file/types/content_matter'
-import {
-    Proto3Extension,
-    ReadOnlyProto3Extension,
-} from '#proto3_definition/types/extension'
-import { ReadOnlyProto3RpcService } from '#proto3_definition/types/service'
+import type { ReadOnlyProto3Extension } from '#proto3_definition/types/extension'
+import type { ReadOnlyProto3RpcService } from '#proto3_definition/types/service'
 import { Proto3CommentProcessor } from '#proto3_processor/classes/proto3_comment_processor'
 import { Proto3FunctionProcessor } from '#proto3_processor/classes/proto3_function_processor'
 import { Proto3RecordExtensionProcessor } from '#proto3_processor/classes/proto3_record_extension_processor'

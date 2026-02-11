@@ -1,8 +1,9 @@
 import { fileContentMatter } from '#file/classes/content_matter'
 import type { FileContentMatter } from '#file/types/content_matter'
+import type { DeepReadOnly } from '#proto3_definition/types/deep_read_only'
 import type {
-    ReadOnlyProto3Extension,
     Proto3ExtensionMessageValue,
+    ReadOnlyProto3Extension,
 } from '#proto3_definition/types/extension'
 import { Proto3ExtensionValueProcessor } from '#proto3_processor/classes/proto3_extension_value_processor'
 
@@ -10,8 +11,9 @@ export class Proto3RecordExtensionProcessor {
     public constructor(private readonly content: FileContentMatter) {}
 
     public isObjectWithExactlyOneEntry(
-        extension: Proto3Extension
-    ): extension is Proto3Extension & { value: Proto3ExtensionMessageValue } {
+        extension: ReadOnlyProto3Extension
+    ): extension is ReadOnlyProto3Extension &
+        DeepReadOnly<{ value: Proto3ExtensionMessageValue }> {
         if (typeof extension.value !== 'object' || Array.isArray(extension.value)) {
             return false
         }

@@ -1,4 +1,4 @@
-import { Proto3Enum } from '#proto3_definition/types/messages'
+import { Proto3Enum, type ReadOnlyProto3Enum } from '#proto3_definition/types/messages'
 import { getProtoMeta } from '#zod_converter/helpers/registry'
 import type { AnyZodMessage } from '#zod_converter/types/messages'
 import {
@@ -11,8 +11,8 @@ import { pascalCase } from 'change-case'
 export class ZodEnumNameConversionTransformer implements ZodEnumConversionTransformer {
     transform(
         schema: WithMaybeZodPassthrough<AnyZodMessage>,
-        protoDefinition: Proto3Enum
-    ): Proto3Enum {
+        protoDefinition: ReadOnlyProto3Enum
+    ): ReadOnlyProto3Enum {
         const deepSchema = ZodPassthroughType.pass(schema)
 
         const protoMeta = getProtoMeta(deepSchema)
