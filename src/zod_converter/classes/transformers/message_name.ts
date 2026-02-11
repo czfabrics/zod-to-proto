@@ -1,7 +1,4 @@
-import {
-    Proto3Message,
-    type ReadOnlyProto3Message,
-} from '#proto3_definition/types/messages'
+import { type ReadOnlyProto3Message } from '#proto3_definition/types/messages'
 import { getProtoMeta } from '#zod_converter/helpers/registry'
 import type { AnyZodMessage } from '#zod_converter/types/messages'
 import {
@@ -24,8 +21,7 @@ export class ZodMessageNameConversionTransformer implements ZodMessageConversion
             return protoDefinition
         }
 
-        return Proto3Message.new({
-            ...protoDefinition,
+        return protoDefinition.clone({
             name: pascalCase(protoMeta.protoDefinitionName),
         })
     }

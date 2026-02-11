@@ -1,4 +1,4 @@
-import { Proto3Enum, type ReadOnlyProto3Enum } from '#proto3_definition/types/messages'
+import { type ReadOnlyProto3Enum } from '#proto3_definition/types/messages'
 import { getProtoMeta } from '#zod_converter/helpers/registry'
 import type { AnyZodMessage } from '#zod_converter/types/messages'
 import {
@@ -21,8 +21,7 @@ export class ZodEnumNameConversionTransformer implements ZodEnumConversionTransf
             return protoDefinition
         }
 
-        return Proto3Enum.new({
-            ...protoDefinition,
+        return protoDefinition.clone({
             name: pascalCase(protoMeta.protoDefinitionName),
         })
     }
