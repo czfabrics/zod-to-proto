@@ -33,9 +33,7 @@ export class Proto3FileProcessor {
         const contents: FileContentMatter[] = []
 
         for (const extension of extensions) {
-            const updatedExtension = Proto3Extension.simplify(extension)
-
-            const content = this.getRecordExtensionContent(updatedExtension)
+            const content = this.getRecordExtensionContent(extension)
 
             if (content.isEmpty()) {
                 continue

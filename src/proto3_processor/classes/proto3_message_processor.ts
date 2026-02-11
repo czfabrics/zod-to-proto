@@ -40,10 +40,7 @@ export class Proto3MessageProcessor {
                 let isFirst = true
 
                 for (const extension of message.extensions) {
-                    const updatedExtension = Proto3Extension.simplify(extension)
-
-                    const extensionContent =
-                        this.getRecordExtensionContent(updatedExtension)
+                    const extensionContent = this.getRecordExtensionContent(extension)
 
                     if (extensionContent.isEmpty()) {
                         continue
@@ -78,10 +75,7 @@ export class Proto3MessageProcessor {
                 let isFirst = true
 
                 for (const extension of messageEnum.extensions) {
-                    const updatedExtension = Proto3Extension.simplify(extension)
-
-                    const extensionContent =
-                        this.getRecordExtensionContent(updatedExtension)
+                    const extensionContent = this.getRecordExtensionContent(extension)
 
                     if (extensionContent.isEmpty()) {
                         continue

@@ -1,6 +1,5 @@
 import { fileContentMatter } from '#file/classes/content_matter'
 import type { FileContentMatter } from '#file/types/content_matter'
-import { Proto3Extension } from '#proto3_definition/types/extension'
 import { Proto3RpcFunction } from '#proto3_definition/types/functions'
 import { AnyProto3Message } from '#proto3_definition/types/messages'
 import { Proto3ImportedType } from '#proto3_definition/types/types'
@@ -48,9 +47,7 @@ export class Proto3FunctionProcessor {
                 extensionContent
             )
 
-            const updatedExtension = Proto3Extension.simplify(extension)
-
-            extensionProcessor.process(updatedExtension)
+            extensionProcessor.process(extension)
 
             if (extensionContent.isEmpty()) {
                 continue

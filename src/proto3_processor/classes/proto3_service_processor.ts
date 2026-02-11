@@ -35,9 +35,7 @@ export class Proto3ServiceProcessor {
         let isFirst = true
 
         for (const extension of service.extensions) {
-            const updatedExtension = Proto3Extension.simplify(extension)
-
-            const extensionContent = this.getRecordExtensionContent(updatedExtension)
+            const extensionContent = this.getRecordExtensionContent(extension)
 
             if (extensionContent.isEmpty()) {
                 continue

@@ -29,18 +29,18 @@ import "buf/validate/validate.proto";
 
 package services.authentification.v1;
 
+enum UserRole {
+  ADMIN = 0;
+  VIEWER = 1;
+}
+
 message User {
   int64 id = 1 [
     (buf.validate.field).required = true
   ];
   optional string full_name = 2;
-  Role role = 3 [
+  UserRole role = 3 [
     (buf.validate.field).required = true
   ];
-}
-
-enum Role {
-  ADMIN = 0;
-  VIEWER = 1;
 }
 ```

@@ -111,10 +111,7 @@ export class Proto3FieldProcessor {
                 const extensionContents: FileContentMatter[] = []
 
                 for (const extension of field.extensions) {
-                    const updatedExtension = Proto3Extension.simplify(extension)
-
-                    const extensionContent =
-                        this.getFieldExtensionContent(updatedExtension)
+                    const extensionContent = this.getFieldExtensionContent(extension)
 
                     if (extensionContent.isEmpty()) {
                         continue
@@ -143,10 +140,7 @@ export class Proto3FieldProcessor {
                 let isFirst = true
 
                 for (const extension of field.extensions) {
-                    const updatedExtension = Proto3Extension.simplify(extension)
-
-                    const extensionContent =
-                        this.getRecordExtensionContent(updatedExtension)
+                    const extensionContent = this.getRecordExtensionContent(extension)
 
                     if (extensionContent.isEmpty()) {
                         continue
@@ -181,10 +175,7 @@ export class Proto3FieldProcessor {
                 const extensionContents: FileContentMatter[] = []
 
                 for (const extension of field.extensions) {
-                    const updatedExtension = Proto3Extension.simplify(extension)
-
-                    const extensionContent =
-                        this.getFieldExtensionContent(updatedExtension)
+                    const extensionContent = this.getFieldExtensionContent(extension)
 
                     if (extensionContent.isEmpty()) {
                         continue

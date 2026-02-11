@@ -31,19 +31,19 @@ import "buf/validate/validate.proto";
 
 package services.authentification.v1;
 
+enum UserRole {
+  ADMIN = 0;
+  VIEWER = 1;
+}
+
 message User {
   int64 id = 1 [
     (buf.validate.field).required = true
   ];
   optional string full_name = 2;
-  Role role = 3 [
+  UserRole role = 3 [
     (buf.validate.field).required = true
   ];
-}
-
-enum Role {
-  ADMIN = 0;
-  VIEWER = 1;
 }
 ```
 
@@ -95,10 +95,9 @@ service UserService {
   rpc GetUsers(google.protobuf.Empty) returns (stream GetUsersOutput) {}
 }
 
-message GetUsersOutput {
-  repeated User users = 1 [
-    (buf.validate.field).required = true
-  ];
+enum UserRole {
+  ADMIN = 0;
+  VIEWER = 1;
 }
 
 message User {
@@ -106,14 +105,83 @@ message User {
     (buf.validate.field).required = true
   ];
   optional string full_name = 2;
-  Role role = 3 [
+  UserRole role = 3 [
     (buf.validate.field).required = true
   ];
 }
 
-enum Role {
+message GetUsersOutput {
+  repeated User users = 1 [
+    (buf.validate.field).required = true
+  ];
+}
+```
+
+### gRPC Service with gRPC gateway annotations
+
+```ts
+import { Proto3HttpAnnotation, zodToProto } from '{{ pkg.name }}'
+import z from 'zod'
+
+const User = z.object({
+    id: z.int64(),
+    fullName: z.string().optional(),
+    role: z.enum(['ADMIN', 'VIEWER']),
+})
+
+const result = zodToProto({
+    syntax: 'proto3',
+    packageName: 'services.authentification.v1',
+    services: [
+        {
+            name: 'UserService',
+            functions: [
+                {
+                    name: 'AddUser',
+                    in: User.omit({ id: true }),
+                    extensions: [
+                        Proto3HttpAnnotation.useExtension({
+                            post: '/users',
+                            body: '*',
+                        }),
+                    ],
+                },
+            ],
+        },
+    ],
+})
+```
+
+**Result:**
+
+```proto
+syntax = "proto3";
+
+import "buf/validate/validate.proto";
+import "google/protobuf/empty.proto";
+import "google/api/annotations.proto";
+
+package services.authentification.v1;
+
+service UserService {
+  rpc AddUser(AddUserInput) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/users",
+      body: "*"
+    };
+  }
+}
+
+enum AddUserInputRole {
   ADMIN = 0;
   VIEWER = 1;
+}
+
+message AddUserInput {
+  optional string full_name = 1;
+  AddUserInputRole role = 2 [
+    (buf.validate.field).required = true
+  ];
 }
 ```
 
@@ -184,47 +252,32 @@ service AuthentificationPackageUserService2 {
   rpc GetUsers(google.protobuf.Empty) returns (AuthentificationPackageUserService2GetUsersOutput) {}
 }
 
-// AuthentificationPackage -> UserService -> GetUsers
-message AuthentificationPackageUserServiceGetUsersOutput {
-  repeated AuthentificationPackageUserServiceGetUsersUser users = 1 [
-    (buf.validate.field).required = true
-  ];
+enum AuthentificationPackageUserService2GetUsersUserServiceGetUsersUserRole {
+  ADMIN = 0;
+  VIEWER = 1;
 }
 
-message AuthentificationPackageUserServiceGetUsersUser {
+message AuthentificationPackageUserService2GetUsersUserServiceGetUsersUser {
   int64 id = 1 [
     (buf.validate.field).required = true
   ];
   optional string full_name = 2;
-  AuthentificationPackageUserServiceGetUsersUserRole role = 3 [
+  AuthentificationPackageUserService2GetUsersUserServiceGetUsersUserRole role = 3 [
     (buf.validate.field).required = true
   ];
-}
-
-enum AuthentificationPackageUserServiceGetUsersUserRole {
-  ADMIN = 0;
-  VIEWER = 1;
 }
 
 message AuthentificationPackageUserService2GetUsersOutput {
-  repeated AuthentificationPackageUserService2GetUsersUser users = 1 [
+  repeated AuthentificationPackageUserService2GetUsersUserServiceGetUsersUser users = 1 [
     (buf.validate.field).required = true
   ];
 }
 
-message AuthentificationPackageUserService2GetUsersUser {
-  int64 id = 1 [
+// AuthentificationPackage -> UserService -> GetUsers
+message AuthentificationPackageUserServiceGetUsersOutput {
+  repeated AuthentificationPackageUserService2GetUsersUserServiceGetUsersUser users = 1 [
     (buf.validate.field).required = true
   ];
-  optional string full_name = 2;
-  AuthentificationPackageUserService2GetUsersUserRole role = 3 [
-    (buf.validate.field).required = true
-  ];
-}
-
-enum AuthentificationPackageUserService2GetUsersUserRole {
-  ADMIN = 0;
-  VIEWER = 1;
 }
 ```
 
@@ -326,16 +379,15 @@ import "google/api/annotations.proto";
 package services.authentification.v1;
 
 service UserService {
-  option deprecated = true;
+  option (deprecated) = true;
   rpc GetUsers(google.protobuf.Empty) returns (stream GetUsersOutput) {
     option (google.api.http).get = "/users";
   }
 }
 
-message GetUsersOutput {
-  repeated User users = 1 [
-    (buf.validate.field).required = true
-  ];
+enum UserRole {
+  ADMIN = 0;
+  VIEWER = 1;
 }
 
 message User {
@@ -343,13 +395,14 @@ message User {
     (buf.validate.field).required = true
   ];
   optional string full_name = 2;
-  Role role = 3 [
+  UserRole role = 3 [
     (buf.validate.field).required = true
   ];
 }
 
-enum Role {
-  ADMIN = 0;
-  VIEWER = 1;
+message GetUsersOutput {
+  repeated User users = 1 [
+    (buf.validate.field).required = true
+  ];
 }
 ```
