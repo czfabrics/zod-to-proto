@@ -5,7 +5,7 @@ exports[`\`zodToProto\` test suite > Testing basic usage (unscoped message) > re
 
 import "buf/validate/validate.proto";
 
-package services.authentification.v1;
+package services.authentication.v1;
 
 enum UserRole {
   ADMIN = 0;
@@ -118,7 +118,7 @@ import "google/protobuf/empty.proto";
 import "buf/validate/validate.proto";
 import "google/api/annotations.proto";
 
-package services.authentification.v1;
+package services.user.v1;
 
 service UserService {
   option (deprecated) = true;
@@ -155,7 +155,7 @@ exports[`\`zodToProto\` test suite > Testing gRPC Service usage > result 1`] = `
 import "google/protobuf/empty.proto";
 import "buf/validate/validate.proto";
 
-package services.authentification.v1;
+package services.user.v1;
 
 service UserService {
   rpc GetUsers(google.protobuf.Empty) returns (stream GetUsersOutput) {}
@@ -190,7 +190,7 @@ import "buf/validate/validate.proto";
 import "google/protobuf/empty.proto";
 import "google/api/annotations.proto";
 
-package services.authentification.v1;
+package services.user.v1;
 
 service UserService {
   rpc AddUser(AddUserInput) returns (google.protobuf.Empty) {
@@ -226,54 +226,79 @@ exports[`\`zodToProto\` test suite > Testing type prefix usage > result 1`] = `
 import "google/protobuf/empty.proto";
 import "buf/validate/validate.proto";
 
-package services.authentification.v1;
+package services.user.v1;
 
 service UserService {
-  rpc GetUsers(google.protobuf.Empty) returns (AuthentificationPackageUserServiceGetUsersOutput) {}
+  rpc GetUsers(google.protobuf.Empty) returns (UserPackageUserServiceGetUsersOutput) {}
 }
 
 service UserService2 {
-  rpc GetUsers(google.protobuf.Empty) returns (AuthentificationPackageUserService2GetUsersOutput) {}
+  rpc GetUsers(google.protobuf.Empty) returns (UserPackageUserService2GetUsersOutput) {}
 }
 
-enum AuthentificationPackageUserService2GetUsersUserRole {
+enum UserPackageUserService2GetUsersUserRole {
   ADMIN = 0;
   VIEWER = 1;
 }
 
-message AuthentificationPackageUserService2GetUsersOutputUser {
+message UserPackageUserService2GetUsersOutputUser {
   int64 id = 1 [
     (buf.validate.field).required = true
   ];
   optional string full_name = 2;
-  AuthentificationPackageUserService2GetUsersUserRole role = 3 [
+  UserPackageUserService2GetUsersUserRole role = 3 [
     (buf.validate.field).required = true
   ];
 }
 
-message AuthentificationPackageUserService2GetUsersOutput {
-  repeated AuthentificationPackageUserService2GetUsersOutputUser users = 1 [
+message UserPackageUserService2GetUsersOutput {
+  repeated UserPackageUserService2GetUsersOutputUser users = 1 [
     (buf.validate.field).required = true
   ];
 }
 
-enum AuthentificationPackageUserServiceGetUsersUserRole {
+enum UserPackageUserServiceGetUsersUserRole {
   ADMIN = 0;
   VIEWER = 1;
 }
 
-message AuthentificationPackageUserServiceGetUsersOutputUser {
+message UserPackageUserServiceGetUsersOutputUser {
   int64 id = 1 [
     (buf.validate.field).required = true
   ];
   optional string full_name = 2;
-  AuthentificationPackageUserServiceGetUsersUserRole role = 3 [
+  UserPackageUserServiceGetUsersUserRole role = 3 [
     (buf.validate.field).required = true
   ];
 }
 
-message AuthentificationPackageUserServiceGetUsersOutput {
-  repeated AuthentificationPackageUserServiceGetUsersOutputUser users = 1 [
+message UserPackageUserServiceGetUsersOutput {
+  repeated UserPackageUserServiceGetUsersOutputUser users = 1 [
+    (buf.validate.field).required = true
+  ];
+}"
+`;
+
+exports[`\`zodToProto\` test suite > Testing with map dynamic type > result 1`] = `
+"syntax = "proto3";
+
+import "buf/validate/validate.proto";
+import "google/protobuf/empty.proto";
+
+package services.user.v1;
+
+service UserService {
+  rpc PostAccesses(PostAccessesInput) returns (google.protobuf.Empty) {}
+}
+
+message PostAccessesInputAccesses {
+  bool can = 1 [
+    (buf.validate.field).required = true
+  ];
+}
+
+message PostAccessesInput {
+  map<string, PostAccessesInputAccesses> accesses = 1 [
     (buf.validate.field).required = true
   ];
 }"

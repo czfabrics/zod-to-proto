@@ -16,12 +16,42 @@ export class ZodMessageNameIncludedInFieldConversionTransformer implements ZodMe
     private readonly alreadyTransformedMessages: Map<string, ReadOnlyAnyProto3Message> =
         new Map()
 
-    myfunc<
+    private updateField<
         TField extends
             | ReadOnlyProto3MessageField
             | ReadOnlyProto3MessageOneOfFieldSubField,
     >(parentName: string, isNameInversed: boolean, field: TField): TField {
-        if (field.type.internalName === 'repeated') {
+        if (field.type.internalName === 'map') {
+            if (field.type.value.internalName !== 'message') {
+                return field
+            }
+
+            const alreadyTransformed = this.alreadyTransformedMessages.get(
+                field.type.value.id
+            )
+
+            if (alreadyTransformed !== undefined) {
+                return field.clone({
+                    type: field.type.clone({
+                        value: alreadyTransformed,
+                    }),
+                }) as TField
+            }
+
+            const updatedValue = field.type.value.clone({
+                name: isNameInversed
+                    ? pascalCase(`${field.type.value.name}_${parentName}`)
+                    : pascalCase(`${parentName}_${field.type.value.name}`),
+            })
+
+            this.alreadyTransformedMessages.set(field.type.value.id, updatedValue)
+
+            return field.clone({
+                type: field.type.clone({
+                    value: updatedValue,
+                }),
+            }) as TField
+        } else if (field.type.internalName === 'repeated') {
             const deepInner = field.type.getDeepInnerType()
 
             if (deepInner.internalName !== 'message') {
@@ -46,14 +76,10 @@ export class ZodMessageNameIncludedInFieldConversionTransformer implements ZodMe
                 type: field.type.updateDeepInnerType(updatedDeepInner),
             })
 
-            if (newField.type.internalName === 'message') {
-                this.alreadyTransformedMessages.set(deepInner.id, updatedDeepInner)
-            }
+            this.alreadyTransformedMessages.set(deepInner.id, updatedDeepInner)
 
             return newField as TField
-        }
-
-        if (
+        } else if (
             field.type.internalName === 'message' &&
             !this.alreadyTransformedMessages.has(field.type.id)
         ) {
@@ -93,14 +119,14 @@ export class ZodMessageNameIncludedInFieldConversionTransformer implements ZodMe
 
         for (const field of protoDefinition.fields) {
             if (field.internalName === 'message_field') {
-                const newField = this.myfunc(protoDefinition.name, false, field)
+                const newField = this.updateField(protoDefinition.name, false, field)
 
                 newFields.push(newField)
             } else {
                 const newSubFields: ReadOnlyProto3MessageOneOfFieldSubField[] = []
 
                 for (const subField of field.subFields) {
-                    const newSubField = this.myfunc(field.key, true, subField)
+                    const newSubField = this.updateField(field.key, true, subField)
 
                     newSubFields.push(newSubField)
                 }

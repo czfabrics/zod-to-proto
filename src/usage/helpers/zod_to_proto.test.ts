@@ -81,7 +81,7 @@ describe('`zodToProto` test suite', () => {
 
         const result = zodToProto({
             syntax: 'proto3',
-            packageName: 'services.authentification.v1',
+            packageName: 'services.authentication.v1',
             services: [],
             unscopedMessages: {
                 user: User,
@@ -100,7 +100,7 @@ describe('`zodToProto` test suite', () => {
 
         const result = zodToProto({
             syntax: 'proto3',
-            packageName: 'services.authentification.v1',
+            packageName: 'services.user.v1',
             services: [
                 {
                     name: 'UserService',
@@ -133,7 +133,7 @@ describe('`zodToProto` test suite', () => {
 
         const result = zodToProto({
             syntax: 'proto3',
-            packageName: 'services.authentification.v1',
+            packageName: 'services.user.v1',
             services: [
                 {
                     name: 'UserService',
@@ -172,8 +172,8 @@ describe('`zodToProto` test suite', () => {
 
         const result = zodToProto({
             syntax: 'proto3',
-            packageName: 'services.authentification.v1',
-            typePrefix: 'AuthentificationPackage', // First level prefix
+            packageName: 'services.user.v1',
+            typePrefix: 'UserPackage', // First level prefix
             services: [
                 {
                     name: 'UserService',
@@ -216,7 +216,7 @@ describe('`zodToProto` test suite', () => {
 
         const result = zodToProto({
             syntax: 'proto3',
-            packageName: 'services.authentification.v1',
+            packageName: 'services.user.v1',
             services: [
                 {
                     name: 'UserService',
@@ -267,6 +267,36 @@ describe('`zodToProto` test suite', () => {
                         {
                             name: 'PostAsyncTasks',
                             in: PostAsyncTasksInputDtoSchema,
+                            inStream: false,
+                        },
+                    ],
+                },
+            ],
+        })
+
+        expect(result).toMatchSnapshot('result')
+    })
+
+    test('Testing with map dynamic type', async ({ expect }) => {
+        const AccessMappingSchema = z.record(
+            z.string().pipe(z.enum(['READ_USER', 'UPDATE_USER', 'DELETER_USER'])),
+            z.object({
+                can: z.boolean(),
+            })
+        )
+
+        const result = zodToProto({
+            syntax: 'proto3',
+            packageName: 'services.user.v1',
+            services: [
+                {
+                    name: 'UserService',
+                    functions: [
+                        {
+                            name: 'PostAccesses',
+                            in: z.object({
+                                accesses: AccessMappingSchema,
+                            }),
                             inStream: false,
                         },
                     ],
