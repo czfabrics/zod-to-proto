@@ -32,8 +32,10 @@
     },
     "license": "MIT",
     "scripts": {
-        "typecheck": "tsc --project ./tsconfig.typecheck.json",
         "format:all": "prettier ./**/*.ts ./**/*.json --write",
+        "typecheck": "tsc --project ./tsconfig.typecheck.json",
+        "test": "vitest",
+        "test:coverage": "vitest --coverage.enabled",
         "check:type-perf": "rimraf .tsc_traces && tsc --project ./tsconfig.typecheck.json --generateTrace .tsc_traces && analyze-trace .tsc_traces",
         "prepare:index": "vscode-generate-index-standalone index.ts",
         "prepare:dist": "tsx build.ts",
@@ -81,6 +83,8 @@
         "tsx": "^4.21.0",
         "type-fest": "^5.3.1",
         "typescript": "^5.9.2",
+        "vite-tsconfig-paths": "^6.1.0",
+        "vitest": "^4.0.18",
         "vscode-generate-index-standalone": "^1.7.1"
     }
 }
