@@ -4,9 +4,9 @@ export type GetNewParams<T> = Omit<
     | 'internalName'
     | 'clone'
     | 'addPrefix'
+    | 'propagateTypePrefix'
     | 'getDeepMessages'
     | 'getDeepImportedTypes'
-    | 'applyTypePrefix'
     | 'getNextIndex'
 >
 
@@ -15,8 +15,8 @@ export type GetAnyNewParams<T> = Omit<
     | 'id'
     | 'clone'
     | 'addPrefix'
+    | 'propagateTypePrefix'
     | 'getDeepMessages'
     | 'getDeepImportedTypes'
-    | 'applyTypePrefix'
     | 'getNextIndex'
 >

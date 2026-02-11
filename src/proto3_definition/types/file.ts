@@ -1,3 +1,5 @@
+import type { PurgeUndefinedValues } from '#core/types/purge_undefined_values'
+import type { CloneParams } from '#proto3_definition/types/clone'
 import type { DeepReadOnly } from '#proto3_definition/types/deep_read_only'
 import type { Proto3Extension } from '#proto3_definition/types/extension'
 import type { GetNewParams } from '#proto3_definition/types/get_new_params'
@@ -7,9 +9,10 @@ import type { Proto3ImportedType } from '#proto3_definition/types/types'
 
 export type Proto3File = {
     internalName: 'file'
+    clone(params: CloneParams<Proto3File>): Proto3File
+    propagateTypePrefix(prefix: string): Proto3File
     getDeepMessages(): AnyProto3Message[]
     getDeepImportedTypes(): Proto3ImportedType[]
-    applyTypePrefix(): void
     syntax: 'proto3'
     /**
      * @example 'services.authentification.v1'
@@ -20,13 +23,39 @@ export type Proto3File = {
     unscopedMessages: AnyProto3Message[]
     extensions: Proto3Extension[]
 }
+export type ReadOnlyProto3File = DeepReadOnly<Proto3File>
 
 export const Proto3File = {
-    new: function <const TParams extends DeepReadOnly<GetNewParams<Proto3File>>>(
-        params: TParams
-    ) {
+    new: function (params: GetNewParams<Proto3File>): ReadOnlyProto3File {
         return {
             internalName: 'file',
+            clone(
+                this: ReadOnlyProto3File,
+                params: PurgeUndefinedValues<CloneParams<Proto3File>>
+            ): ReadOnlyProto3File {
+                return {
+                    ...this,
+                    ...params,
+                }
+            },
+            propagateTypePrefix(
+                this: ReadOnlyProto3File,
+                prefix: string
+            ): ReadOnlyProto3File {
+                const newServices = this.services.map((service) => {
+                    if (this.typePrefix !== undefined) {
+                        return service
+                            .propagateTypePrefix(this.typePrefix)
+                            .propagateTypePrefix(prefix)
+                    }
+
+                    return service.propagateTypePrefix(prefix)
+                })
+
+                return this.clone({
+                    services: newServices,
+                })
+            },
             getDeepMessages() {
                 return [
                     ...this.services.map((service) => service.getDeepMessages()),
@@ -41,39 +70,7 @@ export const Proto3File = {
                     ),
                 ].flat()
             },
-            applyTypePrefix() {
-                for (const service of this.services) {
-                    service.applyTypePrefix()
-                }
-
-                if (this.typePrefix === undefined) {
-                    return
-                }
-
-                const messages = this.getDeepMessages().reduceRight(
-                    (accumulator, message) => {
-                        const isMessageAlreadyPresent = accumulator.findIndex(
-                            (accMessage) => accMessage.id === message.id
-                        )
-
-                        if (isMessageAlreadyPresent >= 0) {
-                            return accumulator
-                        }
-
-                        return [...accumulator, message]
-                    },
-                    [] as AnyProto3Message[]
-                )
-
-                for (const message of messages) {
-                    message.name = `${this.typePrefix}${message.name}`
-                }
-
-                for (const service of this.services) {
-                    service.name = `${this.typePrefix}${service.name}`
-                }
-            },
             ...params,
-        } as const satisfies DeepReadOnly<Proto3File>
+        }
     },
 } as const

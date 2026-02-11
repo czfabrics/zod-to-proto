@@ -1,6 +1,6 @@
 import { getRandomId } from '#core/helpers/get_random_id'
 import type { PurgeUndefinedValues } from '#core/types/purge_undefined_values'
-import { CloneOutput, CloneParams } from '#proto3_definition/types/clone'
+import { CloneParams } from '#proto3_definition/types/clone'
 import type { DeepReadOnly } from '#proto3_definition/types/deep_read_only'
 import type { Proto3Extension } from '#proto3_definition/types/extension'
 import {
@@ -26,25 +26,35 @@ export type Proto3Message = {
     extensions: Proto3Extension[]
     comments: string[]
 }
+export type ReadOnlyProto3Message = DeepReadOnly<Proto3Message>
 
 export const Proto3Message = {
-    new: function <const TParams extends DeepReadOnly<GetNewParams<Proto3Message>>>(
-        params: TParams
-    ) {
+    new: function (params: GetNewParams<Proto3Message>): ReadOnlyProto3Message {
         return {
             id: getRandomId(),
             internalName: 'message',
-            clone<
-                const T extends DeepReadOnly<Proto3Message>,
-                const TParams extends CloneParams<Proto3Message>,
-            >(this: T, params: PurgeUndefinedValues<TParams>) {
-                return Proto3Message.clone(this, params)
+            clone(
+                this: ReadOnlyProto3Message,
+                params: PurgeUndefinedValues<CloneParams<Proto3Message>>
+            ): ReadOnlyProto3Message {
+                return {
+                    ...this,
+                    ...params,
+                }
             },
-            addPrefix<
-                const T extends DeepReadOnly<Proto3Message>,
-                const TPrefix extends string,
-            >(this: T, prefix: TPrefix) {
-                return Proto3Message.addPrefix(this, prefix)
+            addPrefix(
+                this: ReadOnlyProto3Message,
+                prefix: string
+            ): ReadOnlyProto3Message {
+                const fields = this.fields.map((field) =>
+                    field.propagateTypePrefix(prefix)
+                )
+
+                return {
+                    ...this,
+                    name: `${prefix}${this.name}`,
+                    fields: fields,
+                }
             },
             getDeepMessages() {
                 const deepMessages = this.fields
@@ -74,32 +84,7 @@ export const Proto3Message = {
                 return fieldsCount + 1
             },
             ...params,
-        } as const satisfies DeepReadOnly<Proto3Message>
-    },
-    clone<
-        const T extends DeepReadOnly<Proto3Message>,
-        const TParams extends CloneParams<Proto3Message>,
-        const TOutput extends CloneOutput<T, TParams>,
-    >(
-        object: T,
-        params: PurgeUndefinedValues<TParams>
-    ): TOutput extends DeepReadOnly<Proto3Message> ? TOutput : never {
-        return {
-            ...object,
-            ...params,
-        } as any // I didn't have a better solution than any XD, but out of the method, the types are fine.
-    },
-    addPrefix<const T extends DeepReadOnly<Proto3Message>, const TPrefix extends string>(
-        object: T,
-        prefix: TPrefix
-    ): Omit<T, 'name'> & { readonly name: `${TPrefix}${T['name']}` } {
-        const fields = object.fields.map((field) => field.propagateTypePrefix(prefix))
-
-        return {
-            ...object,
-            name: `${prefix}${object.name}`,
-            fields: fields,
-        } as const satisfies DeepReadOnly<Proto3Message>
+        }
     },
 } as const
 
@@ -115,25 +100,27 @@ export type Proto3Enum = {
     extensions: Proto3Extension[]
     comments: string[]
 }
+export type ReadOnlyProto3Enum = DeepReadOnly<Proto3Enum>
 
 export const Proto3Enum = {
-    new: function <const TParams extends DeepReadOnly<GetNewParams<Proto3Enum>>>(
-        params: TParams
-    ) {
+    new: function (params: GetNewParams<Proto3Enum>): ReadOnlyProto3Enum {
         return {
             id: getRandomId(),
             internalName: 'enum',
-            clone<
-                const T extends DeepReadOnly<Proto3Enum>,
-                const TParams extends CloneParams<Proto3Enum>,
-            >(this: T, params: PurgeUndefinedValues<TParams>) {
-                return Proto3Enum.clone(this, params)
+            clone(
+                this: ReadOnlyProto3Enum,
+                params: PurgeUndefinedValues<CloneParams<Proto3Enum>>
+            ): ReadOnlyProto3Enum {
+                return {
+                    ...this,
+                    ...params,
+                }
             },
-            addPrefix<
-                const T extends DeepReadOnly<Proto3Enum>,
-                const TPrefix extends string,
-            >(this: T, prefix: TPrefix) {
-                return Proto3Enum.addPrefix(this, prefix)
+            addPrefix(this: ReadOnlyProto3Enum, prefix: string): ReadOnlyProto3Enum {
+                return {
+                    ...this,
+                    name: `${prefix}${this.name}`,
+                }
             },
             getDeepMessages() {
                 return [this]
@@ -142,28 +129,6 @@ export const Proto3Enum = {
                 return []
             },
             ...params,
-        } as const satisfies DeepReadOnly<Proto3Enum>
-    },
-    clone<
-        const T extends DeepReadOnly<Proto3Enum>,
-        const TParams extends CloneParams<Proto3Enum>,
-        const TOutput extends CloneOutput<T, TParams>,
-    >(
-        object: T,
-        params: PurgeUndefinedValues<TParams>
-    ): TOutput extends DeepReadOnly<Proto3Enum> ? TOutput : never {
-        return {
-            ...object,
-            ...params,
-        } as any // I didn't have a better solution than any XD, but out of the method, the types are fine.
-    },
-    addPrefix<const T extends DeepReadOnly<Proto3Enum>, const TPrefix extends string>(
-        object: T,
-        prefix: TPrefix
-    ): Omit<T, 'name'> & { readonly name: `${TPrefix}${T['name']}` } {
-        return {
-            ...object,
-            name: `${prefix}${object.name}`,
         } as const satisfies DeepReadOnly<Proto3Enum>
     },
 } as const

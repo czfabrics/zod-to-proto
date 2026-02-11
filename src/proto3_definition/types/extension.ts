@@ -29,17 +29,16 @@ export type Proto3Extension = {
     key: AnyProto3Type
     value: AnyProto3ExtensionValue
 }
+export type ReadOnlyProto3Extension = DeepReadOnly<Proto3Extension>
 
 export const Proto3Extension = {
-    new: function <const TParams extends DeepReadOnly<GetNewParams<Proto3Extension>>>(
-        params: TParams
-    ) {
+    new: function (params: GetNewParams<Proto3Extension>): ReadOnlyProto3Extension {
         return {
             internalName: 'extension',
             getDeepImportedTypes() {
                 return this.key.getDeepImportedTypes()
             },
             ...params,
-        } as const satisfies DeepReadOnly<Proto3Extension>
+        }
     },
 } as const

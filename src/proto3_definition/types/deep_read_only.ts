@@ -7,3 +7,5 @@ export type DeepReadOnly<T> = T extends object
               : DeepReadOnly<T[TKey]>
       }
     : T
+
+export type ReadOnlyValue<TValue> = DeepReadOnly<{ value: TValue }>['value']
