@@ -1,6 +1,6 @@
 import { Proto3File } from '#proto3_definition/types/file'
 import type { GetNewParams } from '#proto3_definition/types/get_new_params'
-import { AnyProto3Message } from '#proto3_definition/types/messages'
+import { ReadOnlyAnyProto3Message } from '#proto3_definition/types/messages'
 import { Proto3RpcRawService } from '#usage/types/services'
 import type { UsageSettings } from '#usage/types/settings'
 import { ZodMessageConverter } from '#zod_converter/classes/zod_message_converter'
@@ -29,7 +29,7 @@ export const Proto3RawFile = {
             settings.reuseStrategies,
             settings.transformers
         )
-        const convertedMessages: AnyProto3Message[] = []
+        const convertedMessages: ReadOnlyAnyProto3Message[] = []
 
         for (const [name, schema] of Object.entries(raw.unscopedMessages)) {
             const message = converter.convert(pascalCase(name), schema)

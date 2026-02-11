@@ -1,7 +1,7 @@
 import { fileContentMatter } from '#file/classes/content_matter'
 import type { FileContentMatter } from '#file/types/content_matter'
 import type {
-    Proto3Extension,
+    ReadOnlyProto3Extension,
     Proto3ExtensionMessageValue,
 } from '#proto3_definition/types/extension'
 import { Proto3ExtensionValueProcessor } from '#proto3_processor/classes/proto3_extension_value_processor'
@@ -25,7 +25,7 @@ export class Proto3FieldExtensionProcessor {
         return true
     }
 
-    public process(extension: Proto3Extension): void {
+    public process(extension: ReadOnlyProto3Extension): void {
         const extensionValueContent = fileContentMatter()
         const processor = new Proto3ExtensionValueProcessor(extensionValueContent)
 

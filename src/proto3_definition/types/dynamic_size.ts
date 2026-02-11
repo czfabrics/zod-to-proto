@@ -13,8 +13,10 @@ export type Proto3RepeatedInnerType =
     | Proto3ImportedType
     | Proto3ScalarType
     | WithInternalName<Proto3DynamicSizeTypes, 'REPEATED'>
+export type ReadOnlyProto3RepeatedInnerType = DeepReadOnly<Proto3RepeatedInnerType>
 
 export type Proto3MapValueType = AnyProto3Message | Proto3ImportedType | Proto3ScalarType
+export type ReadOnlyProto3MapValueType = DeepReadOnly<Proto3MapValueType>
 
 type Proto3DynamicSizeTypes = {
     MAP: {
@@ -37,6 +39,7 @@ type Proto3DynamicSizeTypes = {
 export type Proto3DynamicSizeType = {
     [TKey in keyof Proto3DynamicSizeTypes]: WithInternalName<Proto3DynamicSizeTypes, TKey>
 }[keyof Proto3DynamicSizeTypes]
+export type ReadOnlyProto3DynamicSizeType = DeepReadOnly<Proto3DynamicSizeType>
 
 export type Proto3MapType = Extract<Proto3DynamicSizeType, { internalName: 'map' }>
 export type ReadOnlyProto3MapType = DeepReadOnly<Proto3MapType>

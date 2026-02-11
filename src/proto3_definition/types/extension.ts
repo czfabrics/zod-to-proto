@@ -21,6 +21,7 @@ export type AnyProto3ExtensionValue =
     | Proto3ExtensionMessageValue
     | Proto3ExtensionRepeatedValue
     | undefined
+export type ReadOnlyAnyProto3ExtensionValue = DeepReadOnly<AnyProto3ExtensionValue>
 
 export type Proto3Extension = {
     internalName: 'extension'

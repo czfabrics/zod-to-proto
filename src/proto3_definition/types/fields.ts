@@ -18,6 +18,7 @@ export type Proto3MessageFieldType =
     | Proto3ScalarType
     | AnyProto3Message
     | Proto3ImportedType
+export type ReadOnlyProto3MessageFieldType = DeepReadOnly<Proto3MessageFieldType>
 
 export const Proto3OptionalState = {
     PRESENT: 'PRESENT',
@@ -226,3 +227,4 @@ export type AnyProto3Field =
     | Proto3MessageField
     | Proto3MessageOneOfField
     | Proto3EnumField
+export type ReadOnlyAnyProto3Field = DeepReadOnly<AnyProto3Field>

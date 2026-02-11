@@ -134,3 +134,4 @@ export const Proto3Enum = {
 } as const
 
 export type AnyProto3Message = Proto3Message | Proto3Enum
+export type ReadOnlyAnyProto3Message = DeepReadOnly<AnyProto3Message>

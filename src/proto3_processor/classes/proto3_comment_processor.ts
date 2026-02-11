@@ -3,7 +3,7 @@ import type { FileContentMatter } from '#file/types/content_matter'
 export class Proto3CommentProcessor {
     public constructor(private readonly content: FileContentMatter) {}
 
-    public process(comments: string[]): void {
+    public process(comments: readonly string[]): void {
         let isFirst = true
 
         for (const comment of comments) {

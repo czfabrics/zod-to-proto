@@ -1,12 +1,12 @@
 import {
     Proto3EnumField,
-    Proto3MessageField,
-    Proto3MessageOneOfField,
+    ReadOnlyProto3MessageField,
+    ReadOnlyProto3MessageOneOfField,
 } from '#proto3_definition/types/fields'
 import {
     Proto3Enum,
     Proto3Message,
-    type AnyProto3Message,
+    ReadOnlyAnyProto3Message,
 } from '#proto3_definition/types/messages'
 import { assertsAnyZodMessageFieldType } from '#zod_converter/asserts/any_zod_message_field_type'
 import { ZodMessageFieldConverter } from '#zod_converter/classes/zod_message_field_converter'
@@ -117,11 +117,11 @@ export class ZodMessageConverter {
     public convert(
         name: string,
         rootSchema: WithMaybeZodPassthrough<AnyZodMessage>
-    ): AnyProto3Message {
+    ): ReadOnlyAnyProto3Message {
         const deepSchema = ZodPassthroughType.pass(rootSchema)
 
         return match(deepSchema)
-            .returnType<AnyProto3Message>()
+            .returnType<ReadOnlyAnyProto3Message>()
             .with(
                 {
                     _zod: {

@@ -8,7 +8,7 @@ import {
     Proto3UInt32Type,
     Proto3UInt64Type,
 } from '#proto3_definition/types/scalar_standalones'
-import type { Proto3ScalarType } from '#proto3_definition/types/scalars'
+import type { ReadOnlyProto3ScalarType } from '#proto3_definition/types/scalars'
 import { assertsZodFormat } from '#zod_converter/asserts/zod_format'
 import {
     WithMaybeZodPassthrough,
@@ -18,11 +18,13 @@ import type { ZodScalarType } from '#zod_converter/types/scalars'
 import { match } from 'ts-pattern'
 
 export class ZodScalarConverter {
-    public convert(rootSchema: WithMaybeZodPassthrough<ZodScalarType>): Proto3ScalarType {
+    public convert(
+        rootSchema: WithMaybeZodPassthrough<ZodScalarType>
+    ): ReadOnlyProto3ScalarType {
         const deepSchema = ZodPassthroughType.pass(rootSchema)
 
         return match(deepSchema)
-            .returnType<Proto3ScalarType>()
+            .returnType<ReadOnlyProto3ScalarType>()
             .with(
                 {
                     _zod: {

@@ -1,9 +1,12 @@
 import { fileContentMatter } from '#file/classes/content_matter'
 import type { FileContentMatter } from '#file/types/content_matter'
-import { Proto3Extension } from '#proto3_definition/types/extension'
+import {
+    Proto3Extension,
+    ReadOnlyProto3Extension,
+} from '#proto3_definition/types/extension'
 import type {
-    AnyProto3Field,
     Proto3MessageFieldType,
+    ReadOnlyAnyProto3Field,
 } from '#proto3_definition/types/fields'
 import type { Proto3ScalarType } from '#proto3_definition/types/scalars'
 import { Proto3CommentProcessor } from '#proto3_processor/classes/proto3_comment_processor'
@@ -14,7 +17,7 @@ import { match } from 'ts-pattern'
 export class Proto3FieldProcessor {
     public constructor(private readonly fileContent: FileContentMatter) {}
 
-    public getCommentContent(comments: string[]): FileContentMatter {
+    public getCommentContent(comments: readonly string[]): FileContentMatter {
         const content = fileContentMatter()
         const processor = new Proto3CommentProcessor(content)
 
@@ -83,7 +86,9 @@ export class Proto3FieldProcessor {
         return finalType
     }
 
-    private getFieldExtensionContent(extension: Proto3Extension): FileContentMatter {
+    private getFieldExtensionContent(
+        extension: ReadOnlyProto3Extension
+    ): FileContentMatter {
         const extensionContent = fileContentMatter()
         const extensionProcessor = new Proto3FieldExtensionProcessor(extensionContent)
 
@@ -92,7 +97,9 @@ export class Proto3FieldProcessor {
         return extensionContent
     }
 
-    private getRecordExtensionContent(extension: Proto3Extension): FileContentMatter {
+    private getRecordExtensionContent(
+        extension: ReadOnlyProto3Extension
+    ): FileContentMatter {
         const extensionContent = fileContentMatter()
         const extensionProcessor = new Proto3RecordExtensionProcessor(extensionContent)
 
@@ -101,7 +108,7 @@ export class Proto3FieldProcessor {
         return extensionContent
     }
 
-    public process(anyField: AnyProto3Field): void {
+    public process(anyField: ReadOnlyAnyProto3Field): void {
         const commentContent = this.getCommentContent(anyField.comments)
 
         this.fileContent.write(commentContent)

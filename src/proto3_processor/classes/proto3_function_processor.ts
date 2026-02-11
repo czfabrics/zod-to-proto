@@ -1,6 +1,8 @@
 import { fileContentMatter } from '#file/classes/content_matter'
 import type { FileContentMatter } from '#file/types/content_matter'
-import { Proto3RpcFunction } from '#proto3_definition/types/functions'
+import { DeepReadOnly } from '#proto3_definition/types/deep_read_only'
+import { Proto3Extension } from '#proto3_definition/types/extension'
+import { ReadOnlyProto3RpcFunction } from '#proto3_definition/types/functions'
 import { AnyProto3Message } from '#proto3_definition/types/messages'
 import { Proto3ImportedType } from '#proto3_definition/types/types'
 import { Proto3CommentProcessor } from '#proto3_processor/classes/proto3_comment_processor'
@@ -10,7 +12,7 @@ import { match } from 'ts-pattern'
 export class Proto3FunctionProcessor {
     public constructor(private readonly content: FileContentMatter) {}
 
-    public getCommentContent(comments: string[]): FileContentMatter {
+    public getCommentContent(comments: readonly string[]): FileContentMatter {
         const content = fileContentMatter()
         const processor = new Proto3CommentProcessor(content)
 
@@ -19,7 +21,9 @@ export class Proto3FunctionProcessor {
         return content
     }
 
-    private getTypeReferenceString(item: AnyProto3Message | Proto3ImportedType): string {
+    private getTypeReferenceString(
+        item: DeepReadOnly<AnyProto3Message | Proto3ImportedType>
+    ): string {
         return match(item)
             .returnType<string>()
             .with(
@@ -31,7 +35,7 @@ export class Proto3FunctionProcessor {
             .exhaustive()
     }
 
-    public process(rpcFunction: Proto3RpcFunction): void {
+    public process(rpcFunction: ReadOnlyProto3RpcFunction): void {
         const commentContent = this.getCommentContent(rpcFunction.comments)
 
         const inTypeReference = this.getTypeReferenceString(rpcFunction.in)

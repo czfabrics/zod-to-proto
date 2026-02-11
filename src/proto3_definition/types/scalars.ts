@@ -35,6 +35,7 @@ export type ReadOnlySomeProto3ScalarType<
 export type Proto3ScalarType = {
     [TKey in keyof Proto3ScalarRawTypes]: SomeProto3ScalarType<Proto3ScalarRawTypes[TKey]>
 }[keyof Proto3ScalarRawTypes]
+export type ReadOnlyProto3ScalarType = DeepReadOnly<Proto3ScalarType>
 
 export const Proto3ScalarType = {
     new: function <TName extends Proto3ScalarTypeName>(

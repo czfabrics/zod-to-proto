@@ -1,8 +1,11 @@
 import type {
-    Proto3MessageField,
-    Proto3MessageOneOfField,
+    ReadOnlyProto3MessageField,
+    ReadOnlyProto3MessageOneOfField,
 } from '#proto3_definition/types/fields'
-import type { Proto3Enum, Proto3Message } from '#proto3_definition/types/messages'
+import type {
+    ReadOnlyProto3Enum,
+    ReadOnlyProto3Message,
+} from '#proto3_definition/types/messages'
 import type {
     AnyZodMessage,
     ZodMessageFieldType,
@@ -17,22 +20,22 @@ export interface ZodConversionTransformer<TSchema extends SomeType, TProtoDefini
 
 export type ZodMessageConversionTransformer = ZodConversionTransformer<
     WithMaybeZodPassthrough<AnyZodMessage>,
-    Proto3Message
+    ReadOnlyProto3Message
 >
 
 export type ZodMessageFieldConversionTransformer = ZodConversionTransformer<
     WithMaybeZodPassthrough<ZodMessageFieldType>,
-    Proto3MessageField
+    ReadOnlyProto3MessageField
 >
 
 export type ZodMessageOneOfFieldConversionTransformer = ZodConversionTransformer<
     WithMaybeZodPassthrough<ZodMessageOneOfFieldType>,
-    Proto3MessageOneOfField
+    ReadOnlyProto3MessageOneOfField
 >
 
 export type ZodEnumConversionTransformer = ZodConversionTransformer<
     WithMaybeZodPassthrough<AnyZodMessage>,
-    Proto3Enum
+    ReadOnlyProto3Enum
 >
 
 export type ZodConversionTransformers = {
