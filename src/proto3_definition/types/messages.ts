@@ -207,7 +207,7 @@ export const Proto3Enum = {
             ): readonly ReadOnlyProto3EnumField[] {
                 const newFields: ReadOnlyProto3EnumField[] = []
 
-                let currentIndex = 1
+                let currentIndex = 0
 
                 for (const field of fields) {
                     const newField = field.clone({
