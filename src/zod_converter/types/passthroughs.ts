@@ -67,7 +67,7 @@ export type ZodPassthroughType<
 > = ZodObjectIntersection<TInner> | ZodCategoryPassthrough<TInner>
 
 export type WithMaybeZodPassthrough<TSchema extends AnyZodPassthroughInner> =
-    | ZodPassthroughTypeDeep<TSchema, 5>
+    | ZodPassthroughTypeDeep<TSchema, 1>
     | TSchema
 
 export type ZodPassthroughTypeValue = Prettify<GetZodTypeValue<ZodPassthroughType>>

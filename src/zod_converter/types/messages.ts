@@ -23,6 +23,9 @@ export const AnyZodMessageTypeTuple = {
     ): AnyZodMessageTypeTuple {
         return values as AnyZodMessageTypeTuple
     },
+    get: (): AnyZodMessageTypeTuple => {
+        return AnyZodMessageTypeTuple.new(['object', 'enum'])
+    },
 } as const
 
 export const AnyZodMessage = {
@@ -31,7 +34,7 @@ export const AnyZodMessage = {
     ): schema is WithMaybeZodPassthrough<AnyZodMessage> {
         const deepSchema = ZodPassthroughType.pass(schema)
 
-        const zodTypes: string[] = AnyZodMessageTypeTuple.new(['object', 'enum'])
+        const zodTypes: string[] = AnyZodMessageTypeTuple.get()
 
         return zodTypes.includes(deepSchema._zod.def.type)
     },
