@@ -3,7 +3,7 @@ import {
     AnyZodMessageFieldType,
     AnyZodMessageFieldTypeTuple,
 } from '#zod_converter/types/messages'
-import {
+import type {
     AnyZodPassthroughInner,
     WithMaybeZodPassthrough,
 } from '#zod_converter/types/passthroughs'
