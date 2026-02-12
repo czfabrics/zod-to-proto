@@ -1,9 +1,8 @@
-import type { DeepReadOnly } from '#core/types/deep_read_only'
 import { fileContentMatter } from '#file/classes/content_matter'
 import type { FileContentMatter } from '#file/types/content_matter'
 import type { ReadOnlyProto3RpcFunction } from '#proto3_definition/types/functions'
-import type { AnyProto3Message } from '#proto3_definition/types/messages'
-import type { Proto3ImportedType } from '#proto3_definition/types/types'
+import type { ReadOnlyAnyProto3Message } from '#proto3_definition/types/messages'
+import type { ReadOnlyProto3ImportedType } from '#proto3_definition/types/types'
 import { Proto3CommentProcessor } from '#proto3_processor/classes/proto3_comment_processor'
 import { Proto3RecordExtensionProcessor } from '#proto3_processor/classes/proto3_record_extension_processor'
 import { match } from 'ts-pattern'
@@ -21,7 +20,7 @@ export class Proto3FunctionProcessor {
     }
 
     private getTypeReferenceString(
-        item: DeepReadOnly<AnyProto3Message | Proto3ImportedType>
+        item: ReadOnlyAnyProto3Message | ReadOnlyProto3ImportedType
     ): string {
         return match(item)
             .returnType<string>()

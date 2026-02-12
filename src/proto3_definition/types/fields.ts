@@ -1,12 +1,18 @@
-import type { DeepReadOnly } from '#core/types/deep_read_only'
 import type { PurgeUndefinedValues } from '#core/types/purge_undefined_values'
+import type { ReadOnly } from '#core/types/read_only'
 import type { CloneParams } from '#proto3_definition/types/clone'
 import type { Proto3DynamicSizeType } from '#proto3_definition/types/dynamic_size'
-import type { Proto3Extension } from '#proto3_definition/types/extension'
+import type { ReadOnlyProto3Extension } from '#proto3_definition/types/extension'
 import type { GetNewParams } from '#proto3_definition/types/get_new_params'
-import type { AnyProto3Message } from '#proto3_definition/types/messages'
+import type {
+    AnyProto3Message,
+    ReadOnlyAnyProto3Message,
+} from '#proto3_definition/types/messages'
 import type { Proto3ScalarType } from '#proto3_definition/types/scalars'
-import type { Proto3ImportedType } from '#proto3_definition/types/types'
+import type {
+    Proto3ImportedType,
+    ReadOnlyProto3ImportedType,
+} from '#proto3_definition/types/types'
 import { match } from 'ts-pattern'
 
 export type Proto3BaseField = {
@@ -18,7 +24,7 @@ export type Proto3MessageFieldType =
     | Proto3ScalarType
     | AnyProto3Message
     | Proto3ImportedType
-export type ReadOnlyProto3MessageFieldType = DeepReadOnly<Proto3MessageFieldType>
+export type ReadOnlyProto3MessageFieldType = ReadOnly<Proto3MessageFieldType>
 
 export const Proto3OptionalState = {
     PRESENT: 'PRESENT',
@@ -31,16 +37,16 @@ export type Proto3OptionalState =
 export type Proto3MessageField = Proto3BaseField & {
     clone(params: CloneParams<Proto3MessageField>): ReadOnlyProto3MessageField
     propagateTypePrefix(prefixList: string[]): ReadOnlyProto3MessageField
-    getDeepMessages(): AnyProto3Message[]
-    getDeepImportedTypes(): Proto3ImportedType[]
+    getDeepMessages(): readonly ReadOnlyAnyProto3Message[]
+    getDeepImportedTypes(): readonly ReadOnlyProto3ImportedType[]
     index: number
     internalName: 'message_field'
     optionalState: Proto3OptionalState
-    type: Proto3MessageFieldType
-    extensions: Proto3Extension[]
-    comments: string[]
+    type: ReadOnlyProto3MessageFieldType
+    extensions: readonly ReadOnlyProto3Extension[]
+    comments: readonly string[]
 }
-export type ReadOnlyProto3MessageField = DeepReadOnly<Proto3MessageField>
+export type ReadOnlyProto3MessageField = ReadOnly<Proto3MessageField>
 
 export const Proto3MessageField = {
     new: function (params: GetNewParams<Proto3MessageField>): ReadOnlyProto3MessageField {
@@ -106,7 +112,7 @@ export type Proto3MessageOneOfFieldSubField = Omit<
     propagateTypePrefix(prefixList: string[]): ReadOnlyProto3MessageOneOfFieldSubField
 }
 export type ReadOnlyProto3MessageOneOfFieldSubField =
-    DeepReadOnly<Proto3MessageOneOfFieldSubField>
+    ReadOnly<Proto3MessageOneOfFieldSubField>
 
 export const Proto3MessageOneOfFieldSubField = {
     new: function (
@@ -156,19 +162,19 @@ export const Proto3MessageOneOfFieldSubField = {
 export type Proto3MessageOneOfField = Proto3BaseField & {
     clone(params: CloneParams<Proto3MessageOneOfField>): ReadOnlyProto3MessageOneOfField
     propagateTypePrefix(prefixList: string[]): ReadOnlyProto3MessageOneOfField
-    getDeepMessages(): AnyProto3Message[]
-    getDeepImportedTypes(): Proto3ImportedType[]
+    getDeepMessages(): readonly ReadOnlyAnyProto3Message[]
+    getDeepImportedTypes(): readonly ReadOnlyProto3ImportedType[]
     internalName: 'message_one_of_field'
-    subFields: Proto3MessageOneOfFieldSubField[]
-    extensions: Proto3Extension[]
-    comments: string[]
+    subFields: readonly ReadOnlyProto3MessageOneOfFieldSubField[]
+    extensions: readonly ReadOnlyProto3Extension[]
+    comments: readonly string[]
 }
-export type ReadOnlyProto3MessageOneOfField = DeepReadOnly<Proto3MessageOneOfField>
+export type ReadOnlyProto3MessageOneOfField = ReadOnly<Proto3MessageOneOfField>
 
 export const Proto3MessageOneOfField = {
-    new: function <
-        const TParams extends DeepReadOnly<GetNewParams<Proto3MessageOneOfField>>,
-    >(params: TParams): ReadOnlyProto3MessageOneOfField {
+    new: function <const TParams extends ReadOnly<GetNewParams<Proto3MessageOneOfField>>>(
+        params: TParams
+    ): ReadOnlyProto3MessageOneOfField {
         return {
             internalName: 'message_one_of_field',
             clone(
@@ -199,7 +205,7 @@ export const Proto3MessageOneOfField = {
                 return this.subFields.map((field) => field.getDeepImportedTypes()).flat()
             },
             ...params,
-        } as const satisfies DeepReadOnly<Proto3MessageOneOfField>
+        }
     },
 } as const
 
@@ -207,11 +213,11 @@ export type Proto3EnumField = Proto3BaseField & {
     index: number
     internalName: 'enum_field'
     clone(params: CloneParams<Proto3EnumField>): ReadOnlyProto3EnumField
-    extensions: Proto3Extension[]
-    comments: string[]
+    extensions: readonly ReadOnlyProto3Extension[]
+    comments: readonly string[]
 }
 
-export type ReadOnlyProto3EnumField = DeepReadOnly<Proto3EnumField>
+export type ReadOnlyProto3EnumField = ReadOnly<Proto3EnumField>
 
 export const Proto3EnumField = {
     new: function (params: GetNewParams<Proto3EnumField>): ReadOnlyProto3EnumField {

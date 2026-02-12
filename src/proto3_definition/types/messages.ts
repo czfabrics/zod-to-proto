@@ -1,17 +1,22 @@
 import { getRandomId } from '#core/helpers/get_random_id'
-import type { DeepReadOnly } from '#core/types/deep_read_only'
+import type { ReadOnly } from '#core/types/read_only'
 import type { PurgeUndefinedValues } from '#core/types/purge_undefined_values'
-import { CloneParams } from '#proto3_definition/types/clone'
-import type { Proto3Extension } from '#proto3_definition/types/extension'
-import {
+import type { CloneParams } from '#proto3_definition/types/clone'
+import type {
+    Proto3Extension,
+    ReadOnlyProto3Extension,
+} from '#proto3_definition/types/extension'
+import type {
+    Proto3EnumField,
     ReadOnlyAnyProto3MessageField,
     ReadOnlyProto3EnumField,
     ReadOnlyProto3MessageOneOfFieldSubField,
-    type AnyProto3MessageField,
-    type Proto3EnumField,
 } from '#proto3_definition/types/fields'
 import type { GetNewParams } from '#proto3_definition/types/get_new_params'
-import type { Proto3ImportedType } from '#proto3_definition/types/types'
+import type {
+    Proto3ImportedType,
+    ReadOnlyProto3ImportedType,
+} from '#proto3_definition/types/types'
 import { pascalCase } from 'change-case'
 
 export type Proto3Message = {
@@ -22,18 +27,18 @@ export type Proto3Message = {
     computeNewIndexForFields(
         fields: readonly ReadOnlyAnyProto3MessageField[]
     ): readonly ReadOnlyAnyProto3MessageField[]
-    getDeepMessages(): AnyProto3Message[]
-    getDeepImportedTypes(): Proto3ImportedType[]
+    getDeepMessages(): readonly ReadOnlyAnyProto3Message[]
+    getDeepImportedTypes(): readonly ReadOnlyProto3ImportedType[]
     getNextIndex(): number
     /**
      * @example 'User'
      */
     name: string
-    fields: AnyProto3MessageField[]
-    extensions: Proto3Extension[]
-    comments: string[]
+    fields: readonly ReadOnlyAnyProto3MessageField[]
+    extensions: readonly ReadOnlyProto3Extension[]
+    comments: readonly string[]
 }
-export type ReadOnlyProto3Message = DeepReadOnly<Proto3Message>
+export type ReadOnlyProto3Message = ReadOnly<Proto3Message>
 
 export const Proto3Message = {
     new: function (params: GetNewParams<Proto3Message>): ReadOnlyProto3Message {
@@ -156,14 +161,14 @@ export type Proto3Enum = {
     computeNewIndexForFields(
         fields: readonly ReadOnlyProto3EnumField[]
     ): readonly ReadOnlyProto3EnumField[]
-    getDeepMessages(): AnyProto3Message[]
-    getDeepImportedTypes(): Proto3ImportedType[]
+    getDeepMessages(): readonly AnyProto3Message[]
+    getDeepImportedTypes(): readonly Proto3ImportedType[]
     name: string
-    fields: Proto3EnumField[]
-    extensions: Proto3Extension[]
-    comments: string[]
+    fields: readonly Proto3EnumField[]
+    extensions: readonly Proto3Extension[]
+    comments: readonly string[]
 }
-export type ReadOnlyProto3Enum = DeepReadOnly<Proto3Enum>
+export type ReadOnlyProto3Enum = ReadOnly<Proto3Enum>
 
 export const Proto3Enum = {
     new: function (params: GetNewParams<Proto3Enum>): ReadOnlyProto3Enum {
@@ -228,9 +233,9 @@ export const Proto3Enum = {
                 return []
             },
             ...params,
-        } as const satisfies DeepReadOnly<Proto3Enum>
+        }
     },
 } as const
 
 export type AnyProto3Message = Proto3Message | Proto3Enum
-export type ReadOnlyAnyProto3Message = DeepReadOnly<AnyProto3Message>
+export type ReadOnlyAnyProto3Message = ReadOnly<AnyProto3Message>

@@ -1,15 +1,15 @@
-import { DeepReadOnly } from '#core/types/deep_read_only'
+import { ReadOnly } from '#core/types/read_only'
 import { GetAnyNewParams, GetNewParams } from '#proto3_definition/types/get_new_params'
-import { AnyProto3Message } from '#proto3_definition/types/messages'
+import { ReadOnlyAnyProto3Message } from '#proto3_definition/types/messages'
 import { match } from 'ts-pattern'
 
 export type Proto3GlobalType = {
     internalName: 'global_type'
-    getDeepMessages(): AnyProto3Message[]
-    getDeepImportedTypes(): Proto3ImportedType[]
+    getDeepMessages(): readonly ReadOnlyAnyProto3Message[]
+    getDeepImportedTypes(): readonly ReadOnlyProto3ImportedType[]
     typeReference: string
 }
-export type ReadOnlyProto3GlobalType = DeepReadOnly<Proto3GlobalType>
+export type ReadOnlyProto3GlobalType = ReadOnly<Proto3GlobalType>
 
 export const Proto3GlobalType = {
     new: function (params: GetNewParams<Proto3GlobalType>): ReadOnlyProto3GlobalType {
@@ -28,12 +28,12 @@ export const Proto3GlobalType = {
 
 export type Proto3ImportedType = {
     internalName: 'imported_type'
-    getDeepMessages(): AnyProto3Message[]
-    getDeepImportedTypes(): Proto3ImportedType[]
+    getDeepMessages(): readonly ReadOnlyAnyProto3Message[]
+    getDeepImportedTypes(): readonly ReadOnlyProto3ImportedType[]
     importPath: string
     typeReference: string
 }
-export type ReadOnlyProto3ImportedType = DeepReadOnly<Proto3ImportedType>
+export type ReadOnlyProto3ImportedType = ReadOnly<Proto3ImportedType>
 
 export const Proto3ImportedType = {
     new: function (params: GetNewParams<Proto3ImportedType>): ReadOnlyProto3ImportedType {
@@ -51,7 +51,7 @@ export const Proto3ImportedType = {
 } as const
 
 export type AnyProto3Type = Proto3GlobalType | Proto3ImportedType
-export type ReadOnlyAnyProto3Type = DeepReadOnly<AnyProto3Type>
+export type ReadOnlyAnyProto3Type = ReadOnly<AnyProto3Type>
 
 export const AnyProto3Type = {
     new: function (

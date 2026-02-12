@@ -1,31 +1,31 @@
-import type { DeepReadOnly } from '#core/types/deep_read_only'
+import type { ReadOnly } from '#core/types/read_only'
 import type { PurgeUndefinedValues } from '#core/types/purge_undefined_values'
 import type { CloneParams } from '#proto3_definition/types/clone'
-import type { Proto3Extension } from '#proto3_definition/types/extension'
+import type { ReadOnlyProto3Extension } from '#proto3_definition/types/extension'
 import type { GetNewParams } from '#proto3_definition/types/get_new_params'
-import { type AnyProto3Message } from '#proto3_definition/types/messages'
-import type { Proto3ImportedType } from '#proto3_definition/types/types'
+import type { ReadOnlyAnyProto3Message } from '#proto3_definition/types/messages'
+import type { ReadOnlyProto3ImportedType } from '#proto3_definition/types/types'
 import { match } from 'ts-pattern'
 
 export type Proto3RpcFunction = {
     internalName: 'rpc_function'
     clone(params: CloneParams<Proto3RpcFunction>): ReadOnlyProto3RpcFunction
     propagateTypePrefix(prefixList: string[]): ReadOnlyProto3RpcFunction
-    getDeepMessages(): AnyProto3Message[]
-    getDeepImportedTypes(): Proto3ImportedType[]
+    getDeepMessages(): readonly ReadOnlyAnyProto3Message[]
+    getDeepImportedTypes(): readonly ReadOnlyProto3ImportedType[]
     /**
      * @example 'GetUsers'
      */
     name: string
     typePrefix: string | null
-    in: AnyProto3Message | Proto3ImportedType
+    in: ReadOnlyAnyProto3Message | ReadOnlyProto3ImportedType
     inStream: boolean
-    out: AnyProto3Message | Proto3ImportedType
+    out: ReadOnlyAnyProto3Message | ReadOnlyProto3ImportedType
     outStream: boolean
-    extensions: Proto3Extension[]
-    comments: string[]
+    extensions: readonly ReadOnlyProto3Extension[]
+    comments: readonly string[]
 }
-export type ReadOnlyProto3RpcFunction = DeepReadOnly<Proto3RpcFunction>
+export type ReadOnlyProto3RpcFunction = ReadOnly<Proto3RpcFunction>
 
 export const Proto3RpcFunction = {
     new: function (params: GetNewParams<Proto3RpcFunction>): ReadOnlyProto3RpcFunction {

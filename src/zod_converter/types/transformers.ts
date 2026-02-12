@@ -1,4 +1,4 @@
-import { DeepReadOnly } from '#core/types/deep_read_only'
+import { ReadOnly } from '#core/types/read_only'
 import type {
     ReadOnlyProto3MessageField,
     ReadOnlyProto3MessageOneOfField,
@@ -18,8 +18,8 @@ import type { SomeType } from 'zod/v4/core'
 export interface ZodConversionTransformer<TSchema extends SomeType, TProtoDefinition> {
     transform(
         schema: TSchema,
-        protoDefinition: DeepReadOnly<TProtoDefinition>
-    ): DeepReadOnly<TProtoDefinition>
+        protoDefinition: ReadOnly<TProtoDefinition>
+    ): ReadOnly<TProtoDefinition>
 }
 
 export type ZodMessageConversionTransformer = ZodConversionTransformer<

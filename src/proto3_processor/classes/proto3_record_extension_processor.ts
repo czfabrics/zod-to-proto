@@ -1,4 +1,3 @@
-import type { DeepReadOnly } from '#core/types/deep_read_only'
 import { fileContentMatter } from '#file/classes/content_matter'
 import type { FileContentMatter } from '#file/types/content_matter'
 import type {
@@ -12,8 +11,9 @@ export class Proto3RecordExtensionProcessor {
 
     public isObjectWithExactlyOneEntry(
         extension: ReadOnlyProto3Extension
-    ): extension is ReadOnlyProto3Extension &
-        DeepReadOnly<{ value: Proto3ExtensionMessageValue }> {
+    ): extension is ReadOnlyProto3Extension & {
+        readonly value: Proto3ExtensionMessageValue
+    } {
         if (typeof extension.value !== 'object' || Array.isArray(extension.value)) {
             return false
         }

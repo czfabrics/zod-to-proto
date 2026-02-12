@@ -1,4 +1,4 @@
-import type { DeepReadOnly } from '#core/types/deep_read_only'
+import type { DeepReadOnly } from '#core/types/read_only'
 
 export type FileContentMatter = {
     /**

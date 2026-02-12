@@ -1,4 +1,4 @@
-import { DeepReadOnly } from '#core/types/deep_read_only'
+import { ReadOnly } from '#core/types/read_only'
 
 export type GetNewParams<T> =
     | Omit<
@@ -15,7 +15,7 @@ export type GetNewParams<T> =
           | 'getDeepInnerType'
           | 'getNextIndex'
       >
-    | DeepReadOnly<
+    | ReadOnly<
           Omit<
               T,
               | 'id'
@@ -46,7 +46,7 @@ export type GetOverrideParams<T> =
           | 'getDeepInnerType'
           | 'getNextIndex'
       >
-    | DeepReadOnly<
+    | ReadOnly<
           Omit<
               T,
               | 'internalName'

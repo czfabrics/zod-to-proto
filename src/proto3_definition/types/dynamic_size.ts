@@ -1,5 +1,5 @@
-import type { DeepReadOnly } from '#core/types/deep_read_only'
 import type { PurgeUndefinedValues } from '#core/types/purge_undefined_values'
+import type { ReadOnly } from '#core/types/read_only'
 import type { CloneParams } from '#proto3_definition/types/clone'
 import type { GetNewParams } from '#proto3_definition/types/get_new_params'
 import type {
@@ -22,19 +22,19 @@ export type Proto3RepeatedInnerType =
     | Proto3ImportedType
     | Proto3ScalarType
     | WithInternalName<Proto3DynamicSizeTypes, 'REPEATED'>
-export type ReadOnlyProto3RepeatedInnerType = DeepReadOnly<Proto3RepeatedInnerType>
+export type ReadOnlyProto3RepeatedInnerType = ReadOnly<Proto3RepeatedInnerType>
 
 export type Proto3MapValueType = AnyProto3Message | Proto3ImportedType | Proto3ScalarType
-export type ReadOnlyProto3MapValueType = DeepReadOnly<Proto3MapValueType>
+export type ReadOnlyProto3MapValueType = ReadOnly<Proto3MapValueType>
 
 type Proto3DynamicSizeTypes = {
     MAP: {
         clone(params: CloneParams<Proto3MapType>): ReadOnlyProto3MapType
         propagateTypePrefix(prefixList: string[]): ReadOnlyProto3MapType
-        getDeepMessages(): AnyProto3Message[]
-        getDeepImportedTypes(): Proto3ImportedType[]
-        key: Proto3ScalarType
-        value: Proto3MapValueType
+        getDeepMessages(): readonly ReadOnlyAnyProto3Message[]
+        getDeepImportedTypes(): readonly ReadOnlyProto3ImportedType[]
+        key: ReadOnlyProto3ScalarType
+        value: ReadOnlyProto3MapValueType
     }
     REPEATED: {
         clone(params: CloneParams<Proto3RepeatedType>): ReadOnlyProto3RepeatedType
@@ -42,20 +42,22 @@ type Proto3DynamicSizeTypes = {
             newInner: Proto3RepeatedInnerType | ReadOnlyProto3RepeatedInnerType
         ): ReadOnlyProto3RepeatedType
         propagateTypePrefix(prefixList: string[]): ReadOnlyProto3RepeatedType
-        getDeepMessages(): AnyProto3Message[]
-        getDeepImportedTypes(): Proto3ImportedType[]
-        getDeepInnerType(): Exclude<Proto3RepeatedInnerType, { internalName: 'repeated' }>
-        inner: Proto3RepeatedInnerType
+        getDeepMessages(): readonly ReadOnlyAnyProto3Message[]
+        getDeepImportedTypes(): readonly ReadOnlyProto3ImportedType[]
+        getDeepInnerType(): ReadOnly<
+            Exclude<Proto3RepeatedInnerType, { internalName: 'repeated' }>
+        >
+        inner: ReadOnlyProto3RepeatedInnerType
     }
 }
 
 export type Proto3DynamicSizeType = {
     [TKey in keyof Proto3DynamicSizeTypes]: WithInternalName<Proto3DynamicSizeTypes, TKey>
 }[keyof Proto3DynamicSizeTypes]
-export type ReadOnlyProto3DynamicSizeType = DeepReadOnly<Proto3DynamicSizeType>
+export type ReadOnlyProto3DynamicSizeType = ReadOnly<Proto3DynamicSizeType>
 
 export type Proto3MapType = Extract<Proto3DynamicSizeType, { internalName: 'map' }>
-export type ReadOnlyProto3MapType = DeepReadOnly<Proto3MapType>
+export type ReadOnlyProto3MapType = ReadOnly<Proto3MapType>
 
 export const Proto3MapType = {
     new: function (params: GetNewParams<Proto3MapType>): ReadOnlyProto3MapType {
@@ -103,7 +105,7 @@ export type Proto3RepeatedType = Extract<
     Proto3DynamicSizeType,
     { internalName: 'repeated' }
 >
-export type ReadOnlyProto3RepeatedType = DeepReadOnly<Proto3RepeatedType>
+export type ReadOnlyProto3RepeatedType = ReadOnly<Proto3RepeatedType>
 
 export const Proto3RepeatedType = {
     new: function (params: GetNewParams<Proto3RepeatedType>): ReadOnlyProto3RepeatedType {

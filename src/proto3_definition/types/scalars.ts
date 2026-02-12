@@ -1,6 +1,6 @@
-import { DeepReadOnly, ReadOnlyValue } from '#core/types/deep_read_only'
-import type { AnyProto3Message } from '#proto3_definition/types/messages'
-import type { Proto3ImportedType } from '#proto3_definition/types/types'
+import type { ReadOnly } from '#core/types/read_only'
+import type { ReadOnlyAnyProto3Message } from '#proto3_definition/types/messages'
+import type { ReadOnlyProto3ImportedType } from '#proto3_definition/types/types'
 
 type Proto3ScalarRawTypes = {
     STRING: 'string'
@@ -25,21 +25,25 @@ type Proto3ScalarTypeName = Proto3ScalarRawTypes[keyof Proto3ScalarRawTypes]
 type SomeProto3ScalarType<TName extends Proto3ScalarTypeName = Proto3ScalarTypeName> = {
     internalName: TName
     name: TName
-    getDeepMessages(): AnyProto3Message[]
-    getDeepImportedTypes(): Proto3ImportedType[]
+    getDeepMessages(): readonly ReadOnlyAnyProto3Message[]
+    getDeepImportedTypes(): readonly ReadOnlyProto3ImportedType[]
 }
 export type ReadOnlySomeProto3ScalarType<
     TName extends Proto3ScalarTypeName = Proto3ScalarTypeName,
-> = DeepReadOnly<SomeProto3ScalarType<TName>>
+> = ReadOnly<SomeProto3ScalarType<TName>>
 
 export type Proto3ScalarType = {
-    [TKey in keyof Proto3ScalarRawTypes]: SomeProto3ScalarType<Proto3ScalarRawTypes[TKey]>
+    [TKey in keyof Proto3ScalarRawTypes]: ReadOnlySomeProto3ScalarType<
+        Proto3ScalarRawTypes[TKey]
+    >
 }[keyof Proto3ScalarRawTypes]
-export type ReadOnlyProto3ScalarType = DeepReadOnly<Proto3ScalarType>
+// TODO: sert plutôt à rien, retirer les types ReadOnly pour
+// tout mettre par défaut à readonly
+export type ReadOnlyProto3ScalarType = Proto3ScalarType
 
 export const Proto3ScalarType = {
     new: function <TName extends Proto3ScalarTypeName>(
-        name: ReadOnlyValue<TName>
+        name: TName
     ): ReadOnlySomeProto3ScalarType<TName> {
         return {
             internalName: name,

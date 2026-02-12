@@ -1,4 +1,4 @@
-import type { DeepReadOnly } from '#core/types/deep_read_only'
+import type { DeepReadOnly } from '#core/types/read_only'
 import type { FileContentMatter } from '#file/types/content_matter'
 
 export class $FileContentMatter {
