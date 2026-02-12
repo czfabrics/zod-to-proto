@@ -1,11 +1,11 @@
 import { fileContentMatter } from '#file/classes/content_matter'
 import type { FileContentMatter } from '#file/types/content_matter'
-import type { AnyProto3ExtensionValue } from '#proto3_definition/types/extension'
+import type { ReadOnlyAnyProto3ExtensionValue } from '#proto3_definition/types/extension'
 
 export class Proto3ExtensionValueProcessor {
     public constructor(private readonly content: FileContentMatter) {}
 
-    public process(extensionValue: AnyProto3ExtensionValue): void {
+    public process(extensionValue: ReadOnlyAnyProto3ExtensionValue): void {
         if (extensionValue === undefined) {
             return
         } else if (Array.isArray(extensionValue)) {

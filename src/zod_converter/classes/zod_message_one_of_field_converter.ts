@@ -1,9 +1,10 @@
 import { assertsOneElementArray } from '#core/asserts/one_element_array'
 import {
     Proto3MessageOneOfField,
-    Proto3MessageOneOfFieldSubField,
+    ReadOnlyProto3MessageOneOfField,
+    ReadOnlyProto3MessageOneOfFieldSubField,
 } from '#proto3_definition/types/fields'
-import type { Proto3Message } from '#proto3_definition/types/messages'
+import type { ReadOnlyProto3Message } from '#proto3_definition/types/messages'
 import { assertsZodMessageFieldType } from '#zod_converter/asserts/zod_message_field_type'
 import { ZodMessageFieldConverter } from '#zod_converter/classes/zod_message_field_converter'
 import { getZodSchemaComments } from '#zod_converter/helpers/get_zod_schema_comments'
@@ -19,17 +20,16 @@ import { SomeType } from 'zod/v4/core'
 
 export class ZodMessageOneOfFieldConverter {
     public constructor(
-        private readonly message: Proto3Message,
+        private readonly message: ReadOnlyProto3Message,
         private readonly reuseStrategies: ConversionReuseStrategies,
         private readonly transformers: ZodConversionTransformers
     ) {}
 
-    private getSubField(schema: SomeType, key: string): Proto3MessageOneOfFieldSubField {
-        const converter = new ZodMessageFieldConverter(
-            this.message,
-            this.reuseStrategies,
-            this.transformers
-        )
+    private getSubField(
+        schema: SomeType,
+        key: string
+    ): ReadOnlyProto3MessageOneOfFieldSubField {
+        const converter = new ZodMessageFieldConverter(this.message, this.reuseStrategies, this.transformers)
 
         assertsZodMessageFieldType(schema)
 
@@ -41,10 +41,10 @@ export class ZodMessageOneOfFieldConverter {
     public convert(
         key: string,
         rootSchema: WithMaybeZodPassthrough<ZodMessageOneOfFieldType>
-    ): Proto3MessageOneOfField {
+    ): ReadOnlyProto3MessageOneOfField {
         const deepSchema = ZodPassthroughType.pass(rootSchema)
 
-        let subFields: Proto3MessageOneOfFieldSubField[] = []
+        let subFields: ReadOnlyProto3MessageOneOfFieldSubField[] = []
 
         for (
             let subFieldIndex = 0;
@@ -68,7 +68,11 @@ export class ZodMessageOneOfFieldConverter {
 
             //// We override to take into account other sub fields
             //// & generated ones by literal discriminator
-            subField.index = this.message.getNextIndex() + subFieldIndex
+            const newSubField = subField.clone({
+                index: this.message.getNextIndex() + subFieldIndex,
+            })
+
+            subFields.splice(subFieldIndex, 1, newSubField)
         }
 
         const field = Proto3MessageOneOfField.new({

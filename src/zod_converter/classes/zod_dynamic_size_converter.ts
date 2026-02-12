@@ -1,4 +1,4 @@
-import type { Proto3DynamicSizeType } from '#proto3_definition/types/dynamic_size'
+import type { ReadOnlyProto3DynamicSizeType } from '#proto3_definition/types/dynamic_size'
 import { Proto3MapType, Proto3RepeatedType } from '#proto3_definition/types/dynamic_size'
 import { assertsZodMapValueType } from '#zod_converter/asserts/zod_map_value'
 import { assertsZodRepeatedInnerType } from '#zod_converter/asserts/zod_repeated_inner_type'
@@ -23,11 +23,11 @@ export class ZodDynamicSizeConverter {
     public convert(
         key: string,
         rootSchema: WithMaybeZodPassthrough<ZodDynamicSizeType>
-    ): Proto3DynamicSizeType {
+    ): ReadOnlyProto3DynamicSizeType {
         const deepSchema = ZodPassthroughType.pass(rootSchema)
 
         return match(deepSchema)
-            .returnType<Proto3DynamicSizeType>()
+            .returnType<ReadOnlyProto3DynamicSizeType>()
             .with(
                 {
                     _zod: {

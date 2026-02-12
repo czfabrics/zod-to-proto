@@ -1,4 +1,4 @@
-import { Proto3Message } from '#proto3_definition/types/messages'
+import { type ReadOnlyProto3Message } from '#proto3_definition/types/messages'
 import { getProtoMeta } from '#zod_converter/helpers/registry'
 import type { AnyZodMessage } from '#zod_converter/types/messages'
 import {
@@ -11,8 +11,8 @@ import { pascalCase } from 'change-case'
 export class ZodMessageNameConversionTransformer implements ZodMessageConversionTransformer {
     transform(
         schema: WithMaybeZodPassthrough<AnyZodMessage>,
-        protoDefinition: Proto3Message
-    ): Proto3Message {
+        protoDefinition: ReadOnlyProto3Message
+    ): ReadOnlyProto3Message {
         const deepSchema = ZodPassthroughType.pass(schema)
 
         const protoMeta = getProtoMeta(deepSchema)
@@ -21,8 +21,7 @@ export class ZodMessageNameConversionTransformer implements ZodMessageConversion
             return protoDefinition
         }
 
-        return Proto3Message.new({
-            ...protoDefinition,
+        return protoDefinition.clone({
             name: pascalCase(protoMeta.protoDefinitionName),
         })
     }

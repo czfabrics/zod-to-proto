@@ -1,5 +1,8 @@
 import { Proto3ValidateOneOfAnnotation } from '#plugin/types/buf_validate'
-import { Proto3MessageOneOfField } from '#proto3_definition/types/fields'
+import {
+    Proto3MessageOneOfField,
+    ReadOnlyProto3MessageOneOfField,
+} from '#proto3_definition/types/fields'
 import { isZodSchemaOptional } from '#zod_converter/helpers/is_zod_schema_optional'
 import type { ZodMessageOneOfFieldType } from '#zod_converter/types/messages'
 import type { WithMaybeZodPassthrough } from '#zod_converter/types/passthroughs'
@@ -8,8 +11,8 @@ import type { ZodMessageOneOfFieldConversionTransformer } from '#zod_converter/t
 export class ZodRequiredOneOfFieldConversionTransformer implements ZodMessageOneOfFieldConversionTransformer {
     transform(
         schema: WithMaybeZodPassthrough<ZodMessageOneOfFieldType>,
-        protoDefinition: Proto3MessageOneOfField
-    ): Proto3MessageOneOfField {
+        protoDefinition: ReadOnlyProto3MessageOneOfField
+    ): ReadOnlyProto3MessageOneOfField {
         const isOptional = isZodSchemaOptional(schema)
 
         if (isOptional) {

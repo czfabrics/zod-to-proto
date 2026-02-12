@@ -1,11 +1,11 @@
 import { fileContentMatter } from '#file/classes/content_matter'
 import type { FileContentMatter } from '#file/types/content_matter'
-import { Proto3Extension } from '#proto3_definition/types/extension'
+import type { ReadOnlyProto3Extension } from '#proto3_definition/types/extension'
 import type {
-    AnyProto3Field,
-    Proto3MessageFieldType,
+    ReadOnlyAnyProto3Field,
+    ReadOnlyProto3MessageFieldType,
 } from '#proto3_definition/types/fields'
-import type { Proto3ScalarType } from '#proto3_definition/types/scalars'
+import type { ReadOnlyProto3ScalarType } from '#proto3_definition/types/scalars'
 import { Proto3CommentProcessor } from '#proto3_processor/classes/proto3_comment_processor'
 import { Proto3FieldExtensionProcessor } from '#proto3_processor/classes/proto3_field_extension_processor'
 import { Proto3RecordExtensionProcessor } from '#proto3_processor/classes/proto3_record_extension_processor'
@@ -14,7 +14,7 @@ import { match } from 'ts-pattern'
 export class Proto3FieldProcessor {
     public constructor(private readonly fileContent: FileContentMatter) {}
 
-    public getCommentContent(comments: string[]): FileContentMatter {
+    public getCommentContent(comments: readonly string[]): FileContentMatter {
         const content = fileContentMatter()
         const processor = new Proto3CommentProcessor(content)
 
@@ -23,13 +23,13 @@ export class Proto3FieldProcessor {
         return content
     }
 
-    private getScalarTypeReferenceString(scalarType: Proto3ScalarType): string {
+    private getScalarTypeReferenceString(scalarType: ReadOnlyProto3ScalarType): string {
         return scalarType.name
     }
 
-    private getTypeReferenceString(item: Proto3MessageFieldType): string {
+    private getTypeReferenceString(item: ReadOnlyProto3MessageFieldType): string {
         let finalType = ''
-        let currentItem: Proto3MessageFieldType | undefined = item
+        let currentItem: ReadOnlyProto3MessageFieldType | undefined = item
 
         while (currentItem) {
             let currentType = match(currentItem)
@@ -83,7 +83,9 @@ export class Proto3FieldProcessor {
         return finalType
     }
 
-    private getFieldExtensionContent(extension: Proto3Extension): FileContentMatter {
+    private getFieldExtensionContent(
+        extension: ReadOnlyProto3Extension
+    ): FileContentMatter {
         const extensionContent = fileContentMatter()
         const extensionProcessor = new Proto3FieldExtensionProcessor(extensionContent)
 
@@ -92,7 +94,9 @@ export class Proto3FieldProcessor {
         return extensionContent
     }
 
-    private getRecordExtensionContent(extension: Proto3Extension): FileContentMatter {
+    private getRecordExtensionContent(
+        extension: ReadOnlyProto3Extension
+    ): FileContentMatter {
         const extensionContent = fileContentMatter()
         const extensionProcessor = new Proto3RecordExtensionProcessor(extensionContent)
 
@@ -101,7 +105,7 @@ export class Proto3FieldProcessor {
         return extensionContent
     }
 
-    public process(anyField: AnyProto3Field): void {
+    public process(anyField: ReadOnlyAnyProto3Field): void {
         const commentContent = this.getCommentContent(anyField.comments)
 
         this.fileContent.write(commentContent)

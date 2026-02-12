@@ -42,17 +42,23 @@ This package allows you to write custom transformers to modify Protobuf definiti
 
 **Available transformers:**
 
-- `ZodMessageConversionTransformer`
-- `ZodMessageFieldConversionTransformer`
-- `ZodMessageOneOfFieldConversionTransformer`
-- `ZodEnumConversionTransformer`
+- `ZodDeprecatedMessageConversionTransformer`
+- `ZodMessageNameIncludedInFieldConversionTransformer`
+- `ZodEnumNameIncludedInFieldConversionTransformer`
+- `ZodMessageNameConversionTransformer`
+- `ZodDeprecatedFieldConversionTransformer`
+- `ZodRequiredFieldConversionTransformer`
+- `ZodDeprecatedOneOfFieldConversionTransformer`
+- `ZodRequiredOneOfFieldConversionTransformer`
+- `ZodDeprecatedEnumConversionTransformer`
+- `ZodEnumNameConversionTransformer`
 
 #### Writing a transformer
 
 ```ts
 import {
     Proto3Deprecated,
-    Proto3MessageField,
+    type ReadOnlyProto3MessageField,
     isZodSchemaDeprecated,
     ZodMessageFieldType,
     WithMaybeZodPassthrough,
@@ -62,16 +68,15 @@ import {
 export class ZodDeprecatedFieldConversionTransformer implements ZodMessageFieldConversionTransformer {
     transform(
         schema: WithMaybeZodPassthrough<ZodMessageFieldType>,
-        protoDefinition: Proto3MessageField
-    ): Proto3MessageField {
+        protoDefinition: ReadOnlyProto3MessageField
+    ): ReadOnlyProto3MessageField {
         const isDeprecated = isZodSchemaDeprecated(schema)
 
         if (!isDeprecated) {
             return protoDefinition
         }
 
-        return Proto3MessageField.new({
-            ...protoDefinition,
+        return protoDefinition.clone({
             extensions: [
                 ...protoDefinition.extensions,
                 Proto3Deprecated.useExtension(true),

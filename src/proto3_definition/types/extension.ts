@@ -1,5 +1,6 @@
+import type { DeepReadOnly } from '#proto3_definition/types/deep_read_only'
 import type { GetNewParams } from '#proto3_definition/types/get_new_params'
-import type { AnyProto3Type, Proto3ImportedType } from '#proto3_definition/types/types'
+import { AnyProto3Type, type Proto3ImportedType } from '#proto3_definition/types/types'
 
 export type Proto3ExtensionScalarValue = string | number | boolean
 export type Proto3ExtensionRepeatedValue = (
@@ -20,6 +21,7 @@ export type AnyProto3ExtensionValue =
     | Proto3ExtensionMessageValue
     | Proto3ExtensionRepeatedValue
     | undefined
+export type ReadOnlyAnyProto3ExtensionValue = DeepReadOnly<AnyProto3ExtensionValue>
 
 export type Proto3Extension = {
     internalName: 'extension'
@@ -28,15 +30,16 @@ export type Proto3Extension = {
     key: AnyProto3Type
     value: AnyProto3ExtensionValue
 }
+export type ReadOnlyProto3Extension = DeepReadOnly<Proto3Extension>
 
 export const Proto3Extension = {
-    new: function <const TParams extends GetNewParams<Proto3Extension>>(params: TParams) {
+    new: function (params: GetNewParams<Proto3Extension>): ReadOnlyProto3Extension {
         return {
             internalName: 'extension',
             getDeepImportedTypes() {
                 return this.key.getDeepImportedTypes()
             },
             ...params,
-        } as const satisfies Proto3Extension
+        }
     },
 } as const

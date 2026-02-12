@@ -12,7 +12,7 @@ const User = z.object({
 
 const result = zodToProto({
     syntax: 'proto3',
-    packageName: 'services.authentification.v1',
+    packageName: 'services.authentication.v1',
     services: [],
     unscopedMessages: {
         user: User,
@@ -27,7 +27,7 @@ syntax = "proto3";
 
 import "buf/validate/validate.proto";
 
-package services.authentification.v1;
+package services.authentication.v1;
 
 enum UserRole {
   ADMIN = 0;

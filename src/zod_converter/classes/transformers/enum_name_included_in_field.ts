@@ -1,44 +1,146 @@
-import type { Proto3Message } from '#proto3_definition/types/messages'
+import type {
+    ReadOnlyAnyProto3MessageField,
+    ReadOnlyProto3MessageField,
+    ReadOnlyProto3MessageOneOfFieldSubField,
+} from '#proto3_definition/types/fields'
+import type {
+    ReadOnlyAnyProto3Message,
+    ReadOnlyProto3Message,
+} from '#proto3_definition/types/messages'
 import type { AnyZodMessage } from '#zod_converter/types/messages'
 import type { WithMaybeZodPassthrough } from '#zod_converter/types/passthroughs'
 import type { ZodMessageConversionTransformer } from '#zod_converter/types/transformers'
 import { pascalCase } from 'change-case'
 
 export class ZodEnumNameIncludedInFieldConversionTransformer implements ZodMessageConversionTransformer {
-    private readonly alreadyTransformedIds: Set<string> = new Set()
+    private readonly alreadyTransformedMessages: Map<string, ReadOnlyAnyProto3Message> =
+        new Map()
+
+    private updateField<
+        TField extends
+            | ReadOnlyProto3MessageField
+            | ReadOnlyProto3MessageOneOfFieldSubField,
+    >(parentName: string, isNameInversed: boolean, field: TField): TField {
+        if (field.type.internalName === 'map') {
+            if (field.type.value.internalName !== 'enum') {
+                return field
+            }
+
+            const alreadyTransformed = this.alreadyTransformedMessages.get(
+                field.type.value.id
+            )
+
+            if (alreadyTransformed !== undefined) {
+                return field.clone({
+                    type: field.type.clone({
+                        value: alreadyTransformed,
+                    }),
+                }) as TField
+            }
+
+            const updatedValue = field.type.value.clone({
+                name: isNameInversed
+                    ? pascalCase(`${field.type.value.name}_${parentName}`)
+                    : pascalCase(`${parentName}_${field.type.value.name}`),
+            })
+
+            this.alreadyTransformedMessages.set(field.type.value.id, updatedValue)
+
+            return field.clone({
+                type: field.type.clone({
+                    value: updatedValue,
+                }),
+            }) as TField
+        } else if (field.type.internalName === 'repeated') {
+            const deepInner = field.type.getDeepInnerType()
+
+            if (deepInner.internalName !== 'enum') {
+                return field
+            }
+
+            const alreadyTransformed = this.alreadyTransformedMessages.get(deepInner.id)
+
+            if (alreadyTransformed !== undefined) {
+                return field.clone({
+                    type: field.type.updateDeepInnerType(alreadyTransformed),
+                }) as TField
+            }
+
+            const updatedDeepInner = deepInner.clone({
+                name: isNameInversed
+                    ? pascalCase(`${deepInner.name}_${parentName}`)
+                    : pascalCase(`${parentName}_${deepInner.name}`),
+            })
+
+            const newField = field.clone({
+                type: field.type.updateDeepInnerType(updatedDeepInner),
+            })
+
+            this.alreadyTransformedMessages.set(deepInner.id, updatedDeepInner)
+
+            return newField as TField
+        } else if (
+            field.type.internalName === 'enum' &&
+            !this.alreadyTransformedMessages.has(field.type.id)
+        ) {
+            const newField = field.clone({
+                type: field.type.clone({
+                    name: isNameInversed
+                        ? pascalCase(`${field.type.name}_${parentName}`)
+                        : pascalCase(`${parentName}_${field.type.name}`),
+                }),
+            })
+
+            if (newField.type.internalName === 'enum') {
+                this.alreadyTransformedMessages.set(field.type.id, newField.type)
+            }
+
+            return newField as TField
+        } else if (field.type.internalName === 'enum') {
+            const alreadyTransformed = this.alreadyTransformedMessages.get(field.type.id)
+
+            return field.clone({
+                //// We keep the same ID after clone for the processor
+                type:
+                    alreadyTransformed?.clone({
+                        id: alreadyTransformed.id,
+                    }) ?? field.type,
+            }) as TField
+        } else {
+            return field
+        }
+    }
 
     transform(
         _schema: WithMaybeZodPassthrough<AnyZodMessage>,
-        protoDefinition: Proto3Message
-    ): Proto3Message {
+        protoDefinition: ReadOnlyProto3Message
+    ): ReadOnlyProto3Message {
+        const newFields: ReadOnlyAnyProto3MessageField[] = []
+
         for (const field of protoDefinition.fields) {
             if (field.internalName === 'message_field') {
-                if (
-                    field.type.internalName === 'enum' &&
-                    !this.alreadyTransformedIds.has(field.type.id)
-                ) {
-                    field.type.name = pascalCase(
-                        `${protoDefinition.name}_${field.type.name}`
-                    )
+                const newField = this.updateField(protoDefinition.name, false, field)
 
-                    this.alreadyTransformedIds.add(field.type.id)
-                }
+                newFields.push(newField)
             } else {
+                const newSubFields: ReadOnlyProto3MessageOneOfFieldSubField[] = []
+
                 for (const subField of field.subFields) {
-                    if (
-                        subField.type.internalName === 'enum' &&
-                        !this.alreadyTransformedIds.has(subField.type.id)
-                    ) {
-                        subField.type.name = pascalCase(
-                            `${subField.type.name}_${field.key}`
-                        )
-                        this.alreadyTransformedIds.add(subField.type.id)
-                    }
+                    const newSubField = this.updateField(field.key, true, subField)
+
+                    newSubFields.push(newSubField)
                 }
+
+                const newField = field.clone({
+                    subFields: newSubFields,
+                })
+
+                newFields.push(newField)
             }
         }
 
-        // TODO: immutable instance...
-        return protoDefinition
+        return protoDefinition.clone({
+            fields: newFields,
+        })
     }
 }

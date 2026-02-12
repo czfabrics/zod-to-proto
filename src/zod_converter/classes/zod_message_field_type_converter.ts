@@ -1,11 +1,11 @@
 import type {
-    Proto3DynamicSizeType,
-    Proto3MapValueType,
-    Proto3RepeatedInnerType,
+    ReadOnlyProto3DynamicSizeType,
+    ReadOnlyProto3MapValueType,
+    ReadOnlyProto3RepeatedInnerType,
 } from '#proto3_definition/types/dynamic_size'
-import type { Proto3MessageFieldType } from '#proto3_definition/types/fields'
-import type { AnyProto3Message } from '#proto3_definition/types/messages'
-import type { Proto3ScalarType } from '#proto3_definition/types/scalars'
+import type { ReadOnlyProto3MessageFieldType } from '#proto3_definition/types/fields'
+import type { ReadOnlyAnyProto3Message } from '#proto3_definition/types/messages'
+import type { ReadOnlyProto3ScalarType } from '#proto3_definition/types/scalars'
 import { ZodDynamicSizeConverter } from '#zod_converter/classes/zod_dynamic_size_converter'
 import { ZodMessageConverter } from '#zod_converter/classes/zod_message_converter'
 import { ZodScalarConverter } from '#zod_converter/classes/zod_scalar_converter'
@@ -30,31 +30,31 @@ export class ZodMessageFieldTypeConverter {
     public convert(
         key: string,
         schema: WithMaybeZodPassthrough<ZodScalarType>
-    ): Proto3ScalarType
+    ): ReadOnlyProto3ScalarType
     public convert(
         key: string,
         schema: WithMaybeZodPassthrough<ZodDynamicSizeType>
-    ): Proto3DynamicSizeType
+    ): ReadOnlyProto3DynamicSizeType
     public convert(
         key: string,
         schema: WithMaybeZodPassthrough<AnyZodMessage>
-    ): AnyProto3Message
+    ): ReadOnlyAnyProto3Message
     public convert(
         key: string,
         schema: WithMaybeZodPassthrough<ZodMapValueType>
-    ): Proto3MapValueType
+    ): ReadOnlyProto3MapValueType
     public convert(
         key: string,
         schema: WithMaybeZodPassthrough<ZodRepeatedInnerType>
-    ): Proto3RepeatedInnerType
+    ): ReadOnlyProto3RepeatedInnerType
     public convert(
         key: string,
         schema: WithMaybeZodPassthrough<ZodMessageFieldType>
-    ): Proto3MessageFieldType
+    ): ReadOnlyProto3MessageFieldType
     public convert(
         key: string,
         schema: WithMaybeZodPassthrough<ZodMessageFieldType>
-    ): Proto3MessageFieldType {
+    ): ReadOnlyProto3MessageFieldType {
         if (ZodScalarType.is(schema)) {
             const converter = new ZodScalarConverter()
 

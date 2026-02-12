@@ -1,0 +1,305 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`\`zodToProto\` test suite > Testing basic usage (unscoped message) > result 1`] = `
+"syntax = "proto3";
+
+import "buf/validate/validate.proto";
+
+package services.authentication.v1;
+
+enum UserRole {
+  ADMIN = 0;
+  VIEWER = 1;
+}
+
+message User {
+  int64 id = 1 [
+    (buf.validate.field).required = true
+  ];
+  optional string full_name = 2;
+  UserRole role = 3 [
+    (buf.validate.field).required = true
+  ];
+}"
+`;
+
+exports[`\`zodToProto\` test suite > Testing complex usage > result 1`] = `
+"syntax = "proto3";
+
+import "buf/validate/validate.proto";
+import "google/protobuf/empty.proto";
+
+package services.synchronization.v1;
+
+service SynchronizationService {
+  rpc PostAsyncTasks(PostAsyncTasksInput) returns (google.protobuf.Empty) {}
+}
+
+message TargetWorkspace {
+  string external_id = 1 [
+    (buf.validate.field).required = true
+  ];
+}
+
+message TargetCredential {
+  string external_id = 1 [
+    (buf.validate.field).required = true
+  ];
+}
+
+message UpdateWorkspaceTarget {
+  TargetCredential credential = 1 [
+    (buf.validate.field).required = true
+  ];
+  TargetWorkspace workspace = 2 [
+    (buf.validate.field).required = true
+  ];
+}
+
+message UpdateWorkspaceTask {
+  UpdateWorkspaceTarget target = 1 [
+    (buf.validate.field).required = true
+  ];
+}
+
+message CreateWorkspaceTarget {
+  TargetCredential credential = 1 [
+    (buf.validate.field).required = true
+  ];
+  TargetWorkspace workspace = 2 [
+    (buf.validate.field).required = true
+  ];
+}
+
+message CreateWorkspaceTask {
+  CreateWorkspaceTarget target = 1 [
+    (buf.validate.field).required = true
+  ];
+}
+
+message SynchronizeUsersTarget {
+  TargetWorkspace workspace = 1 [
+    (buf.validate.field).required = true
+  ];
+}
+
+message SynchronizeUsersTask {
+  SynchronizeUsersTarget target = 1 [
+    (buf.validate.field).required = true
+  ];
+}
+
+message PostAsyncTasksInputTask {
+  oneof task {
+    option (buf.validate.oneof).required = true;
+    SynchronizeUsersTask synchronize_users = 1 [
+      (buf.validate.field).required = true
+    ];
+    CreateWorkspaceTask create_workspace = 2 [
+      (buf.validate.field).required = true
+    ];
+    UpdateWorkspaceTask update_workspace = 3 [
+      (buf.validate.field).required = true
+    ];
+  }
+}
+
+message PostAsyncTasksInput {
+  repeated PostAsyncTasksInputTask tasks = 1 [
+    (buf.validate.field).required = true
+  ];
+}"
+`;
+
+exports[`\`zodToProto\` test suite > Testing extension usage > result 1`] = `
+"syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+import "buf/validate/validate.proto";
+import "google/api/annotations.proto";
+
+package services.user.v1;
+
+service UserService {
+  option (deprecated) = true;
+  rpc GetUsers(google.protobuf.Empty) returns (stream GetUsersOutput) {
+    option (google.api.http).get = "/users";
+  }
+}
+
+enum UserRole {
+  ADMIN = 0;
+  VIEWER = 1;
+}
+
+message GetUsersOutputUser {
+  int64 id = 1 [
+    (buf.validate.field).required = true
+  ];
+  optional string full_name = 2;
+  UserRole role = 3 [
+    (buf.validate.field).required = true
+  ];
+}
+
+message GetUsersOutput {
+  repeated GetUsersOutputUser users = 1 [
+    (buf.validate.field).required = true
+  ];
+}"
+`;
+
+exports[`\`zodToProto\` test suite > Testing gRPC Service usage > result 1`] = `
+"syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+import "buf/validate/validate.proto";
+
+package services.user.v1;
+
+service UserService {
+  rpc GetUsers(google.protobuf.Empty) returns (stream GetUsersOutput) {}
+}
+
+enum UserRole {
+  ADMIN = 0;
+  VIEWER = 1;
+}
+
+message GetUsersOutputUser {
+  int64 id = 1 [
+    (buf.validate.field).required = true
+  ];
+  optional string full_name = 2;
+  UserRole role = 3 [
+    (buf.validate.field).required = true
+  ];
+}
+
+message GetUsersOutput {
+  repeated GetUsersOutputUser users = 1 [
+    (buf.validate.field).required = true
+  ];
+}"
+`;
+
+exports[`\`zodToProto\` test suite > Testing gRPC Service with gRPC gateway annotations usage > result 1`] = `
+"syntax = "proto3";
+
+import "buf/validate/validate.proto";
+import "google/protobuf/empty.proto";
+import "google/api/annotations.proto";
+
+package services.user.v1;
+
+service UserService {
+  rpc AddUser(AddUserInput) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/users",
+      body: "*"
+    };
+  }
+}
+
+enum UserRole {
+  ADMIN = 0;
+  VIEWER = 1;
+}
+
+message AddUserInputUser {
+  optional string full_name = 1;
+  UserRole role = 2 [
+    (buf.validate.field).required = true
+  ];
+}
+
+message AddUserInput {
+  AddUserInputUser user = 1 [
+    (buf.validate.field).required = true
+  ];
+}"
+`;
+
+exports[`\`zodToProto\` test suite > Testing type prefix usage > result 1`] = `
+"syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+import "buf/validate/validate.proto";
+
+package services.user.v1;
+
+service UserService {
+  rpc GetUsers(google.protobuf.Empty) returns (UserPackageUserServiceGetUsersOutput) {}
+}
+
+service UserService2 {
+  rpc GetUsers(google.protobuf.Empty) returns (UserPackageUserService2GetUsersOutput) {}
+}
+
+enum UserPackageUserService2GetUsersUserRole {
+  ADMIN = 0;
+  VIEWER = 1;
+}
+
+message UserPackageUserService2GetUsersOutputUser {
+  int64 id = 1 [
+    (buf.validate.field).required = true
+  ];
+  optional string full_name = 2;
+  UserPackageUserService2GetUsersUserRole role = 3 [
+    (buf.validate.field).required = true
+  ];
+}
+
+message UserPackageUserService2GetUsersOutput {
+  repeated UserPackageUserService2GetUsersOutputUser users = 1 [
+    (buf.validate.field).required = true
+  ];
+}
+
+enum UserPackageUserServiceGetUsersUserRole {
+  ADMIN = 0;
+  VIEWER = 1;
+}
+
+message UserPackageUserServiceGetUsersOutputUser {
+  int64 id = 1 [
+    (buf.validate.field).required = true
+  ];
+  optional string full_name = 2;
+  UserPackageUserServiceGetUsersUserRole role = 3 [
+    (buf.validate.field).required = true
+  ];
+}
+
+message UserPackageUserServiceGetUsersOutput {
+  repeated UserPackageUserServiceGetUsersOutputUser users = 1 [
+    (buf.validate.field).required = true
+  ];
+}"
+`;
+
+exports[`\`zodToProto\` test suite > Testing with map dynamic type > result 1`] = `
+"syntax = "proto3";
+
+import "buf/validate/validate.proto";
+import "google/protobuf/empty.proto";
+
+package services.user.v1;
+
+service UserService {
+  rpc PostAccesses(PostAccessesInput) returns (google.protobuf.Empty) {}
+}
+
+message PostAccessesInputAccesses {
+  bool can = 1 [
+    (buf.validate.field).required = true
+  ];
+}
+
+message PostAccessesInput {
+  map<string, PostAccessesInputAccesses> accesses = 1 [
+    (buf.validate.field).required = true
+  ];
+}"
+`;

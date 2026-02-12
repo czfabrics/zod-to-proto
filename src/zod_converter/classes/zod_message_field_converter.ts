@@ -1,9 +1,11 @@
 import {
     Proto3MessageField,
     Proto3MessageOneOfFieldSubField,
+    ReadOnlyProto3MessageField,
+    ReadOnlyProto3MessageOneOfFieldSubField,
     type Proto3OptionalState,
 } from '#proto3_definition/types/fields'
-import type { Proto3Message } from '#proto3_definition/types/messages'
+import type { ReadOnlyProto3Message } from '#proto3_definition/types/messages'
 import { ZodMessageFieldTypeConverter } from '#zod_converter/classes/zod_message_field_type_converter'
 import { getZodSchemaComments } from '#zod_converter/helpers/get_zod_schema_comments'
 import { isZodSchemaOptional } from '#zod_converter/helpers/is_zod_schema_optional'
@@ -18,7 +20,7 @@ import { snakeCase } from 'change-case'
 
 export class ZodMessageFieldConverter {
     public constructor(
-        private readonly message: Proto3Message,
+        private readonly message: ReadOnlyProto3Message,
         private readonly reuseStrategies: ConversionReuseStrategies,
         private readonly transformers: ZodConversionTransformers
     ) {}
@@ -37,7 +39,7 @@ export class ZodMessageFieldConverter {
         key: string,
         rootSchema: WithMaybeZodPassthrough<ZodMessageFieldType>,
         optionalState?: Proto3OptionalState
-    ): Proto3MessageField | Proto3MessageOneOfFieldSubField {
+    ): ReadOnlyProto3MessageField | ReadOnlyProto3MessageOneOfFieldSubField {
         const deepSchema = ZodPassthroughType.pass(rootSchema)
 
         const converter = new ZodMessageFieldTypeConverter(
