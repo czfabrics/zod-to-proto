@@ -1,4 +1,4 @@
-import { DeepReadOnly } from '#proto3_definition/types/deep_read_only'
+import { DeepReadOnly } from '#core/types/deep_read_only'
 import type {
     ReadOnlyProto3MessageField,
     ReadOnlyProto3MessageOneOfField,

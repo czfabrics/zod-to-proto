@@ -1,6 +1,6 @@
+import type { DeepReadOnly } from '#core/types/deep_read_only'
 import type { PurgeUndefinedValues } from '#core/types/purge_undefined_values'
 import type { CloneParams } from '#proto3_definition/types/clone'
-import type { DeepReadOnly } from '#proto3_definition/types/deep_read_only'
 import type { Proto3DynamicSizeType } from '#proto3_definition/types/dynamic_size'
 import type { Proto3Extension } from '#proto3_definition/types/extension'
 import type { GetNewParams } from '#proto3_definition/types/get_new_params'

@@ -1,7 +1,7 @@
 import { getRandomId } from '#core/helpers/get_random_id'
+import type { DeepReadOnly } from '#core/types/deep_read_only'
 import type { PurgeUndefinedValues } from '#core/types/purge_undefined_values'
 import { CloneParams } from '#proto3_definition/types/clone'
-import type { DeepReadOnly } from '#proto3_definition/types/deep_read_only'
 import type { Proto3Extension } from '#proto3_definition/types/extension'
 import {
     ReadOnlyAnyProto3MessageField,

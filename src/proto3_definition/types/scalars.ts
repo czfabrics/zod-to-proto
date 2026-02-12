@@ -1,4 +1,4 @@
-import { DeepReadOnly, ReadOnlyValue } from '#proto3_definition/types/deep_read_only'
+import { DeepReadOnly, ReadOnlyValue } from '#core/types/deep_read_only'
 import type { AnyProto3Message } from '#proto3_definition/types/messages'
 import type { Proto3ImportedType } from '#proto3_definition/types/types'
 

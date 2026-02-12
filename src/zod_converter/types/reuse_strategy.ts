@@ -1,4 +1,4 @@
-import { DeepReadOnly } from '#proto3_definition/types/deep_read_only'
+import { DeepReadOnly } from '#core/types/deep_read_only'
 import { Proto3Enum, Proto3Message } from '#proto3_definition/types/messages'
 import { AnyZodMessage } from '#zod_converter/types/messages'
 import type { SomeType } from 'zod/v4/core'

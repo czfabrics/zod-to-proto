@@ -1,4 +1,4 @@
-import { DeepReadOnly } from '#proto3_definition/types/deep_read_only'
+import { DeepReadOnly } from '#core/types/deep_read_only'
 import { GetAnyNewParams, GetNewParams } from '#proto3_definition/types/get_new_params'
 import { AnyProto3Message } from '#proto3_definition/types/messages'
 import { match } from 'ts-pattern'

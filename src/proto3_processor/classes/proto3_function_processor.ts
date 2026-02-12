@@ -1,6 +1,6 @@
+import type { DeepReadOnly } from '#core/types/deep_read_only'
 import { fileContentMatter } from '#file/classes/content_matter'
 import type { FileContentMatter } from '#file/types/content_matter'
-import type { DeepReadOnly } from '#proto3_definition/types/deep_read_only'
 import type { ReadOnlyProto3RpcFunction } from '#proto3_definition/types/functions'
 import type { AnyProto3Message } from '#proto3_definition/types/messages'
 import type { Proto3ImportedType } from '#proto3_definition/types/types'

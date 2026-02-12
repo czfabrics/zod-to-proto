@@ -1,4 +1,4 @@
-import { DeepReadOnly } from '#proto3_definition/types/deep_read_only'
+import { DeepReadOnly } from '#core/types/deep_read_only'
 import type { Proto3Message } from '#proto3_definition/types/messages'
 import type { Proto3ImportedType } from '#proto3_definition/types/types'
 import type { ConversionReuseStrategies } from '#zod_converter/types/reuse_strategy'

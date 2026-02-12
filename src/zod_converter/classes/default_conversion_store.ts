@@ -1,5 +1,5 @@
 import { getRandomId } from '#core/helpers/get_random_id'
-import { DeepReadOnly } from '#proto3_definition/types/deep_read_only'
+import { DeepReadOnly } from '#core/types/deep_read_only'
 import {
     getProtoConversionId,
     setProtoConversionId,
