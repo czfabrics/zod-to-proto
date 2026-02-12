@@ -332,7 +332,11 @@ const result = zodToProto({
         user2: safeZodMessage(
             z.object({
                 createdAt: z.date(),
-            }) // => TypeDebuggingError<"This Zod type 'date' is not supported">
+            })
+            // => TypeDebuggingError<"This Zod type 'date' is not supported">
+            //
+            // **Note:** You can make the schema compatible by using z.string().pipe(z.coerce.date()).
+            // This will result in the following proto field: `string created_at = 1;`
         ),
     },
 })
