@@ -66,19 +66,19 @@ A TypeScript library for seamlessly converting Zod schemas into Protocol Buffers
 ### Bun
 
 ```sh
-bun add @czlab/zod-to-proto@0.1.0-beta.10
+bun add @czlab/zod-to-proto@0.1.0-beta.11
 ```
 
 ### Yarn
 
 ```sh
-yarn add @czlab/zod-to-proto@0.1.0-beta.10
+yarn add @czlab/zod-to-proto@0.1.0-beta.11
 ```
 
 ### NPM
 
 ```sh
-npm install @czlab/zod-to-proto@0.1.0-beta.10
+npm install @czlab/zod-to-proto@0.1.0-beta.11
 ```
 
 
@@ -98,7 +98,7 @@ const User = z.object({
 
 const result = zodToProto({
     syntax: 'proto3',
-    packageName: 'services.authentification.v1',
+    packageName: 'services.authentication.v1',
     services: [],
     unscopedMessages: {
         user: User,
@@ -113,7 +113,7 @@ syntax = "proto3";
 
 import "buf/validate/validate.proto";
 
-package services.authentification.v1;
+package services.authentication.v1;
 
 enum UserRole {
   ADMIN = 0;
@@ -150,7 +150,7 @@ const User = z.object({
 
 const result = zodToProto({
     syntax: 'proto3',
-    packageName: 'services.authentification.v1',
+    packageName: 'services.authentication.v1',
     services: [],
     unscopedMessages: {
         user: User,
@@ -165,7 +165,7 @@ syntax = "proto3";
 
 import "buf/validate/validate.proto";
 
-package services.authentification.v1;
+package services.authentication.v1;
 
 enum UserRole {
   ADMIN = 0;
@@ -197,7 +197,7 @@ const User = z.object({
 
 const result = zodToProto({
     syntax: 'proto3',
-    packageName: 'services.authentification.v1',
+    packageName: 'services.user.v1',
     services: [
         {
             name: 'UserService',
@@ -225,7 +225,7 @@ syntax = "proto3";
 import "google/protobuf/empty.proto";
 import "buf/validate/validate.proto";
 
-package services.authentification.v1;
+package services.user.v1;
 
 service UserService {
   rpc GetUsers(google.protobuf.Empty) returns (stream GetUsersOutput) {}
@@ -236,7 +236,7 @@ enum UserRole {
   VIEWER = 1;
 }
 
-message User {
+message GetUsersOutputUser {
   int64 id = 1 [
     (buf.validate.field).required = true
   ];
@@ -247,7 +247,7 @@ message User {
 }
 
 message GetUsersOutput {
-  repeated User users = 1 [
+  repeated GetUsersOutputUser users = 1 [
     (buf.validate.field).required = true
   ];
 }
@@ -267,14 +267,16 @@ const User = z.object({
 
 const result = zodToProto({
     syntax: 'proto3',
-    packageName: 'services.authentification.v1',
+    packageName: 'services.user.v1',
     services: [
         {
             name: 'UserService',
             functions: [
                 {
                     name: 'AddUser',
-                    in: User.omit({ id: true }),
+                    in: z.object({
+                        user: User.omit({ id: true }),
+                    }),
                     extensions: [
                         Proto3HttpAnnotation.useExtension({
                             post: '/users',
@@ -297,7 +299,7 @@ import "buf/validate/validate.proto";
 import "google/protobuf/empty.proto";
 import "google/api/annotations.proto";
 
-package services.authentification.v1;
+package services.user.v1;
 
 service UserService {
   rpc AddUser(AddUserInput) returns (google.protobuf.Empty) {
@@ -308,14 +310,20 @@ service UserService {
   }
 }
 
-enum AddUserInputRole {
+enum UserRole {
   ADMIN = 0;
   VIEWER = 1;
 }
 
-message AddUserInput {
+message AddUserInputUser {
   optional string full_name = 1;
-  AddUserInputRole role = 2 [
+  UserRole role = 2 [
+    (buf.validate.field).required = true
+  ];
+}
+
+message AddUserInput {
+  AddUserInputUser user = 1 [
     (buf.validate.field).required = true
   ];
 }
@@ -334,11 +342,16 @@ const User = z.object({
     fullName: z.string().optional(),
     role: z.enum(['ADMIN', 'VIEWER']),
 })
+const User2 = z.object({
+    id: z.int64(),
+    fullName: z.string().optional(),
+    role: z.enum(['ADMIN', 'VIEWER']),
+})
 
 const result = zodToProto({
     syntax: 'proto3',
-    packageName: 'services.authentification.v1',
-    typePrefix: 'AuthentificationPackage', // First level prefix
+    packageName: 'services.user.v1',
+    typePrefix: 'UserPackage', // First level prefix
     services: [
         {
             name: 'UserService',
@@ -361,7 +374,7 @@ const result = zodToProto({
                     name: 'GetUsers',
                     typePrefix: 'GetUsers',
                     out: z.object({
-                        users: z.array(User),
+                        users: z.array(User2),
                     }),
                 },
             ],
@@ -378,40 +391,55 @@ syntax = "proto3";
 import "google/protobuf/empty.proto";
 import "buf/validate/validate.proto";
 
-package services.authentification.v1;
+package services.user.v1;
 
-service AuthentificationPackageUserService {
-  rpc GetUsers(google.protobuf.Empty) returns (AuthentificationPackageUserServiceGetUsersOutput) {}
+service UserService {
+  rpc GetUsers(google.protobuf.Empty) returns (UserPackageUserServiceGetUsersOutput) {}
 }
 
-service AuthentificationPackageUserService2 {
-  rpc GetUsers(google.protobuf.Empty) returns (AuthentificationPackageUserService2GetUsersOutput) {}
+service UserService2 {
+  rpc GetUsers(google.protobuf.Empty) returns (UserPackageUserService2GetUsersOutput) {}
 }
 
-enum AuthentificationPackageUserService2GetUsersUserServiceGetUsersUserRole {
+enum UserPackageUserService2GetUsersUserRole {
   ADMIN = 0;
   VIEWER = 1;
 }
 
-message AuthentificationPackageUserService2GetUsersUserServiceGetUsersUser {
+message UserPackageUserService2GetUsersOutputUser {
   int64 id = 1 [
     (buf.validate.field).required = true
   ];
   optional string full_name = 2;
-  AuthentificationPackageUserService2GetUsersUserServiceGetUsersUserRole role = 3 [
+  UserPackageUserService2GetUsersUserRole role = 3 [
     (buf.validate.field).required = true
   ];
 }
 
-message AuthentificationPackageUserService2GetUsersOutput {
-  repeated AuthentificationPackageUserService2GetUsersUserServiceGetUsersUser users = 1 [
+message UserPackageUserService2GetUsersOutput {
+  repeated UserPackageUserService2GetUsersOutputUser users = 1 [
     (buf.validate.field).required = true
   ];
 }
 
-// AuthentificationPackage -> UserService -> GetUsers
-message AuthentificationPackageUserServiceGetUsersOutput {
-  repeated AuthentificationPackageUserService2GetUsersUserServiceGetUsersUser users = 1 [
+enum UserPackageUserServiceGetUsersUserRole {
+  ADMIN = 0;
+  VIEWER = 1;
+}
+
+message UserPackageUserServiceGetUsersOutputUser {
+  int64 id = 1 [
+    (buf.validate.field).required = true
+  ];
+  optional string full_name = 2;
+  UserPackageUserServiceGetUsersUserRole role = 3 [
+    (buf.validate.field).required = true
+  ];
+}
+
+// UserPackage -> UserService -> GetUsers
+message UserPackageUserServiceGetUsersOutput {
+  repeated UserPackageUserServiceGetUsersOutputUser users = 1 [
     (buf.validate.field).required = true
   ];
 }
@@ -440,7 +468,11 @@ const result = zodToProto({
         user2: safeZodMessage(
             z.object({
                 createdAt: z.date(),
-            }) // => TypeDebuggingError<"This Zod type 'date' is not supported">
+            })
+            // => TypeDebuggingError<"This Zod type 'date' is not supported">
+            //
+            // **Note:** You can make the schema compatible by using z.string().pipe(z.coerce.date()).
+            // This will result in the following proto field: `string created_at = 1;`
         ),
     },
 })
@@ -666,17 +698,23 @@ This package allows you to write custom transformers to modify Protobuf definiti
 
 **Available transformers:**
 
-- `ZodMessageConversionTransformer`
-- `ZodMessageFieldConversionTransformer`
-- `ZodMessageOneOfFieldConversionTransformer`
-- `ZodEnumConversionTransformer`
+- `ZodDeprecatedMessageConversionTransformer`
+- `ZodMessageNameIncludedInFieldConversionTransformer`
+- `ZodEnumNameIncludedInFieldConversionTransformer`
+- `ZodMessageNameConversionTransformer`
+- `ZodDeprecatedFieldConversionTransformer`
+- `ZodRequiredFieldConversionTransformer`
+- `ZodDeprecatedOneOfFieldConversionTransformer`
+- `ZodRequiredOneOfFieldConversionTransformer`
+- `ZodDeprecatedEnumConversionTransformer`
+- `ZodEnumNameConversionTransformer`
 
 #### Writing a transformer
 
 ```ts
 import {
     Proto3Deprecated,
-    Proto3MessageField,
+    type ReadOnlyProto3MessageField,
     isZodSchemaDeprecated,
     ZodMessageFieldType,
     WithMaybeZodPassthrough,
@@ -686,16 +724,15 @@ import {
 export class ZodDeprecatedFieldConversionTransformer implements ZodMessageFieldConversionTransformer {
     transform(
         schema: WithMaybeZodPassthrough<ZodMessageFieldType>,
-        protoDefinition: Proto3MessageField
-    ): Proto3MessageField {
+        protoDefinition: ReadOnlyProto3MessageField
+    ): ReadOnlyProto3MessageField {
         const isDeprecated = isZodSchemaDeprecated(schema)
 
         if (!isDeprecated) {
             return protoDefinition
         }
 
-        return Proto3MessageField.new({
-            ...protoDefinition,
+        return protoDefinition.clone({
             extensions: [
                 ...protoDefinition.extensions,
                 Proto3Deprecated.useExtension(true),
