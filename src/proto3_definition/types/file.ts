@@ -1,5 +1,5 @@
-import type { ReadOnly } from '#core/types/read_only'
 import type { PurgeUndefinedValues } from '#core/types/purge_undefined_values'
+import type { ReadOnly } from '#core/types/read_only'
 import type { CloneParams } from '#proto3_definition/types/clone'
 import type { ReadOnlyProto3Extension } from '#proto3_definition/types/extension'
 import type { GetNewParams } from '#proto3_definition/types/get_new_params'
@@ -39,14 +39,10 @@ export const Proto3File = {
                 }
             },
             propagateTypePrefix(this: ReadOnlyProto3File): ReadOnlyProto3File {
-                const typePrefix = this.typePrefix
-
-                if (typePrefix === null) {
-                    return this
-                }
+                const prefixList = this.typePrefix !== null ? [this.typePrefix] : []
 
                 const newServices = this.services.map((service) => {
-                    return service.propagateTypePrefix([typePrefix])
+                    return service.propagateTypePrefix(prefixList)
                 })
 
                 return this.clone({

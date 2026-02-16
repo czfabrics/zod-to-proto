@@ -220,6 +220,40 @@ message AddUserInput {
 }"
 `;
 
+exports[`\`zodToProto\` test suite > Testing type prefix (method only) > result 1`] = `
+"syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+import "buf/validate/validate.proto";
+
+package services.user.v1;
+
+service UserService {
+  rpc GetUsers(google.protobuf.Empty) returns (GetUsersOutput) {}
+}
+
+enum GetUsersUserRole {
+  ADMIN = 0;
+  VIEWER = 1;
+}
+
+message GetUsersOutputUser {
+  int64 id = 1 [
+    (buf.validate.field).required = true
+  ];
+  optional string full_name = 2;
+  GetUsersUserRole role = 3 [
+    (buf.validate.field).required = true
+  ];
+}
+
+message GetUsersOutput {
+  repeated GetUsersOutputUser users = 1 [
+    (buf.validate.field).required = true
+  ];
+}"
+`;
+
 exports[`\`zodToProto\` test suite > Testing type prefix usage > result 1`] = `
 "syntax = "proto3";
 

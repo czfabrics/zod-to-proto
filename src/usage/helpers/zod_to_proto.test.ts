@@ -306,4 +306,33 @@ describe('`zodToProto` test suite', () => {
 
         expect(result).toMatchSnapshot('result')
     })
+
+    test('Testing type prefix (method only)', async ({ expect }) => {
+        const User = z.object({
+            id: z.int64(),
+            fullName: z.string().optional(),
+            role: z.enum(['ADMIN', 'VIEWER']),
+        })
+
+        const result = zodToProto({
+            syntax: 'proto3',
+            packageName: 'services.user.v1',
+            services: [
+                {
+                    name: 'UserService',
+                    functions: [
+                        {
+                            name: 'GetUsers',
+                            typePrefix: 'GetUsers',
+                            out: z.object({
+                                users: z.array(User),
+                            }),
+                        },
+                    ],
+                },
+            ],
+        })
+
+        expect(result).toMatchSnapshot('result')
+    })
 })
