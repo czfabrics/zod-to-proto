@@ -7,6 +7,7 @@ import type {
     ReadOnlyAnyProto3Message,
     ReadOnlyProto3Message,
 } from '#proto3_definition/types/messages'
+import { alreadyTransformedMessages } from '#zod_converter/classes/transformers/enum_name_included_in_field'
 import type { AnyZodMessage } from '#zod_converter/types/messages'
 import type { WithMaybeZodPassthrough } from '#zod_converter/types/passthroughs'
 import type { ZodMessageConversionTransformer } from '#zod_converter/types/transformers'
@@ -14,7 +15,7 @@ import { pascalCase } from 'change-case'
 
 export class ZodMessageNameIncludedInFieldConversionTransformer implements ZodMessageConversionTransformer {
     private readonly alreadyTransformedMessages: Map<string, ReadOnlyAnyProto3Message> =
-        new Map()
+        alreadyTransformedMessages
 
     private updateField<
         TField extends
@@ -38,7 +39,7 @@ export class ZodMessageNameIncludedInFieldConversionTransformer implements ZodMe
                 }) as TField
             }
 
-            const updatedValue = field.type.value.clone({
+            const updatedValue = field.type.value.duplicate({
                 name: isNameInversed
                     ? pascalCase(`${field.type.value.name}_${parentName}`)
                     : pascalCase(`${parentName}_${field.type.value.name}`),
@@ -66,7 +67,7 @@ export class ZodMessageNameIncludedInFieldConversionTransformer implements ZodMe
                 }) as TField
             }
 
-            const updatedDeepInner = deepInner.clone({
+            const updatedDeepInner = deepInner.duplicate({
                 name: isNameInversed
                     ? pascalCase(`${deepInner.name}_${parentName}`)
                     : pascalCase(`${parentName}_${deepInner.name}`),
@@ -84,7 +85,7 @@ export class ZodMessageNameIncludedInFieldConversionTransformer implements ZodMe
             !this.alreadyTransformedMessages.has(field.type.id)
         ) {
             const newField = field.clone({
-                type: field.type.clone({
+                type: field.type.duplicate({
                     name: isNameInversed
                         ? pascalCase(`${field.type.name}_${parentName}`)
                         : pascalCase(`${parentName}_${field.type.name}`),
@@ -139,7 +140,7 @@ export class ZodMessageNameIncludedInFieldConversionTransformer implements ZodMe
             }
         }
 
-        return protoDefinition.clone({
+        return protoDefinition.duplicate({
             fields: newFields,
         })
     }

@@ -220,6 +220,210 @@ message AddUserInput {
 }"
 `;
 
+exports[`\`zodToProto\` test suite > Testing property override (proto meta) for enum => protoConversionId & protoDefinitionName > result 1`] = `
+"syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+import "buf/validate/validate.proto";
+
+package services.user.v1;
+
+service UserService {
+  rpc GetUsers(google.protobuf.Empty) returns (GetUsersOutput) {}
+}
+
+enum Role {
+  ADMIN = 0;
+  VIEWER = 1;
+}
+
+message UserSupervisor1 {
+  int64 id = 1 [
+    (buf.validate.field).required = true
+  ];
+  optional string full_name = 2;
+  Role role = 3 [
+    (buf.validate.field).required = true
+  ];
+}
+
+message GetUsersOutputUser {
+  int64 id = 1 [
+    (buf.validate.field).required = true
+  ];
+  optional string full_name = 2;
+  Role role = 3 [
+    (buf.validate.field).required = true
+  ];
+  UserSupervisor1 supervisor1 = 4 [
+    (buf.validate.field).required = true
+  ];
+}
+
+message GetUsersOutput {
+  repeated GetUsersOutputUser users = 1 [
+    (buf.validate.field).required = true
+  ];
+}"
+`;
+
+exports[`\`zodToProto\` test suite > Testing property override (proto meta) for enum => protoConversionId > result 1`] = `
+"syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+import "buf/validate/validate.proto";
+
+package services.user.v1;
+
+service UserService {
+  rpc GetUsers(google.protobuf.Empty) returns (GetUsersOutput) {}
+}
+
+enum GetUsersSupervisor1Role {
+  ADMIN = 0;
+  VIEWER = 1;
+}
+
+message GetUsersUserSupervisor1 {
+  int64 id = 1 [
+    (buf.validate.field).required = true
+  ];
+  optional string full_name = 2;
+  GetUsersSupervisor1Role role = 3 [
+    (buf.validate.field).required = true
+  ];
+}
+
+message GetUsersOutputUser {
+  int64 id = 1 [
+    (buf.validate.field).required = true
+  ];
+  optional string full_name = 2;
+  GetUsersSupervisor1Role role = 3 [
+    (buf.validate.field).required = true
+  ];
+  GetUsersUserSupervisor1 supervisor1 = 4 [
+    (buf.validate.field).required = true
+  ];
+}
+
+message GetUsersOutput {
+  repeated GetUsersOutputUser users = 1 [
+    (buf.validate.field).required = true
+  ];
+}"
+`;
+
+exports[`\`zodToProto\` test suite > Testing property override (proto meta) for message => protoConversionId & protoDefinitionName > result 1`] = `
+"syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+import "buf/validate/validate.proto";
+
+package services.user.v1;
+
+service UserService {
+  rpc GetUsers(google.protobuf.Empty) returns (GetUsersOutput) {}
+}
+
+enum Supervisor1Role {
+  ADMIN = 0;
+  VIEWER = 1;
+}
+
+message Sup {
+  int64 id = 1 [
+    (buf.validate.field).required = true
+  ];
+  optional string full_name = 2;
+  Supervisor1Role role = 3 [
+    (buf.validate.field).required = true
+  ];
+}
+
+enum UserRole {
+  ADMIN = 0;
+  VIEWER = 1;
+}
+
+message GetUsersOutputUser {
+  int64 id = 1 [
+    (buf.validate.field).required = true
+  ];
+  optional string full_name = 2;
+  UserRole role = 3 [
+    (buf.validate.field).required = true
+  ];
+  Sup supervisor1 = 4 [
+    (buf.validate.field).required = true
+  ];
+  Sup supervisor2 = 5 [
+    (buf.validate.field).required = true
+  ];
+}
+
+message GetUsersOutput {
+  repeated GetUsersOutputUser users = 1 [
+    (buf.validate.field).required = true
+  ];
+}"
+`;
+
+exports[`\`zodToProto\` test suite > Testing property override (proto meta) for message => protoConversionId > result 1`] = `
+"syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+import "buf/validate/validate.proto";
+
+package services.user.v1;
+
+service UserService {
+  rpc GetUsers(google.protobuf.Empty) returns (GetUsersOutput) {}
+}
+
+enum GetUsersSupervisor1Role {
+  ADMIN = 0;
+  VIEWER = 1;
+}
+
+message GetUsersUserSupervisor1 {
+  int64 id = 1 [
+    (buf.validate.field).required = true
+  ];
+  optional string full_name = 2;
+  GetUsersSupervisor1Role role = 3 [
+    (buf.validate.field).required = true
+  ];
+}
+
+enum GetUsersUserRole {
+  ADMIN = 0;
+  VIEWER = 1;
+}
+
+message GetUsersOutputUser {
+  int64 id = 1 [
+    (buf.validate.field).required = true
+  ];
+  optional string full_name = 2;
+  GetUsersUserRole role = 3 [
+    (buf.validate.field).required = true
+  ];
+  GetUsersUserSupervisor1 supervisor1 = 4 [
+    (buf.validate.field).required = true
+  ];
+  GetUsersUserSupervisor1 supervisor2 = 5 [
+    (buf.validate.field).required = true
+  ];
+}
+
+message GetUsersOutput {
+  repeated GetUsersOutputUser users = 1 [
+    (buf.validate.field).required = true
+  ];
+}"
+`;
+
 exports[`\`zodToProto\` test suite > Testing type prefix (method only) > result 1`] = `
 "syntax = "proto3";
 

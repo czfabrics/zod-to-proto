@@ -1,4 +1,5 @@
 import { type ReadOnlyProto3Message } from '#proto3_definition/types/messages'
+import { alreadyTransformedMessages } from '#zod_converter/classes/transformers/enum_name_included_in_field'
 import { getProtoMeta } from '#zod_converter/helpers/registry'
 import type { AnyZodMessage } from '#zod_converter/types/messages'
 import {
@@ -21,8 +22,12 @@ export class ZodMessageNameConversionTransformer implements ZodMessageConversion
             return protoDefinition
         }
 
-        return protoDefinition.clone({
+        const newProtoDefinition = protoDefinition.duplicate({
             name: pascalCase(protoMeta.protoDefinitionName),
         })
+
+        alreadyTransformedMessages.set(newProtoDefinition.id, newProtoDefinition)
+
+        return newProtoDefinition
     }
 }

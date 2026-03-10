@@ -12,9 +12,11 @@ import type { WithMaybeZodPassthrough } from '#zod_converter/types/passthroughs'
 import type { ZodMessageConversionTransformer } from '#zod_converter/types/transformers'
 import { pascalCase } from 'change-case'
 
+export const alreadyTransformedMessages: Map<string, ReadOnlyAnyProto3Message> = new Map()
+
 export class ZodEnumNameIncludedInFieldConversionTransformer implements ZodMessageConversionTransformer {
     private readonly alreadyTransformedMessages: Map<string, ReadOnlyAnyProto3Message> =
-        new Map()
+        alreadyTransformedMessages
 
     private updateField<
         TField extends
@@ -38,7 +40,7 @@ export class ZodEnumNameIncludedInFieldConversionTransformer implements ZodMessa
                 }) as TField
             }
 
-            const updatedValue = field.type.value.clone({
+            const updatedValue = field.type.value.duplicate({
                 name: isNameInversed
                     ? pascalCase(`${field.type.value.name}_${parentName}`)
                     : pascalCase(`${parentName}_${field.type.value.name}`),
@@ -66,7 +68,7 @@ export class ZodEnumNameIncludedInFieldConversionTransformer implements ZodMessa
                 }) as TField
             }
 
-            const updatedDeepInner = deepInner.clone({
+            const updatedDeepInner = deepInner.duplicate({
                 name: isNameInversed
                     ? pascalCase(`${deepInner.name}_${parentName}`)
                     : pascalCase(`${parentName}_${deepInner.name}`),
@@ -84,7 +86,7 @@ export class ZodEnumNameIncludedInFieldConversionTransformer implements ZodMessa
             !this.alreadyTransformedMessages.has(field.type.id)
         ) {
             const newField = field.clone({
-                type: field.type.clone({
+                type: field.type.duplicate({
                     name: isNameInversed
                         ? pascalCase(`${field.type.name}_${parentName}`)
                         : pascalCase(`${parentName}_${field.type.name}`),
@@ -139,7 +141,7 @@ export class ZodEnumNameIncludedInFieldConversionTransformer implements ZodMessa
             }
         }
 
-        return protoDefinition.clone({
+        return protoDefinition.duplicate({
             fields: newFields,
         })
     }
