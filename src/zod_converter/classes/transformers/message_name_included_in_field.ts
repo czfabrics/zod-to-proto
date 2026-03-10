@@ -3,19 +3,15 @@ import type {
     ReadOnlyProto3MessageField,
     ReadOnlyProto3MessageOneOfFieldSubField,
 } from '#proto3_definition/types/fields'
-import type {
-    ReadOnlyAnyProto3Message,
-    ReadOnlyProto3Message,
-} from '#proto3_definition/types/messages'
-import { alreadyTransformedMessages } from '#zod_converter/classes/transformers/enum_name_included_in_field'
+import type { ReadOnlyProto3Message } from '#proto3_definition/types/messages'
 import type { AnyZodMessage } from '#zod_converter/types/messages'
 import type { WithMaybeZodPassthrough } from '#zod_converter/types/passthroughs'
+import { TransformationReuseStrategies } from '#zod_converter/types/reuse_strategy'
 import type { ZodMessageConversionTransformer } from '#zod_converter/types/transformers'
 import { pascalCase } from 'change-case'
 
 export class ZodMessageNameIncludedInFieldConversionTransformer implements ZodMessageConversionTransformer {
-    private readonly alreadyTransformedMessages: Map<string, ReadOnlyAnyProto3Message> =
-        alreadyTransformedMessages
+    public constructor(private readonly reuseStrategies: TransformationReuseStrategies) {}
 
     private updateField<
         TField extends
@@ -27,7 +23,7 @@ export class ZodMessageNameIncludedInFieldConversionTransformer implements ZodMe
                 return field
             }
 
-            const alreadyTransformed = this.alreadyTransformedMessages.get(
+            const alreadyTransformed = this.reuseStrategies.message.reuseTransformation(
                 field.type.value.id
             )
 
@@ -45,7 +41,10 @@ export class ZodMessageNameIncludedInFieldConversionTransformer implements ZodMe
                     : pascalCase(`${parentName}_${field.type.value.name}`),
             })
 
-            this.alreadyTransformedMessages.set(field.type.value.id, updatedValue)
+            this.reuseStrategies.message.storeTransformation(
+                field.type.value.id,
+                updatedValue
+            )
 
             return field.clone({
                 type: field.type.clone({
@@ -59,7 +58,9 @@ export class ZodMessageNameIncludedInFieldConversionTransformer implements ZodMe
                 return field
             }
 
-            const alreadyTransformed = this.alreadyTransformedMessages.get(deepInner.id)
+            const alreadyTransformed = this.reuseStrategies.message.reuseTransformation(
+                deepInner.id
+            )
 
             if (alreadyTransformed !== undefined) {
                 return field.clone({
@@ -77,12 +78,15 @@ export class ZodMessageNameIncludedInFieldConversionTransformer implements ZodMe
                 type: field.type.updateDeepInnerType(updatedDeepInner),
             })
 
-            this.alreadyTransformedMessages.set(deepInner.id, updatedDeepInner)
+            this.reuseStrategies.message.storeTransformation(
+                deepInner.id,
+                updatedDeepInner
+            )
 
             return newField as TField
         } else if (
             field.type.internalName === 'message' &&
-            !this.alreadyTransformedMessages.has(field.type.id)
+            !this.reuseStrategies.message.reuseTransformation(field.type.id)
         ) {
             const newField = field.clone({
                 type: field.type.duplicate({
@@ -93,19 +97,20 @@ export class ZodMessageNameIncludedInFieldConversionTransformer implements ZodMe
             })
 
             if (newField.type.internalName === 'message') {
-                this.alreadyTransformedMessages.set(field.type.id, newField.type)
+                this.reuseStrategies.message.storeTransformation(
+                    field.type.id,
+                    newField.type
+                )
             }
 
             return newField as TField
         } else if (field.type.internalName === 'message') {
-            const alreadyTransformed = this.alreadyTransformedMessages.get(field.type.id)
+            const alreadyTransformed = this.reuseStrategies.message.reuseTransformation(
+                field.type.id
+            )
 
             return field.clone({
-                //// We keep the same ID after clone for the processor
-                type:
-                    alreadyTransformed?.clone({
-                        id: alreadyTransformed.id,
-                    }) ?? field.type,
+                type: alreadyTransformed ?? field.type,
             }) as TField
         } else {
             return field

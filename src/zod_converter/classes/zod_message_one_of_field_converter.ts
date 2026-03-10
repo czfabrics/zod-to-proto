@@ -13,23 +13,32 @@ import {
     WithMaybeZodPassthrough,
     ZodPassthroughType,
 } from '#zod_converter/types/passthroughs'
-import type { ConversionReuseStrategies } from '#zod_converter/types/reuse_strategy'
-import type { ZodConversionTransformers } from '#zod_converter/types/transformers'
+import type {
+    ConversionReuseStrategies,
+    TransformationReuseStrategies,
+} from '#zod_converter/types/reuse_strategy'
+import { ZodConversionTransformers } from '#zod_converter/types/transformers'
 import { snakeCase } from 'change-case'
 import { SomeType } from 'zod/v4/core'
 
 export class ZodMessageOneOfFieldConverter {
     public constructor(
         private readonly message: ReadOnlyProto3Message,
-        private readonly reuseStrategies: ConversionReuseStrategies,
-        private readonly transformers: ZodConversionTransformers
+        private readonly conversionReuseStrategies: ConversionReuseStrategies,
+        private readonly transformers: ZodConversionTransformers,
+        private readonly transformationReuseStrategies: TransformationReuseStrategies
     ) {}
 
     private getSubField(
         schema: SomeType,
         key: string
     ): ReadOnlyProto3MessageOneOfFieldSubField {
-        const converter = new ZodMessageFieldConverter(this.message, this.reuseStrategies, this.transformers)
+        const converter = new ZodMessageFieldConverter(
+            this.message,
+            this.conversionReuseStrategies,
+            this.transformers,
+            this.transformationReuseStrategies
+        )
 
         assertsZodMessageFieldType(schema)
 
@@ -82,7 +91,12 @@ export class ZodMessageOneOfFieldConverter {
             comments: getZodSchemaComments(rootSchema),
         })
 
-        const updatedField = this.transformers.messageOneOfField.reduce(
+        const transformerInstances = ZodConversionTransformers.intoInstances(
+            this.transformers,
+            this.transformationReuseStrategies
+        )
+
+        const updatedField = transformerInstances.messageOneOfField.reduce(
             (field, transformer) => {
                 return transformer.transform(rootSchema, field)
             },

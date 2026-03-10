@@ -29,8 +29,9 @@ export const Proto3RawFile = {
         raw.unscopedMessages ??= {}
 
         const converter = new ZodMessageConverter(
-            settings.reuseStrategies,
-            settings.transformers
+            settings.conversionReuseStrategies,
+            settings.transformers,
+            settings.transformationReuseStrategies
         )
         const convertedMessages: ReadOnlyAnyProto3Message[] = []
 

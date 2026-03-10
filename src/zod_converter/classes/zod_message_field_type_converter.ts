@@ -17,14 +17,18 @@ import {
 import { SchemaError } from '#zod_converter/types/error'
 import { AnyZodMessage, type ZodMessageFieldType } from '#zod_converter/types/messages'
 import { WithMaybeZodPassthrough } from '#zod_converter/types/passthroughs'
-import type { ConversionReuseStrategies } from '#zod_converter/types/reuse_strategy'
+import type {
+    ConversionReuseStrategies,
+    TransformationReuseStrategies,
+} from '#zod_converter/types/reuse_strategy'
 import { ZodScalarType } from '#zod_converter/types/scalars'
 import { ZodConversionTransformers } from '#zod_converter/types/transformers'
 
 export class ZodMessageFieldTypeConverter {
     public constructor(
-        private readonly reuseStrategies: ConversionReuseStrategies,
-        private readonly transformers: ZodConversionTransformers
+        private readonly conversionReuseStrategies: ConversionReuseStrategies,
+        private readonly transformers: ZodConversionTransformers,
+        private readonly transformationReuseStrategies: TransformationReuseStrategies
     ) {}
 
     public convert(
@@ -63,8 +67,9 @@ export class ZodMessageFieldTypeConverter {
 
         if (ZodDynamicSizeType.is(schema)) {
             const converter = new ZodDynamicSizeConverter(
-                this.reuseStrategies,
-                this.transformers
+                this.conversionReuseStrategies,
+                this.transformers,
+                this.transformationReuseStrategies
             )
 
             return converter.convert(key, schema)
@@ -72,8 +77,9 @@ export class ZodMessageFieldTypeConverter {
 
         if (AnyZodMessage.is(schema)) {
             const converter = new ZodMessageConverter(
-                this.reuseStrategies,
-                this.transformers
+                this.conversionReuseStrategies,
+                this.transformers,
+                this.transformationReuseStrategies
             )
 
             return converter.convert(key, schema)

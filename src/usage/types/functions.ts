@@ -22,8 +22,9 @@ export type Proto3RpcRawFunction = SetOptional<
 export const Proto3RpcRawFunction = {
     into: function (raw: Proto3RpcRawFunction, settings: UsageSettings) {
         const converter = new ZodMessageConverter(
-            settings.reuseStrategies,
-            settings.transformers
+            settings.conversionReuseStrategies,
+            settings.transformers,
+            settings.transformationReuseStrategies
         )
 
         const inMessageName = raw.typePrefix ? `Input` : `${raw.name}Input`

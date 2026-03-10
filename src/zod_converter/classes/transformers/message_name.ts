@@ -1,15 +1,17 @@
 import { type ReadOnlyProto3Message } from '#proto3_definition/types/messages'
-import { alreadyTransformedMessages } from '#zod_converter/classes/transformers/enum_name_included_in_field'
 import { getProtoMeta } from '#zod_converter/helpers/registry'
 import type { AnyZodMessage } from '#zod_converter/types/messages'
 import {
     ZodPassthroughType,
     type WithMaybeZodPassthrough,
 } from '#zod_converter/types/passthroughs'
+import { TransformationReuseStrategies } from '#zod_converter/types/reuse_strategy'
 import type { ZodMessageConversionTransformer } from '#zod_converter/types/transformers'
 import { pascalCase } from 'change-case'
 
 export class ZodMessageNameConversionTransformer implements ZodMessageConversionTransformer {
+    public constructor(private readonly reuseStrategies: TransformationReuseStrategies) {}
+
     transform(
         schema: WithMaybeZodPassthrough<AnyZodMessage>,
         protoDefinition: ReadOnlyProto3Message
@@ -26,7 +28,12 @@ export class ZodMessageNameConversionTransformer implements ZodMessageConversion
             name: pascalCase(protoMeta.protoDefinitionName),
         })
 
-        alreadyTransformedMessages.set(newProtoDefinition.id, newProtoDefinition)
+        //// This is useful to override behavior of the `ZodMessageNameIncludedInFieldConversionTransformer`
+        //// to keep the name as defined in the meta
+        this.reuseStrategies.message.storeTransformation(
+            newProtoDefinition.id,
+            newProtoDefinition
+        )
 
         return newProtoDefinition
     }

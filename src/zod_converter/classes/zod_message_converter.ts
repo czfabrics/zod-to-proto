@@ -20,7 +20,10 @@ import {
     WithMaybeZodPassthrough,
     ZodPassthroughType,
 } from '#zod_converter/types/passthroughs'
-import type { ConversionReuseStrategies } from '#zod_converter/types/reuse_strategy'
+import type {
+    ConversionReuseStrategies,
+    TransformationReuseStrategies,
+} from '#zod_converter/types/reuse_strategy'
 import { ZodConversionTransformers } from '#zod_converter/types/transformers'
 import { pascalCase } from 'change-case'
 import { match } from 'ts-pattern'
@@ -28,8 +31,9 @@ import { ZodEnum, ZodObject } from 'zod'
 
 export class ZodMessageConverter {
     public constructor(
-        private readonly reuseStrategies: ConversionReuseStrategies,
-        private readonly transformers: ZodConversionTransformers
+        private readonly conversionReuseStrategies: ConversionReuseStrategies,
+        private readonly transformers: ZodConversionTransformers,
+        private readonly transformationReuseStrategies: TransformationReuseStrategies
     ) {}
 
     private makeMessageFromSchema(
@@ -54,16 +58,18 @@ export class ZodMessageConverter {
             if (ZodMessageFieldType.is(entrySchema)) {
                 const converter = new ZodMessageFieldConverter(
                     message,
-                    this.reuseStrategies,
-                    this.transformers
+                    this.conversionReuseStrategies,
+                    this.transformers,
+                    this.transformationReuseStrategies
                 )
 
                 field = converter.convert(key, entrySchema)
             } else {
                 const converter = new ZodMessageOneOfFieldConverter(
                     message,
-                    this.reuseStrategies,
-                    this.transformers
+                    this.conversionReuseStrategies,
+                    this.transformers,
+                    this.transformationReuseStrategies
                 )
 
                 field = converter.convert(key, entrySchema)
@@ -76,7 +82,12 @@ export class ZodMessageConverter {
             fields,
         })
 
-        message = this.transformers.message.reduce((message, transformer) => {
+        const transformerInstances = ZodConversionTransformers.intoInstances(
+            this.transformers,
+            this.transformationReuseStrategies
+        )
+
+        message = transformerInstances.message.reduce((message, transformer) => {
             return transformer.transform(rootSchema, message)
         }, message)
 
@@ -110,7 +121,12 @@ export class ZodMessageConverter {
             comments: getZodSchemaComments(rootSchema),
         })
 
-        const updatedMessageEnum = this.transformers.enum.reduce(
+        const transformerInstances = ZodConversionTransformers.intoInstances(
+            this.transformers,
+            this.transformationReuseStrategies
+        )
+
+        const updatedMessageEnum = transformerInstances.enum.reduce(
             (messageEnum, transformer) => {
                 return transformer.transform(rootSchema, messageEnum)
             },
@@ -138,7 +154,7 @@ export class ZodMessageConverter {
                 },
                 (schema) => {
                     const storedConversion =
-                        this.reuseStrategies.message.reuseConversion(deepSchema)
+                        this.conversionReuseStrategies.message.reuseConversion(deepSchema)
 
                     if (storedConversion !== undefined) {
                         return storedConversion
@@ -150,7 +166,10 @@ export class ZodMessageConverter {
                         schema
                     )
 
-                    this.reuseStrategies.message.storeConversion(deepSchema, conversion)
+                    this.conversionReuseStrategies.message.storeConversion(
+                        deepSchema,
+                        conversion
+                    )
 
                     return conversion
                 }
@@ -165,7 +184,7 @@ export class ZodMessageConverter {
                 },
                 (schema) => {
                     const storedConversion =
-                        this.reuseStrategies.enum.reuseConversion(deepSchema)
+                        this.conversionReuseStrategies.enum.reuseConversion(deepSchema)
 
                     if (storedConversion !== undefined) {
                         return storedConversion
@@ -173,7 +192,10 @@ export class ZodMessageConverter {
 
                     const conversion = this.makeEnumFromSchema(name, rootSchema, schema)
 
-                    this.reuseStrategies.enum.storeConversion(deepSchema, conversion)
+                    this.conversionReuseStrategies.enum.storeConversion(
+                        deepSchema,
+                        conversion
+                    )
 
                     return conversion
                 }

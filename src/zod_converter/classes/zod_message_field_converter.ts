@@ -14,15 +14,19 @@ import {
     WithMaybeZodPassthrough,
     ZodPassthroughType,
 } from '#zod_converter/types/passthroughs'
-import type { ConversionReuseStrategies } from '#zod_converter/types/reuse_strategy'
-import type { ZodConversionTransformers } from '#zod_converter/types/transformers'
+import type {
+    ConversionReuseStrategies,
+    TransformationReuseStrategies,
+} from '#zod_converter/types/reuse_strategy'
+import { ZodConversionTransformers } from '#zod_converter/types/transformers'
 import { snakeCase } from 'change-case'
 
 export class ZodMessageFieldConverter {
     public constructor(
         private readonly message: ReadOnlyProto3Message,
-        private readonly reuseStrategies: ConversionReuseStrategies,
-        private readonly transformers: ZodConversionTransformers
+        private readonly conversionReuseStrategies: ConversionReuseStrategies,
+        private readonly transformers: ZodConversionTransformers,
+        private readonly transformationReuseStrategies: TransformationReuseStrategies
     ) {}
 
     public convert(
@@ -43,8 +47,9 @@ export class ZodMessageFieldConverter {
         const deepSchema = ZodPassthroughType.pass(rootSchema)
 
         const converter = new ZodMessageFieldTypeConverter(
-            this.reuseStrategies,
-            this.transformers
+            this.conversionReuseStrategies,
+            this.transformers,
+            this.transformationReuseStrategies
         )
 
         optionalState ??= isZodSchemaOptional(rootSchema) ? 'PRESENT' : 'NONE'
@@ -61,7 +66,12 @@ export class ZodMessageFieldConverter {
             comments: getZodSchemaComments(rootSchema),
         })
 
-        const updatedField = this.transformers.messageField.reduce(
+        const transformerInstances = ZodConversionTransformers.intoInstances(
+            this.transformers,
+            this.transformationReuseStrategies
+        )
+
+        const updatedField = transformerInstances.messageField.reduce(
             (field, transformer) => {
                 return transformer.transform(rootSchema, field)
             },

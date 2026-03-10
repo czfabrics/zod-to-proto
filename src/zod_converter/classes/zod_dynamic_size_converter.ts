@@ -9,15 +9,19 @@ import {
     WithMaybeZodPassthrough,
     ZodPassthroughType,
 } from '#zod_converter/types/passthroughs'
-import type { ConversionReuseStrategies } from '#zod_converter/types/reuse_strategy'
+import type {
+    ConversionReuseStrategies,
+    TransformationReuseStrategies,
+} from '#zod_converter/types/reuse_strategy'
 import type { ZodConversionTransformers } from '#zod_converter/types/transformers'
 import pluralize from 'pluralize'
 import { match } from 'ts-pattern'
 
 export class ZodDynamicSizeConverter {
     public constructor(
-        private readonly reuseStrategies: ConversionReuseStrategies,
-        private readonly transformers: ZodConversionTransformers
+        private readonly conversionReuseStrategies: ConversionReuseStrategies,
+        private readonly transformers: ZodConversionTransformers,
+        private readonly transformationReuseStrategies: TransformationReuseStrategies
     ) {}
 
     public convert(
@@ -38,8 +42,9 @@ export class ZodDynamicSizeConverter {
                 },
                 (schema) => {
                     const converter = new ZodMessageFieldTypeConverter(
-                        this.reuseStrategies,
-                        this.transformers
+                        this.conversionReuseStrategies,
+                        this.transformers,
+                        this.transformationReuseStrategies
                     )
 
                     assertsZodRepeatedInnerType(schema._zod.def.element)
@@ -64,8 +69,9 @@ export class ZodDynamicSizeConverter {
                 },
                 (schema) => {
                     const converter = new ZodMessageFieldTypeConverter(
-                        this.reuseStrategies,
-                        this.transformers
+                        this.conversionReuseStrategies,
+                        this.transformers,
+                        this.transformationReuseStrategies
                     )
 
                     assertsZodRepeatedInnerType(schema._zod.def.valueType)
@@ -87,8 +93,9 @@ export class ZodDynamicSizeConverter {
                 },
                 (schema) => {
                     const converter = new ZodMessageFieldTypeConverter(
-                        this.reuseStrategies,
-                        this.transformers
+                        this.conversionReuseStrategies,
+                        this.transformers,
+                        this.transformationReuseStrategies
                     )
 
                     assertsZodScalarType(schema._zod.def.keyType)

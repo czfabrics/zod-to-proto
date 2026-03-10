@@ -13,22 +13,19 @@ import { ZodConversionTransformers } from '#zod_converter/types/transformers'
 export const getFullTransformers = function (): ZodConversionTransformers {
     return {
         message: [
-            new ZodDeprecatedMessageConversionTransformer(),
-            new ZodMessageNameIncludedInFieldConversionTransformer(),
-            new ZodEnumNameIncludedInFieldConversionTransformer(),
-            new ZodMessageNameConversionTransformer(),
+            ZodDeprecatedMessageConversionTransformer,
+            ZodMessageNameIncludedInFieldConversionTransformer,
+            ZodEnumNameIncludedInFieldConversionTransformer,
+            ZodMessageNameConversionTransformer,
         ],
         messageField: [
-            new ZodDeprecatedFieldConversionTransformer(),
-            new ZodRequiredFieldConversionTransformer(),
+            ZodDeprecatedFieldConversionTransformer,
+            ZodRequiredFieldConversionTransformer,
         ],
         messageOneOfField: [
-            new ZodDeprecatedOneOfFieldConversionTransformer(),
-            new ZodRequiredOneOfFieldConversionTransformer(),
+            ZodDeprecatedOneOfFieldConversionTransformer,
+            ZodRequiredOneOfFieldConversionTransformer,
         ],
-        enum: [
-            new ZodDeprecatedEnumConversionTransformer(),
-            new ZodEnumNameConversionTransformer(),
-        ],
+        enum: [ZodDeprecatedEnumConversionTransformer, ZodEnumNameConversionTransformer],
     }
 }
