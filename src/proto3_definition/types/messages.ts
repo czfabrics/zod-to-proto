@@ -1,7 +1,7 @@
 import { getRandomId } from '#core/helpers/get_random_id'
-import type { ReadOnly } from '#core/types/read_only'
 import type { PurgeUndefinedValues } from '#core/types/purge_undefined_values'
-import type { CloneParams } from '#proto3_definition/types/clone'
+import type { ReadOnly } from '#core/types/read_only'
+import type { CloneParams, DuplicateParams } from '#proto3_definition/types/clone'
 import type {
     Proto3Extension,
     ReadOnlyProto3Extension,
@@ -23,6 +23,7 @@ export type Proto3Message = {
     id: string
     internalName: 'message'
     clone(params: CloneParams<Proto3Message>): ReadOnlyProto3Message
+    duplicate(params: DuplicateParams<Proto3Message>): ReadOnlyProto3Message
     addPrefix(prefixList: string[]): ReadOnlyProto3Message
     computeNewIndexForFields(
         fields: readonly ReadOnlyAnyProto3MessageField[]
@@ -64,6 +65,27 @@ export const Proto3Message = {
                     ...this,
                     ...params,
                     id: params?.id ?? getRandomId(),
+                }
+            },
+            duplicate(
+                this: ReadOnlyProto3Message,
+                params: PurgeUndefinedValues<DuplicateParams<Proto3Message>>
+            ): ReadOnlyProto3Message {
+                if (params?.fields !== undefined) {
+                    const newFields = this.computeNewIndexForFields(params?.fields)
+
+                    return {
+                        ...this,
+                        ...params,
+                        id: this.id,
+                        fields: newFields,
+                    }
+                }
+
+                return {
+                    ...this,
+                    ...params,
+                    id: this.id,
                 }
             },
             addPrefix(
@@ -157,6 +179,7 @@ export type Proto3Enum = {
     id: string
     internalName: 'enum'
     clone(params: CloneParams<Proto3Enum>): ReadOnlyProto3Enum
+    duplicate(params: DuplicateParams<Proto3Enum>): ReadOnlyProto3Enum
     addPrefix(prefixList: string[]): ReadOnlyProto3Enum
     computeNewIndexForFields(
         fields: readonly ReadOnlyProto3EnumField[]
@@ -194,6 +217,27 @@ export const Proto3Enum = {
                     ...this,
                     ...params,
                     id: params?.id ?? getRandomId(),
+                }
+            },
+            duplicate(
+                this: ReadOnlyProto3Enum,
+                params: PurgeUndefinedValues<DuplicateParams<Proto3Enum>>
+            ): ReadOnlyProto3Enum {
+                if (params?.fields !== undefined) {
+                    const newFields = this.computeNewIndexForFields(params?.fields)
+
+                    return {
+                        ...this,
+                        ...params,
+                        id: this.id,
+                        fields: newFields,
+                    }
+                }
+
+                return {
+                    ...this,
+                    ...params,
+                    id: this.id,
                 }
             },
             addPrefix(
