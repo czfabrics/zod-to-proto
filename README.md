@@ -1,14 +1,9 @@
-<!-- ⚠️ This README has been generated from the file(s) ".blueprint.md" ⚠️--><h1 align="center">@czlab/zod-to-proto</h1>
+<!-- ⚠️ This README has been generated from the file(s) ".blueprint.md" ⚠️--><h1 align="center">@czfabrics/zod-to-proto</h1>
 <p align="center">
-		<a href="https://npmcharts.com/compare/@czlab/zod-to-proto?minimal=true"><img alt="Downloads per month" src="https://img.shields.io/npm/dm/@czlab/zod-to-proto.svg" height="20"/></a>
-<a href="https://www.npmjs.com/package/@czlab/zod-to-proto"><img alt="NPM Version" src="https://img.shields.io/npm/v/@czlab/zod-to-proto.svg" height="20"/></a>
+		<a href="https://npmcharts.com/compare/@czfabrics/zod-to-proto?minimal=true"><img alt="Downloads per month" src="https://img.shields.io/npm/dm/@czfabrics/zod-to-proto.svg" height="20"/></a>
+<a href="https://www.npmjs.com/package/@czfabrics/zod-to-proto"><img alt="NPM Version" src="https://img.shields.io/npm/v/@czfabrics/zod-to-proto.svg" height="20"/></a>
 <a href="https://github.com/czfabrics/zod-to-proto/graphs/commit-activity"><img alt="Maintained" src="https://img.shields.io/badge/Maintained%3F-yes-green.svg" height="20"/></a>
 	</p>
-
-
-<p align="center">
-  <b>⚠️ This package has moved to <a href="https://www.npmjs.com/package/@czfabrics/zod-to-proto">@czfabrics/zod-to-proto</a>. ⚠️</b>
-</p>
 
 <p align="center">
   <b>A TypeScript library for seamlessly converting Zod schemas into Protocol Buffers v3 definitions, with built-in support for generating RPC services and functions from structured object definitions.</b></br>
@@ -71,19 +66,19 @@ A TypeScript library for seamlessly converting Zod schemas into Protocol Buffers
 ### Bun
 
 ```sh
-bun add @czlab/zod-to-proto@0.1.0-beta.14
+bun add @czfabrics/zod-to-proto@0.1.0-beta.14
 ```
 
 ### Yarn
 
 ```sh
-yarn add @czlab/zod-to-proto@0.1.0-beta.14
+yarn add @czfabrics/zod-to-proto@0.1.0-beta.14
 ```
 
 ### NPM
 
 ```sh
-npm install @czlab/zod-to-proto@0.1.0-beta.14
+npm install @czfabrics/zod-to-proto@0.1.0-beta.14
 ```
 
 
@@ -92,7 +87,7 @@ npm install @czlab/zod-to-proto@0.1.0-beta.14
 ## Quick Start
 
 ```ts
-import { zodToProto } from '@czlab/zod-to-proto'
+import { zodToProto } from '@czfabrics/zod-to-proto'
 import z from 'zod'
 
 const User = z.object({
@@ -144,7 +139,7 @@ message User {
 ### Basic
 
 ```ts
-import { zodToProto } from '@czlab/zod-to-proto'
+import { zodToProto } from '@czfabrics/zod-to-proto'
 import z from 'zod'
 
 const User = z.object({
@@ -191,7 +186,7 @@ message User {
 ### gRPC Service
 
 ```ts
-import { zodToProto } from '@czlab/zod-to-proto'
+import { zodToProto } from '@czfabrics/zod-to-proto'
 import z from 'zod'
 
 const User = z.object({
@@ -261,7 +256,7 @@ message GetUsersOutput {
 ### gRPC Service with gRPC gateway annotations
 
 ```ts
-import { Proto3HttpAnnotation, zodToProto } from '@czlab/zod-to-proto'
+import { Proto3HttpAnnotation, zodToProto } from '@czfabrics/zod-to-proto'
 import z from 'zod'
 
 const User = z.object({
@@ -339,7 +334,7 @@ message AddUserInput {
 Three levels of type prefix: file, service, function.
 
 ```ts
-import { zodToProto } from '@czlab/zod-to-proto'
+import { zodToProto } from '@czfabrics/zod-to-proto'
 import z from 'zod'
 
 const User = z.object({
@@ -455,7 +450,7 @@ message UserPackageUserServiceGetUsersOutput {
 You can safely check if your schema is compatible. It will trigger a TypeScript error. Note that deeper schemas may slow down the TSC compiler.
 
 ```ts
-import { zodToProto, safeZodMessage } from '@czlab/zod-to-proto'
+import { zodToProto, safeZodMessage } from '@czfabrics/zod-to-proto'
 import z from 'zod'
 
 const User = z.object({
@@ -488,7 +483,7 @@ _Note that you can utilize the type behind the safeZodMessage method in your own
 **Example of usage:**
 
 ```ts
-import { CheckZodSchemaCompatibility } from '@czlab/zod-to-proto'
+import { CheckZodSchemaCompatibility } from '@czfabrics/zod-to-proto'
 import { SomeType } from 'zod/v4/core'
 
 export const safeZodMessage = function <const T extends SomeType>(
@@ -501,7 +496,7 @@ export const safeZodMessage = function <const T extends SomeType>(
 ### Extension
 
 ```ts
-import { Proto3Deprecated, Proto3HttpAnnotation, zodToProto } from '@czlab/zod-to-proto'
+import { Proto3Deprecated, Proto3HttpAnnotation, zodToProto } from '@czfabrics/zod-to-proto'
 import z from 'zod'
 
 const User = z.object({
@@ -664,7 +659,7 @@ message GetUsersOutput {
 ### Custom Type
 
 ```ts
-import { Proto3ImportedType } from '@czlab/zod-to-proto'
+import { Proto3ImportedType } from '@czfabrics/zod-to-proto'
 
 export const Proto3Empty = {
     useType: () => {
@@ -679,7 +674,7 @@ export const Proto3Empty = {
 ### Custom Extension
 
 ```ts
-import { Proto3Extension, Proto3ImportedType } from '@czlab/zod-to-proto'
+import { Proto3Extension, Proto3ImportedType } from '@czfabrics/zod-to-proto'
 
 export const Proto3ValidateFieldAnnotation = {
     useType: function () {
@@ -724,7 +719,7 @@ import {
     ZodMessageFieldType,
     WithMaybeZodPassthrough,
     ZodMessageFieldConversionTransformer,
-} from '@czlab/zod-to-proto'
+} from '@czfabrics/zod-to-proto'
 
 export class ZodDeprecatedFieldConversionTransformer implements ZodMessageFieldConversionTransformer {
     transform(

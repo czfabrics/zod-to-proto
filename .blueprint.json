@@ -9,7 +9,7 @@
     },
     "line": "dark",
     "ids": {
-        "npm": "@czlab/zod-to-proto"
+        "npm": "@czfabrics/zod-to-proto"
     },
     "badges": [
         {
