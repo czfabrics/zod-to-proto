@@ -22,13 +22,13 @@
         "email": "dylan.valentin@ik.me",
         "url": "https://github.com/czyrok"
     },
-    "homepage": "https://github.com/czyrok/czlab.zod-to-proto#readme",
+    "homepage": "https://github.com/czfabrics/zod-to-proto#readme",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/czyrok/czlab.zod-to-proto.git"
+        "url": "git+https://github.com/czfabrics/zod-to-proto.git"
     },
     "bugs": {
-        "url": "https://github.com/czyrok/czlab.zod-to-proto/issues"
+        "url": "https://github.com/czfabrics/zod-to-proto/issues"
     },
     "license": "MIT",
     "scripts": {
