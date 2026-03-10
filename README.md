@@ -5,6 +5,11 @@
 <a href="https://github.com/czyrok/czlab.zod-to-proto/graphs/commit-activity"><img alt="Maintained" src="https://img.shields.io/badge/Maintained%3F-yes-green.svg" height="20"/></a>
 	</p>
 
+
+<p align="center">
+  <b>⚠️ This package has moved to <a href="https://www.npmjs.com/package/@czfabrics/zod-to-proto">@czfabrics/zod-to-proto</a>. ⚠️</b>
+</p>
+
 <p align="center">
   <b>A TypeScript library for seamlessly converting Zod schemas into Protocol Buffers v3 definitions, with built-in support for generating RPC services and functions from structured object definitions.</b></br>
   <sub><sub>
@@ -66,19 +71,19 @@ A TypeScript library for seamlessly converting Zod schemas into Protocol Buffers
 ### Bun
 
 ```sh
-bun add @czlab/zod-to-proto@0.1.0-beta.13
+bun add @czlab/zod-to-proto@0.1.0-beta.14
 ```
 
 ### Yarn
 
 ```sh
-yarn add @czlab/zod-to-proto@0.1.0-beta.13
+yarn add @czlab/zod-to-proto@0.1.0-beta.14
 ```
 
 ### NPM
 
 ```sh
-npm install @czlab/zod-to-proto@0.1.0-beta.13
+npm install @czlab/zod-to-proto@0.1.0-beta.14
 ```
 
 
