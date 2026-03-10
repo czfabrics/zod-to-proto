@@ -5,3 +5,7 @@ export type CloneParams<T> =
     | Partial<GetOverrideParams<T>>
     | Partial<GetOverrideParams<ReadOnly<T>>>
     | undefined
+
+export type DuplicateParams<T> =
+    | Omit<Partial<GetOverrideParams<T>> | Partial<GetOverrideParams<ReadOnly<T>>>, 'id'>
+    | undefined

@@ -12,3 +12,13 @@ export type ConversionReuseStrategies = {
     message: ConversionReuseStrategy<AnyZodMessage, Proto3Message>
     enum: ConversionReuseStrategy<AnyZodMessage, Proto3Enum>
 }
+
+export type TransformationReuseStrategy<TProtoDefinition> = {
+    reuseTransformation(id: string): ReadOnly<TProtoDefinition> | undefined
+    storeTransformation(id: string, protoMessage: ReadOnly<TProtoDefinition>): void
+}
+
+export type TransformationReuseStrategies = {
+    message: TransformationReuseStrategy<Proto3Message>
+    enum: TransformationReuseStrategy<Proto3Enum>
+}

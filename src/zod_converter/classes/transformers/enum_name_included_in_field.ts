@@ -3,18 +3,15 @@ import type {
     ReadOnlyProto3MessageField,
     ReadOnlyProto3MessageOneOfFieldSubField,
 } from '#proto3_definition/types/fields'
-import type {
-    ReadOnlyAnyProto3Message,
-    ReadOnlyProto3Message,
-} from '#proto3_definition/types/messages'
+import type { ReadOnlyProto3Message } from '#proto3_definition/types/messages'
 import type { AnyZodMessage } from '#zod_converter/types/messages'
 import type { WithMaybeZodPassthrough } from '#zod_converter/types/passthroughs'
+import { TransformationReuseStrategies } from '#zod_converter/types/reuse_strategy'
 import type { ZodMessageConversionTransformer } from '#zod_converter/types/transformers'
 import { pascalCase } from 'change-case'
 
 export class ZodEnumNameIncludedInFieldConversionTransformer implements ZodMessageConversionTransformer {
-    private readonly alreadyTransformedMessages: Map<string, ReadOnlyAnyProto3Message> =
-        new Map()
+    public constructor(private readonly reuseStrategies: TransformationReuseStrategies) {}
 
     private updateField<
         TField extends
@@ -26,7 +23,7 @@ export class ZodEnumNameIncludedInFieldConversionTransformer implements ZodMessa
                 return field
             }
 
-            const alreadyTransformed = this.alreadyTransformedMessages.get(
+            const alreadyTransformed = this.reuseStrategies.enum.reuseTransformation(
                 field.type.value.id
             )
 
@@ -38,13 +35,16 @@ export class ZodEnumNameIncludedInFieldConversionTransformer implements ZodMessa
                 }) as TField
             }
 
-            const updatedValue = field.type.value.clone({
+            const updatedValue = field.type.value.duplicate({
                 name: isNameInversed
                     ? pascalCase(`${field.type.value.name}_${parentName}`)
                     : pascalCase(`${parentName}_${field.type.value.name}`),
             })
 
-            this.alreadyTransformedMessages.set(field.type.value.id, updatedValue)
+            this.reuseStrategies.enum.storeTransformation(
+                field.type.value.id,
+                updatedValue
+            )
 
             return field.clone({
                 type: field.type.clone({
@@ -58,7 +58,9 @@ export class ZodEnumNameIncludedInFieldConversionTransformer implements ZodMessa
                 return field
             }
 
-            const alreadyTransformed = this.alreadyTransformedMessages.get(deepInner.id)
+            const alreadyTransformed = this.reuseStrategies.enum.reuseTransformation(
+                deepInner.id
+            )
 
             if (alreadyTransformed !== undefined) {
                 return field.clone({
@@ -66,7 +68,7 @@ export class ZodEnumNameIncludedInFieldConversionTransformer implements ZodMessa
                 }) as TField
             }
 
-            const updatedDeepInner = deepInner.clone({
+            const updatedDeepInner = deepInner.duplicate({
                 name: isNameInversed
                     ? pascalCase(`${deepInner.name}_${parentName}`)
                     : pascalCase(`${parentName}_${deepInner.name}`),
@@ -76,15 +78,15 @@ export class ZodEnumNameIncludedInFieldConversionTransformer implements ZodMessa
                 type: field.type.updateDeepInnerType(updatedDeepInner),
             })
 
-            this.alreadyTransformedMessages.set(deepInner.id, updatedDeepInner)
+            this.reuseStrategies.enum.storeTransformation(deepInner.id, updatedDeepInner)
 
             return newField as TField
         } else if (
             field.type.internalName === 'enum' &&
-            !this.alreadyTransformedMessages.has(field.type.id)
+            !this.reuseStrategies.enum.reuseTransformation(field.type.id)
         ) {
             const newField = field.clone({
-                type: field.type.clone({
+                type: field.type.duplicate({
                     name: isNameInversed
                         ? pascalCase(`${field.type.name}_${parentName}`)
                         : pascalCase(`${parentName}_${field.type.name}`),
@@ -92,19 +94,21 @@ export class ZodEnumNameIncludedInFieldConversionTransformer implements ZodMessa
             })
 
             if (newField.type.internalName === 'enum') {
-                this.alreadyTransformedMessages.set(field.type.id, newField.type)
+                this.reuseStrategies.enum.storeTransformation(
+                    field.type.id,
+                    newField.type
+                )
             }
 
             return newField as TField
         } else if (field.type.internalName === 'enum') {
-            const alreadyTransformed = this.alreadyTransformedMessages.get(field.type.id)
+            const alreadyTransformed = this.reuseStrategies.enum.reuseTransformation(
+                field.type.id
+            )
 
             return field.clone({
                 //// We keep the same ID after clone for the processor
-                type:
-                    alreadyTransformed?.clone({
-                        id: alreadyTransformed.id,
-                    }) ?? field.type,
+                type: alreadyTransformed ?? field.type,
             }) as TField
         } else {
             return field
@@ -139,7 +143,7 @@ export class ZodEnumNameIncludedInFieldConversionTransformer implements ZodMessa
             }
         }
 
-        return protoDefinition.clone({
+        return protoDefinition.duplicate({
             fields: newFields,
         })
     }

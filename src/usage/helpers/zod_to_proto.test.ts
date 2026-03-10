@@ -335,4 +335,188 @@ describe('`zodToProto` test suite', () => {
 
         expect(result).toMatchSnapshot('result')
     })
+
+    test('Testing property override (proto meta) for message => protoConversionId & protoDefinitionName', async ({
+        expect,
+    }) => {
+        const User = z.object({
+            id: z.int64(),
+            fullName: z.string().optional(),
+            role: z.enum(['ADMIN', 'VIEWER']),
+            supervisor1: setProtoMeta(
+                z.object({
+                    id: z.int64(),
+                    fullName: z.string().optional(),
+                    role: z.enum(['ADMIN', 'VIEWER']),
+                }),
+                {
+                    protoDefinitionName: 'Sup',
+                    protoConversionId: 'test',
+                }
+            ),
+            supervisor2: setProtoMeta(
+                z.object({
+                    id: z.int64(),
+                    fullName: z.string().optional(),
+                    role: z.enum(['ADMIN', 'VIEWER']),
+                }),
+                {
+                    protoDefinitionName: 'Sup',
+                    protoConversionId: 'test',
+                }
+            ),
+        })
+
+        const result = zodToProto({
+            syntax: 'proto3',
+            packageName: 'services.user.v1',
+            services: [
+                {
+                    name: 'UserService',
+                    functions: [
+                        {
+                            name: 'GetUsers',
+                            out: z.object({
+                                users: z.array(User),
+                            }),
+                        },
+                    ],
+                },
+            ],
+        })
+
+        expect(result).toMatchSnapshot('result')
+    })
+
+    test('Testing property override (proto meta) for message => protoConversionId', async ({
+        expect,
+    }) => {
+        const User = z.object({
+            id: z.int64(),
+            fullName: z.string().optional(),
+            role: z.enum(['ADMIN', 'VIEWER']),
+            supervisor1: setProtoMeta(
+                z.object({
+                    id: z.int64(),
+                    fullName: z.string().optional(),
+                    role: z.enum(['ADMIN', 'VIEWER']),
+                }),
+                {
+                    protoConversionId: 'test',
+                }
+            ),
+            supervisor2: setProtoMeta(
+                z.object({
+                    id: z.int64(),
+                    fullName: z.string().optional(),
+                    role: z.enum(['ADMIN', 'VIEWER']),
+                }),
+                {
+                    protoConversionId: 'test',
+                }
+            ),
+        })
+
+        const result = zodToProto({
+            syntax: 'proto3',
+            packageName: 'services.user.v1',
+            services: [
+                {
+                    name: 'UserService',
+                    functions: [
+                        {
+                            name: 'GetUsers',
+                            typePrefix: 'GetUsers',
+                            out: z.object({
+                                users: z.array(User),
+                            }),
+                        },
+                    ],
+                },
+            ],
+        })
+
+        expect(result).toMatchSnapshot('result')
+    })
+
+    test('Testing property override (proto meta) for enum => protoConversionId & protoDefinitionName', async ({
+        expect,
+    }) => {
+        const User = z.object({
+            id: z.int64(),
+            fullName: z.string().optional(),
+            role: setProtoMeta(z.enum(['ADMIN', 'VIEWER']), {
+                protoDefinitionName: 'role',
+                protoConversionId: 'test',
+            }),
+            supervisor1: z.object({
+                id: z.int64(),
+                fullName: z.string().optional(),
+                role: setProtoMeta(z.enum(['ADMIN', 'VIEWER']), {
+                    protoDefinitionName: 'role',
+                    protoConversionId: 'test',
+                }),
+            }),
+        })
+
+        const result = zodToProto({
+            syntax: 'proto3',
+            packageName: 'services.user.v1',
+            services: [
+                {
+                    name: 'UserService',
+                    functions: [
+                        {
+                            name: 'GetUsers',
+                            out: z.object({
+                                users: z.array(User),
+                            }),
+                        },
+                    ],
+                },
+            ],
+        })
+
+        expect(result).toMatchSnapshot('result')
+    })
+
+    test('Testing property override (proto meta) for enum => protoConversionId', async ({
+        expect,
+    }) => {
+        const User = z.object({
+            id: z.int64(),
+            fullName: z.string().optional(),
+            role: setProtoMeta(z.enum(['ADMIN', 'VIEWER']), {
+                protoConversionId: 'test',
+            }),
+            supervisor1: z.object({
+                id: z.int64(),
+                fullName: z.string().optional(),
+                role: setProtoMeta(z.enum(['ADMIN', 'VIEWER']), {
+                    protoConversionId: 'test',
+                }),
+            }),
+        })
+
+        const result = zodToProto({
+            syntax: 'proto3',
+            packageName: 'services.user.v1',
+            services: [
+                {
+                    name: 'UserService',
+                    functions: [
+                        {
+                            name: 'GetUsers',
+                            typePrefix: 'GetUsers',
+                            out: z.object({
+                                users: z.array(User),
+                            }),
+                        },
+                    ],
+                },
+            ],
+        })
+
+        expect(result).toMatchSnapshot('result')
+    })
 })

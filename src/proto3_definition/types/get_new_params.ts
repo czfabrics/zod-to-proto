@@ -6,6 +6,7 @@ export type GetNewParams<T> =
           | 'id'
           | 'internalName'
           | 'clone'
+          | 'duplicate'
           | 'updateDeepInnerType'
           | 'addPrefix'
           | 'propagateTypePrefix'
@@ -21,6 +22,7 @@ export type GetNewParams<T> =
               | 'id'
               | 'internalName'
               | 'clone'
+              | 'duplicate'
               | 'updateDeepInnerType'
               | 'addPrefix'
               | 'propagateTypePrefix'
@@ -37,6 +39,7 @@ export type GetOverrideParams<T> =
           T,
           | 'internalName'
           | 'clone'
+          | 'duplicate'
           | 'updateDeepInnerType'
           | 'addPrefix'
           | 'propagateTypePrefix'
@@ -51,6 +54,7 @@ export type GetOverrideParams<T> =
               T,
               | 'internalName'
               | 'clone'
+              | 'duplicate'
               | 'updateDeepInnerType'
               | 'addPrefix'
               | 'propagateTypePrefix'
@@ -66,6 +70,7 @@ export type GetAnyNewParams<T> = Omit<
     T,
     | 'id'
     | 'clone'
+    | 'duplicate'
     | 'updateDeepInnerType'
     | 'addPrefix'
     | 'propagateTypePrefix'
