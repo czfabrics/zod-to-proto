@@ -12,6 +12,7 @@ import {
     type ReadOnlyProto3Message,
 } from '#proto3_definition/types/messages'
 import { assertsAnyZodMessageFieldType } from '#zod_converter/asserts/any_zod_message_field_type'
+import { assertsZodMessageOneOfFieldType } from '#zod_converter/asserts/zod_message_one_of_field_type'
 import { ZodMessageFieldConverter } from '#zod_converter/classes/zod_message_field_converter'
 import { ZodMessageOneOfFieldConverter } from '#zod_converter/classes/zod_message_one_of_field_converter'
 import { getZodSchemaComments } from '#zod_converter/helpers/get_zod_schema_comments'
@@ -68,6 +69,8 @@ export class ZodMessageConverter {
 
                 field = converter.convert(key, entrySchema)
             } else {
+                assertsZodMessageOneOfFieldType(this.context, entrySchema)
+
                 const converter = new ZodMessageOneOfFieldConverter(
                     this.context,
                     message,
