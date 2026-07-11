@@ -2,14 +2,15 @@
     "languages": {
         "TypeScript": {
             "prettier": {
-                "allowed": true
-            }
+                "allowed": true,
+            },
         },
         "JSON": {
             "prettier": {
-                "allowed": true
-            }
-        }
+                "allowed": true,
+            },
+        },
     },
-    "file_scan_exclusions": ["bun.lock"]
+    "language_servers": ["tsgo", "!vtsls", "!typescript-language-server", "..."],
+    "file_scan_exclusions": ["bun.lock"],
 }

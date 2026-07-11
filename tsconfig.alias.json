@@ -1,14 +1,14 @@
 {
     "compilerOptions": {
         "paths": {
-            "#core/*": ["src/core/*"],
-            "#file/*": ["src/file/*"],
-            "#plugin/*": ["src/plugin/*"],
-            "#proto3_definition/*": ["src/proto3_definition/*"],
-            "#proto3_processor/*": ["src/proto3_processor/*"],
-            "#usage/*": ["src/usage/*"],
-            "#zod/*": ["src/zod/*"],
-            "#zod_converter/*": ["src/zod_converter/*"],
+            "#core/*": ["./src/core/*"],
+            "#file/*": ["./src/file/*"],
+            "#plugin/*": ["./src/plugin/*"],
+            "#proto3_definition/*": ["./src/proto3_definition/*"],
+            "#proto3_processor/*": ["./src/proto3_processor/*"],
+            "#usage/*": ["./src/usage/*"],
+            "#zod/*": ["./src/zod/*"],
+            "#zod_converter/*": ["./src/zod_converter/*"],
         },
     },
 }
