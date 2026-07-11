@@ -1,6 +1,8 @@
 import type { CheckTuple } from '#core/types/check_tuple'
 import type { Prettify } from '#core/types/prettify'
 import type { ZodOneOfUnion } from '#zod/types/zod_one_of_union'
+import { isZodUnion } from '#zod_converter/helpers/is_union'
+import { isZodObject } from '#zod_converter/helpers/is_zod_object'
 import type { ZodConversionContext } from '#zod_converter/types/conversion'
 import type { ZodDynamicSizeType } from '#zod_converter/types/dynamic_size'
 import {
@@ -107,8 +109,25 @@ export const ZodMessageOneOfFieldType = {
         const deepSchema = ZodPassthroughType.pass(context.direction, schema)
 
         const zodTypes: string[] = ZodMessageOneOfFieldTypeTuple.get()
+        const result = zodTypes.includes(deepSchema._zod.def.type)
 
-        return zodTypes.includes(deepSchema._zod.def.type)
+        if (!isZodUnion(deepSchema) || !result) {
+            return result
+        }
+
+        for (const unionOptionSchema of deepSchema._zod.def.options) {
+            if (!isZodObject(unionOptionSchema)) {
+                return false
+            }
+
+            const isValidOption =
+                '$case' in unionOptionSchema.shape && 'value' in unionOptionSchema.shape
+            if (!isValidOption) {
+                return false
+            }
+        }
+
+        return true
     },
 } as const
 
