@@ -3,7 +3,7 @@
 ### Basic
 
 ```ts
-import { zodToProto } from '{{ pkg.name }}'
+import { UnscopedMessage, zodToProto } from '{{ pkg.name }}'
 import z from 'zod'
 
 const User = z.object({
@@ -17,7 +17,7 @@ const result = zodToProto({
     packageName: 'services.authentication.v1',
     services: [],
     unscopedMessages: {
-        user: User,
+        user: UnscopedMessage.new('OUT', User),
     },
 })
 ```
@@ -50,7 +50,7 @@ message User {
 ### gRPC Service
 
 ```ts
-import { zodToProto } from '{{ pkg.name }}'
+import { MessageOut, zodToProto } from '{{ pkg.name }}'
 import z from 'zod'
 
 const User = z.object({
@@ -70,9 +70,11 @@ const result = zodToProto({
                     name: 'GetUsers',
                     in: undefined,
                     inStream: false,
-                    out: z.object({
-                        users: z.array(User),
-                    }),
+                    out: MessageOut.new(
+                        z.object({
+                            users: z.array(User),
+                        })
+                    ),
                     outStream: true,
                 },
             ],
@@ -120,7 +122,7 @@ message GetUsersOutput {
 ### gRPC Service with gRPC gateway annotations
 
 ```ts
-import { Proto3HttpAnnotation, zodToProto } from '{{ pkg.name }}'
+import { MessageIn, Proto3HttpAnnotation, zodToProto } from '{{ pkg.name }}'
 import z from 'zod'
 
 const User = z.object({
@@ -138,9 +140,11 @@ const result = zodToProto({
             functions: [
                 {
                     name: 'AddUser',
-                    in: z.object({
-                        user: User.omit({ id: true }),
-                    }),
+                    in: MessageIn.new(
+                        z.object({
+                            user: User.omit({ id: true }),
+                        })
+                    ),
                     extensions: [
                         Proto3HttpAnnotation.useExtension({
                             post: '/users',
@@ -198,7 +202,7 @@ message AddUserInput {
 Three levels of type prefix: file, service, function.
 
 ```ts
-import { zodToProto } from '{{ pkg.name }}'
+import { MessageOut, zodToProto } from '{{ pkg.name }}'
 import z from 'zod'
 
 const User = z.object({
@@ -224,9 +228,11 @@ const result = zodToProto({
                 {
                     name: 'GetUsers',
                     typePrefix: 'GetUsers', // Third level prefix
-                    out: z.object({
-                        users: z.array(User),
-                    }),
+                    out: MessageOut.new(
+                        z.object({
+                            users: z.array(User),
+                        })
+                    ),
                 },
             ],
         },
@@ -237,9 +243,11 @@ const result = zodToProto({
                 {
                     name: 'GetUsers',
                     typePrefix: 'GetUsers',
-                    out: z.object({
-                        users: z.array(User2),
-                    }),
+                    out: MessageOut.new(
+                        z.object({
+                            users: z.array(User2),
+                        })
+                    ),,
                 },
             ],
         },
@@ -314,7 +322,7 @@ message UserPackageUserServiceGetUsersOutput {
 You can safely check if your schema is compatible. It will trigger a TypeScript error. Note that deeper schemas may slow down the TSC compiler.
 
 ```ts
-import { zodToProto, safeZodMessage } from '{{ pkg.name }}'
+import { UnscopedMessage, zodToProto } from '{{ pkg.name }}'
 import z from 'zod'
 
 const User = z.object({
@@ -328,31 +336,53 @@ const result = zodToProto({
     packageName: 'services.authentification.v1',
     services: [],
     unscopedMessages: {
-        user: safeZodMessage(User), // => No TS error because it's compatible
-        user2: safeZodMessage(
+        user: UnscopedMessage.safeNew('OUT', User), // => No TS error because it's compatible
+        user2: UnscopedMessage.safeNew(
+            'OUT',
             z.object({
                 createdAt: z.date(),
+                // => TypeDebuggingError<"This Zod type 'date' is not supported">
+                //
+                // **Note:** You can make the schema compatible by using z.string().pipe(z.coerce.date()) or a ZodCodec.
+                // This will result in the following proto field: `string created_at = 1;`
             })
-            // => TypeDebuggingError<"This Zod type 'date' is not supported">
-            //
-            // **Note:** You can make the schema compatible by using z.string().pipe(z.coerce.date()).
-            // This will result in the following proto field: `string created_at = 1;`
+        ),
+        user3: UnscopedMessage.safeNew(
+            'OUT',
+            z.object({
+                createdAt: z.codec(z.date(), z.iso.datetime(), {
+                    decode: (date) => date.toISOString(),
+                    encode: (isoString) => new Date(isoString),
+                }),
+                // => No TS error because it will take the 'out' schema of the Codec: `z.iso.datetime`
+            })
+        ),
+        user4: UnscopedMessage.safeNew(
+            'IN',
+            z.object({
+                createdAt: z.codec(z.iso.datetime(), z.date(), {
+                    decode: (isoString) => new Date(isoString),
+                    encode: (date) => date.toISOString(),
+                }),
+                // => No TS error because it will take the 'in' schema of the Codec: `z.iso.datetime`
+            })
         ),
     },
 })
 ```
 
-_Note that you can utilize the type behind the safeZodMessage method in your own functions._
+_Note that you can utilize the type behind the `UnscopedMessage.safeNew` method in your own functions._
 
 **Example of usage:**
 
 ```ts
-import { CheckZodSchemaCompatibility } from '{{ pkg.name }}'
+import { CheckZodSchemaCompatibility, ZodPassthroughDirection } from '{{ pkg.name }}'
 import { SomeType } from 'zod/v4/core'
 
-export const safeZodMessage = function <const T extends SomeType>(
-    schema: CheckZodSchemaCompatibility<T>
-) {
+export const safeNew = function <
+    const TDirection extends ZodPassthroughDirection,
+    const TSchema extends SomeType,
+>(direction: TDirection, schema: CheckZodSchemaCompatibility<TDirection, TSchema>) {
     return schema
 }
 ```
@@ -360,7 +390,12 @@ export const safeZodMessage = function <const T extends SomeType>(
 ### Extension
 
 ```ts
-import { Proto3Deprecated, Proto3HttpAnnotation, zodToProto } from '{{ pkg.name }}'
+import {
+    MessageOut,
+    Proto3Deprecated,
+    Proto3HttpAnnotation,
+    zodToProto,
+} from '{{ pkg.name }}'
 import z from 'zod'
 
 const User = z.object({
@@ -378,9 +413,11 @@ const result = zodToProto({
             functions: [
                 {
                     name: 'GetUsers',
-                    out: z.object({
-                        users: z.array(User),
-                    }),
+                    out: MessageOut.new(
+                        z.object({
+                            users: z.array(User),
+                        })
+                    ),
                     outStream: true,
                     extensions: [
                         //// google.api.http option for gRPC restful gateway
