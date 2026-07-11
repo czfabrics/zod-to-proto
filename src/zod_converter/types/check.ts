@@ -2,6 +2,7 @@ import type { ArrayToStringDisplay, CheckTuple } from '#core/types/check_tuple'
 import type { TuplifyUnion } from '#core/types/tuplify_union'
 import type { TypeDebuggingError } from '#core/types/type_debugging_error'
 import type { ZodOneOfUnion } from '#zod/types/zod_one_of_union'
+import type { ZodPassthroughDirection } from '#zod_converter/types/passthroughs'
 import type { ExtractZodPassthroughInInner } from '#zod_converter/types/passthroughs_in'
 import type { ExtractZodPassthroughOutInner } from '#zod_converter/types/passthroughs_out'
 import type {
@@ -142,17 +143,16 @@ export type ZodCategoryPassthroughOut<TChild extends SomeType = SomeType> =
 
 export type ZodCategoryOneChildWithoutPasstrough = ZodSet | ZodArray
 
-// TODO: on peut réduire... faut passer un in au CheckZodTypeCompatibility
 export type ZodCategoryOneChild =
     | ZodCategoryOneChildWithoutPasstrough
     | ZodCategoryPassthroughIn
     | ZodCategoryPassthroughOut
-type GetChild<TZodType extends SomeType> =
+type GetChild<TDirection extends ZodPassthroughDirection, TZodType extends SomeType> =
     TZodType extends SomeZodSet<infer TChild>
         ? readonly [TChild]
         : TZodType extends SomeZodArray<infer TChild>
           ? readonly [TChild]
-          : TZodType extends SomeZodPassthrough<infer TChild>
+          : TZodType extends SomeZodPassthrough<TDirection, infer TChild>
             ? readonly [TChild]
             : []
 
@@ -174,11 +174,14 @@ type ZodCategoryChildArray = ZodOneOfUnion
 type GetChildrenFromChildArray<TZodType extends SomeType> =
     TZodType extends SomeZodUnion<infer TChildArray> ? TChildArray : []
 
-type GetChildZodType<TZodType extends SomeType> =
+type GetChildZodType<
+    TDirection extends ZodPassthroughDirection,
+    TZodType extends SomeType,
+> =
     GetZodTypeValue<TZodType> extends GetZodTypeValue<ZodCategoryNoChild>
         ? []
         : GetZodTypeValue<TZodType> extends GetZodTypeValue<ZodCategoryOneChild>
-          ? GetChild<TZodType>
+          ? GetChild<TDirection, TZodType>
           : GetZodTypeValue<TZodType> extends GetZodTypeValue<ZodCategoryChildRecord>
             ? GetChildrenFromChildRecord<TZodType>
             : GetZodTypeValue<TZodType> extends GetZodTypeValue<ZodCategoryChildArray>
@@ -292,20 +295,24 @@ type CheckChildConditions<
         : false
 
 type ContinueRecursiveForChildren<
+    TDirection extends ZodPassthroughDirection,
     TRoot extends SomeType,
     TZodTypes extends readonly SomeType[],
     TRawIndex extends string[] = [],
     TIndex extends number = TRawIndex['length'],
 > = TZodTypes['length'] extends TIndex
     ? TRoot
-    : CheckZodSchemaCompatibility<TZodTypes[TIndex]> extends infer TResult extends
-            TypeDebuggingError<string>
+    : CheckZodSchemaCompatibility<
+            TDirection,
+            TZodTypes[TIndex]
+        > extends infer TResult extends TypeDebuggingError<string>
       ? TResult
-      : ContinueRecursiveForChildren<TRoot, TZodTypes, [...TRawIndex, '+1']>
+      : ContinueRecursiveForChildren<TDirection, TRoot, TZodTypes, [...TRawIndex, '+1']>
 
 export type CheckZodSchemaCompatibility<
+    TDirection extends ZodPassthroughDirection,
     TZodType extends SomeType,
-    TChildren extends readonly SomeType[] = GetChildZodType<TZodType>,
+    TChildren extends readonly SomeType[] = GetChildZodType<TDirection, TZodType>,
     TChildConditions extends readonly SomeType[] = GetChildConditions<TZodType>,
     TChildConditionError extends TypeDebuggingError<string> =
         GetChildConditionError<TZodType>,
@@ -315,7 +322,7 @@ export type CheckZodSchemaCompatibility<
         : TChildConditions['length'] extends 0
           ? TChildren['length'] extends 0
               ? TZodType
-              : ContinueRecursiveForChildren<TZodType, TChildren>
+              : ContinueRecursiveForChildren<TDirection, TZodType, TChildren>
           : CheckChildConditions<TChildren, TChildConditions> extends true
-            ? ContinueRecursiveForChildren<TZodType, TChildren>
+            ? ContinueRecursiveForChildren<TDirection, TZodType, TChildren>
             : TChildConditionError

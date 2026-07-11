@@ -1,3 +1,4 @@
+import type { ZodPassthroughDirection } from '#zod_converter/types/passthroughs'
 import type { GetZodTypeValue } from '#zod_converter/types/zod_type_value'
 import type { SomeType } from 'zod/v4/core'
 
@@ -65,7 +66,10 @@ export type SomeZodSet<TValueType extends SomeType = SomeType> = SomeZodType<'se
 export type ExtractZodTypeValue<TZodTypeValue extends GetZodTypeValue<SomeType>> =
     Extract<GetZodTypeValue<SomeType>, TZodTypeValue>
 
-export type SomeZodPassthrough<TInnerType extends SomeType = SomeType> =
+export type SomeZodPassthrough<
+    TDirection extends ZodPassthroughDirection,
+    TInnerType extends SomeType = SomeType,
+> =
     | (SomeZodType<
           ExtractZodTypeValue<
               'catch' | 'optional' | 'nonoptional' | 'readonly' | 'default' | 'prefault'
@@ -77,13 +81,21 @@ export type SomeZodPassthrough<TInnerType extends SomeType = SomeType> =
               }
           }
       })
-    | (SomeZodType<'pipe'> & {
-          _zod: {
-              def: {
-                  in: TInnerType
-              }
-          }
-      })
+    | (TDirection extends 'IN'
+          ? SomeZodType<'pipe'> & {
+                _zod: {
+                    def: {
+                        in: TInnerType
+                    }
+                }
+            }
+          : SomeZodType<'pipe'> & {
+                _zod: {
+                    def: {
+                        out: TInnerType
+                    }
+                }
+            })
 
 export type SomeZodRecord<
     TKeyType extends SomeType = SomeType,
