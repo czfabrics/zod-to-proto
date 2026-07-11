@@ -1,6 +1,7 @@
 import { Proto3Deprecated } from '#plugin/types/global'
 import { Proto3HttpAnnotation } from '#plugin/types/google_api_annotations'
 import { zodToProto } from '#usage/helpers/zod_to_proto'
+import { MessageIn, MessageOut, UnscopedMessage } from '#usage/types/messages'
 import { pz } from '#zod/helpers/zod_one_of_union'
 import { setProtoMeta } from '#zod_converter/helpers/registry'
 import { describe, test } from 'vitest'
@@ -72,11 +73,19 @@ export const SynchronizationTaskOrGroupExternalUnionWithGroupSchema = pz.oneOfUn
 ])
 
 describe('`zodToProto` test suite', () => {
-    test('Testing basic usage (unscoped message)', async ({ expect }) => {
+    test("Testing basic usage (unscoped message with 'in' direction)", async ({
+        expect,
+    }) => {
+        const isoStringToDateSchema = z.codec(z.iso.datetime(), z.date(), {
+            decode: (isoString) => new Date(isoString),
+            encode: (date) => date.toISOString(),
+        })
+
         const User = z.object({
             id: z.int64(),
             fullName: z.string().optional(),
             role: z.enum(['ADMIN', 'VIEWER']),
+            createdAt: isoStringToDateSchema,
         })
 
         const result = zodToProto({
@@ -84,7 +93,34 @@ describe('`zodToProto` test suite', () => {
             packageName: 'services.authentication.v1',
             services: [],
             unscopedMessages: {
-                user: User,
+                user: UnscopedMessage.new('IN', User),
+            },
+        })
+
+        expect(result).toMatchSnapshot('result')
+    })
+
+    test("Testing basic usage (unscoped message with 'out' direction)", async ({
+        expect,
+    }) => {
+        const dateToIsoStringSchema = z.codec(z.date(), z.iso.datetime(), {
+            decode: (date) => date.toISOString(),
+            encode: (isoString) => new Date(isoString),
+        })
+
+        const User = z.object({
+            id: z.int64(),
+            fullName: z.string().optional(),
+            role: z.enum(['ADMIN', 'VIEWER']),
+            createdAt: dateToIsoStringSchema,
+        })
+
+        const result = zodToProto({
+            syntax: 'proto3',
+            packageName: 'services.authentication.v1',
+            services: [],
+            unscopedMessages: {
+                user: UnscopedMessage.new('OUT', User),
             },
         })
 
@@ -109,9 +145,11 @@ describe('`zodToProto` test suite', () => {
                             name: 'GetUsers',
                             in: undefined,
                             inStream: false,
-                            out: z.object({
-                                users: z.array(User),
-                            }),
+                            out: MessageOut.new(
+                                z.object({
+                                    users: z.array(User),
+                                })
+                            ),
                             outStream: true,
                         },
                     ],
@@ -140,9 +178,11 @@ describe('`zodToProto` test suite', () => {
                     functions: [
                         {
                             name: 'AddUser',
-                            in: z.object({
-                                user: User.omit({ id: true }),
-                            }),
+                            in: MessageIn.new(
+                                z.object({
+                                    user: User.omit({ id: true }),
+                                })
+                            ),
                             extensions: [
                                 Proto3HttpAnnotation.useExtension({
                                     post: '/users',
@@ -182,9 +222,11 @@ describe('`zodToProto` test suite', () => {
                         {
                             name: 'GetUsers',
                             typePrefix: 'GetUsers', // Third level prefix
-                            out: z.object({
-                                users: z.array(User),
-                            }),
+                            out: MessageOut.new(
+                                z.object({
+                                    users: z.array(User),
+                                })
+                            ),
                         },
                     ],
                 },
@@ -195,9 +237,11 @@ describe('`zodToProto` test suite', () => {
                         {
                             name: 'GetUsers',
                             typePrefix: 'GetUsers',
-                            out: z.object({
-                                users: z.array(User2),
-                            }),
+                            out: MessageOut.new(
+                                z.object({
+                                    users: z.array(User2),
+                                })
+                            ),
                         },
                     ],
                 },
@@ -223,9 +267,11 @@ describe('`zodToProto` test suite', () => {
                     functions: [
                         {
                             name: 'GetUsers',
-                            out: z.object({
-                                users: z.array(User),
-                            }),
+                            out: MessageOut.new(
+                                z.object({
+                                    users: z.array(User),
+                                })
+                            ),
                             outStream: true,
                             extensions: [
                                 //// google.api.http option for gRPC restful gateway
@@ -266,7 +312,7 @@ describe('`zodToProto` test suite', () => {
                     functions: [
                         {
                             name: 'PostAsyncTasks',
-                            in: PostAsyncTasksInputDtoSchema,
+                            in: MessageIn.new(PostAsyncTasksInputDtoSchema),
                             inStream: false,
                         },
                     ],
@@ -294,9 +340,11 @@ describe('`zodToProto` test suite', () => {
                     functions: [
                         {
                             name: 'PostAccesses',
-                            in: z.object({
-                                accesses: AccessMappingSchema,
-                            }),
+                            in: MessageIn.new(
+                                z.object({
+                                    accesses: AccessMappingSchema,
+                                })
+                            ),
                             inStream: false,
                         },
                     ],
@@ -324,9 +372,11 @@ describe('`zodToProto` test suite', () => {
                         {
                             name: 'GetUsers',
                             typePrefix: 'GetUsers',
-                            out: z.object({
-                                users: z.array(User),
-                            }),
+                            out: MessageOut.new(
+                                z.object({
+                                    users: z.array(User),
+                                })
+                            ),
                         },
                     ],
                 },
@@ -376,9 +426,11 @@ describe('`zodToProto` test suite', () => {
                     functions: [
                         {
                             name: 'GetUsers',
-                            out: z.object({
-                                users: z.array(User),
-                            }),
+                            out: MessageOut.new(
+                                z.object({
+                                    users: z.array(User),
+                                })
+                            ),
                         },
                     ],
                 },
@@ -427,9 +479,11 @@ describe('`zodToProto` test suite', () => {
                         {
                             name: 'GetUsers',
                             typePrefix: 'GetUsers',
-                            out: z.object({
-                                users: z.array(User),
-                            }),
+                            out: MessageOut.new(
+                                z.object({
+                                    users: z.array(User),
+                                })
+                            ),
                         },
                     ],
                 },
@@ -468,9 +522,11 @@ describe('`zodToProto` test suite', () => {
                     functions: [
                         {
                             name: 'GetUsers',
-                            out: z.object({
-                                users: z.array(User),
-                            }),
+                            out: MessageOut.new(
+                                z.object({
+                                    users: z.array(User),
+                                })
+                            ),
                         },
                     ],
                 },
@@ -508,9 +564,11 @@ describe('`zodToProto` test suite', () => {
                         {
                             name: 'GetUsers',
                             typePrefix: 'GetUsers',
-                            out: z.object({
-                                users: z.array(User),
-                            }),
+                            out: MessageOut.new(
+                                z.object({
+                                    users: z.array(User),
+                                })
+                            ),
                         },
                     ],
                 },
