@@ -66,19 +66,19 @@ A TypeScript library for seamlessly converting Zod schemas into Protocol Buffers
 ### Bun
 
 ```sh
-bun add @czfabrics/zod-to-proto@0.1.0
+bun add @czfabrics/zod-to-proto@0.2.0
 ```
 
 ### Yarn
 
 ```sh
-yarn add @czfabrics/zod-to-proto@0.1.0
+yarn add @czfabrics/zod-to-proto@0.2.0
 ```
 
 ### NPM
 
 ```sh
-npm install @czfabrics/zod-to-proto@0.1.0
+npm install @czfabrics/zod-to-proto@0.2.0
 ```
 
 
@@ -87,7 +87,7 @@ npm install @czfabrics/zod-to-proto@0.1.0
 ## Quick Start
 
 ```ts
-import { zodToProto } from '@czfabrics/zod-to-proto'
+import { UnscopedMessage, zodToProto } from '@czfabrics/zod-to-proto'
 import z from 'zod'
 
 const User = z.object({
@@ -101,7 +101,7 @@ const result = zodToProto({
     packageName: 'services.authentication.v1',
     services: [],
     unscopedMessages: {
-        user: User,
+        user: UnscopedMessage.new('OUT', User),
     },
 })
 ```
@@ -139,7 +139,7 @@ message User {
 ### Basic
 
 ```ts
-import { zodToProto } from '@czfabrics/zod-to-proto'
+import { UnscopedMessage, zodToProto } from '@czfabrics/zod-to-proto'
 import z from 'zod'
 
 const User = z.object({
@@ -153,7 +153,7 @@ const result = zodToProto({
     packageName: 'services.authentication.v1',
     services: [],
     unscopedMessages: {
-        user: User,
+        user: UnscopedMessage.new('OUT', User),
     },
 })
 ```
@@ -186,7 +186,7 @@ message User {
 ### gRPC Service
 
 ```ts
-import { zodToProto } from '@czfabrics/zod-to-proto'
+import { MessageOut, zodToProto } from '@czfabrics/zod-to-proto'
 import z from 'zod'
 
 const User = z.object({
@@ -206,9 +206,11 @@ const result = zodToProto({
                     name: 'GetUsers',
                     in: undefined,
                     inStream: false,
-                    out: z.object({
-                        users: z.array(User),
-                    }),
+                    out: MessageOut.new(
+                        z.object({
+                            users: z.array(User),
+                        })
+                    ),
                     outStream: true,
                 },
             ],
@@ -256,7 +258,7 @@ message GetUsersOutput {
 ### gRPC Service with gRPC gateway annotations
 
 ```ts
-import { Proto3HttpAnnotation, zodToProto } from '@czfabrics/zod-to-proto'
+import { MessageIn, Proto3HttpAnnotation, zodToProto } from '@czfabrics/zod-to-proto'
 import z from 'zod'
 
 const User = z.object({
@@ -274,9 +276,11 @@ const result = zodToProto({
             functions: [
                 {
                     name: 'AddUser',
-                    in: z.object({
-                        user: User.omit({ id: true }),
-                    }),
+                    in: MessageIn.new(
+                        z.object({
+                            user: User.omit({ id: true }),
+                        })
+                    ),
                     extensions: [
                         Proto3HttpAnnotation.useExtension({
                             post: '/users',
@@ -334,7 +338,7 @@ message AddUserInput {
 Three levels of type prefix: file, service, function.
 
 ```ts
-import { zodToProto } from '@czfabrics/zod-to-proto'
+import { MessageOut, zodToProto } from '@czfabrics/zod-to-proto'
 import z from 'zod'
 
 const User = z.object({
@@ -360,9 +364,11 @@ const result = zodToProto({
                 {
                     name: 'GetUsers',
                     typePrefix: 'GetUsers', // Third level prefix
-                    out: z.object({
-                        users: z.array(User),
-                    }),
+                    out: MessageOut.new(
+                        z.object({
+                            users: z.array(User),
+                        })
+                    ),
                 },
             ],
         },
@@ -373,9 +379,11 @@ const result = zodToProto({
                 {
                     name: 'GetUsers',
                     typePrefix: 'GetUsers',
-                    out: z.object({
-                        users: z.array(User2),
-                    }),
+                    out: MessageOut.new(
+                        z.object({
+                            users: z.array(User2),
+                        })
+                    ),,
                 },
             ],
         },
@@ -450,7 +458,7 @@ message UserPackageUserServiceGetUsersOutput {
 You can safely check if your schema is compatible. It will trigger a TypeScript error. Note that deeper schemas may slow down the TSC compiler.
 
 ```ts
-import { zodToProto, safeZodMessage } from '@czfabrics/zod-to-proto'
+import { UnscopedMessage, zodToProto } from '@czfabrics/zod-to-proto'
 import z from 'zod'
 
 const User = z.object({
@@ -464,31 +472,53 @@ const result = zodToProto({
     packageName: 'services.authentification.v1',
     services: [],
     unscopedMessages: {
-        user: safeZodMessage(User), // => No TS error because it's compatible
-        user2: safeZodMessage(
+        user: UnscopedMessage.safeNew('OUT', User), // => No TS error because it's compatible
+        user2: UnscopedMessage.safeNew(
+            'OUT',
             z.object({
                 createdAt: z.date(),
+                // => TypeDebuggingError<"This Zod type 'date' is not supported">
+                //
+                // **Note:** You can make the schema compatible by using z.string().pipe(z.coerce.date()) or a ZodCodec.
+                // This will result in the following proto field: `string created_at = 1;`
             })
-            // => TypeDebuggingError<"This Zod type 'date' is not supported">
-            //
-            // **Note:** You can make the schema compatible by using z.string().pipe(z.coerce.date()).
-            // This will result in the following proto field: `string created_at = 1;`
+        ),
+        user3: UnscopedMessage.safeNew(
+            'OUT',
+            z.object({
+                createdAt: z.codec(z.date(), z.iso.datetime(), {
+                    decode: (date) => date.toISOString(),
+                    encode: (isoString) => new Date(isoString),
+                }),
+                // => No TS error because it will take the 'out' schema of the Codec: `z.iso.datetime`
+            })
+        ),
+        user4: UnscopedMessage.safeNew(
+            'IN',
+            z.object({
+                createdAt: z.codec(z.iso.datetime(), z.date(), {
+                    decode: (isoString) => new Date(isoString),
+                    encode: (date) => date.toISOString(),
+                }),
+                // => No TS error because it will take the 'in' schema of the Codec: `z.iso.datetime`
+            })
         ),
     },
 })
 ```
 
-_Note that you can utilize the type behind the safeZodMessage method in your own functions._
+_Note that you can utilize the type behind the `UnscopedMessage.safeNew` method in your own functions._
 
 **Example of usage:**
 
 ```ts
-import { CheckZodSchemaCompatibility } from '@czfabrics/zod-to-proto'
+import { CheckZodSchemaCompatibility, ZodPassthroughDirection } from '@czfabrics/zod-to-proto'
 import { SomeType } from 'zod/v4/core'
 
-export const safeZodMessage = function <const T extends SomeType>(
-    schema: CheckZodSchemaCompatibility<T>
-) {
+export const safeNew = function <
+    const TDirection extends ZodPassthroughDirection,
+    const TSchema extends SomeType,
+>(direction: TDirection, schema: CheckZodSchemaCompatibility<TDirection, TSchema>) {
     return schema
 }
 ```
@@ -496,7 +526,12 @@ export const safeZodMessage = function <const T extends SomeType>(
 ### Extension
 
 ```ts
-import { Proto3Deprecated, Proto3HttpAnnotation, zodToProto } from '@czfabrics/zod-to-proto'
+import {
+    MessageOut,
+    Proto3Deprecated,
+    Proto3HttpAnnotation,
+    zodToProto,
+} from '@czfabrics/zod-to-proto'
 import z from 'zod'
 
 const User = z.object({
@@ -514,9 +549,11 @@ const result = zodToProto({
             functions: [
                 {
                     name: 'GetUsers',
-                    out: z.object({
-                        users: z.array(User),
-                    }),
+                    out: MessageOut.new(
+                        z.object({
+                            users: z.array(User),
+                        })
+                    ),
                     outStream: true,
                     extensions: [
                         //// google.api.http option for gRPC restful gateway
@@ -605,7 +642,7 @@ message GetUsersOutput {
 | `ZodOptional`           | `optional {some_type} my_field = 1`                                | Internally uses Zod's `safeParse` to determine if the schema is optional.                                                                                            |
 | `ZodNonOptional`        | `{some_type} my_field = 1 [(buf.validate.field).required = true];` | Internally uses Zod's `safeParse` to determine if the schema is optional.                                                                                            |
 | `ZodIntersection`       | `message Some {}`                                                  | **Only works with `ZodObject`**<br>Uses the left `ZodObject` to extend the right one.                                                                                |
-| `ZodPipe`               |                                                                    | The `ZodPipe` is transparent—it just passes through the input value.                                                                                                 |
+| `ZodPipe`               |                                                                    | The `ZodPipe` is transparent—it just passes through the input value depending on the direction (`IN` or `OUT`).                                                      |
 | `ZodCodec`              |                                                                    | Same as `ZodPipe`.                                                                                                                                                   |
 | `ZodTransform`          |                                                                    | Same as `ZodPipe`.                                                                                                                                                   |
 | `ZodPrefault`           |                                                                    | Same as `ZodPipe`.                                                                                                                                                   |
@@ -713,20 +750,22 @@ This package allows you to write custom transformers to modify Protobuf definiti
 
 ```ts
 import {
-    Proto3Deprecated,
-    type ReadOnlyProto3MessageField,
     isZodSchemaDeprecated,
-    ZodMessageFieldType,
+    Proto3Deprecated,
     WithMaybeZodPassthrough,
+    ZodConversionContext,
     ZodMessageFieldConversionTransformer,
+    ZodMessageFieldType,
+    type ReadOnlyProto3MessageField,
 } from '@czfabrics/zod-to-proto'
 
 export class ZodDeprecatedFieldConversionTransformer implements ZodMessageFieldConversionTransformer {
     transform(
+        context: ZodConversionContext,
         schema: WithMaybeZodPassthrough<ZodMessageFieldType>,
         protoDefinition: ReadOnlyProto3MessageField
     ): ReadOnlyProto3MessageField {
-        const isDeprecated = isZodSchemaDeprecated(schema)
+        const isDeprecated = isZodSchemaDeprecated(context, schema)
 
         if (!isDeprecated) {
             return protoDefinition
