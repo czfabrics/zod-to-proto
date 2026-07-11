@@ -4,6 +4,7 @@ import type {
     ReadOnlyProto3MessageOneOfFieldSubField,
 } from '#proto3_definition/types/fields'
 import type { ReadOnlyProto3Message } from '#proto3_definition/types/messages'
+import type { ZodConversionContext } from '#zod_converter/types/conversion'
 import type { AnyZodMessage } from '#zod_converter/types/messages'
 import type { WithMaybeZodPassthrough } from '#zod_converter/types/passthroughs'
 import { TransformationReuseStrategies } from '#zod_converter/types/reuse_strategy'
@@ -116,6 +117,7 @@ export class ZodEnumNameIncludedInFieldConversionTransformer implements ZodMessa
     }
 
     transform(
+        _context: ZodConversionContext,
         _schema: WithMaybeZodPassthrough<AnyZodMessage>,
         protoDefinition: ReadOnlyProto3Message
     ): ReadOnlyProto3Message {

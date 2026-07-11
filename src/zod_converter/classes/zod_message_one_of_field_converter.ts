@@ -8,6 +8,7 @@ import type { ReadOnlyProto3Message } from '#proto3_definition/types/messages'
 import { assertsZodMessageFieldType } from '#zod_converter/asserts/zod_message_field_type'
 import { ZodMessageFieldConverter } from '#zod_converter/classes/zod_message_field_converter'
 import { getZodSchemaComments } from '#zod_converter/helpers/get_zod_schema_comments'
+import type { ZodConversionContext } from '#zod_converter/types/conversion'
 import type { ZodMessageOneOfFieldType } from '#zod_converter/types/messages'
 import {
     WithMaybeZodPassthrough,
@@ -23,6 +24,7 @@ import { SomeType } from 'zod/v4/core'
 
 export class ZodMessageOneOfFieldConverter {
     public constructor(
+        private readonly context: ZodConversionContext,
         private readonly message: ReadOnlyProto3Message,
         private readonly conversionReuseStrategies: ConversionReuseStrategies,
         private readonly transformers: ZodConversionTransformers,
@@ -34,13 +36,14 @@ export class ZodMessageOneOfFieldConverter {
         key: string
     ): ReadOnlyProto3MessageOneOfFieldSubField {
         const converter = new ZodMessageFieldConverter(
+            this.context,
             this.message,
             this.conversionReuseStrategies,
             this.transformers,
             this.transformationReuseStrategies
         )
 
-        assertsZodMessageFieldType(schema)
+        assertsZodMessageFieldType(this.context, schema)
 
         const subField = converter.convert(key, schema, 'NOT_NEEDED')
 
@@ -51,7 +54,7 @@ export class ZodMessageOneOfFieldConverter {
         key: string,
         rootSchema: WithMaybeZodPassthrough<ZodMessageOneOfFieldType>
     ): ReadOnlyProto3MessageOneOfField {
-        const deepSchema = ZodPassthroughType.pass(rootSchema)
+        const deepSchema = ZodPassthroughType.pass(this.context.direction, rootSchema)
 
         let subFields: ReadOnlyProto3MessageOneOfFieldSubField[] = []
 
@@ -88,7 +91,7 @@ export class ZodMessageOneOfFieldConverter {
             key: snakeCase(key),
             subFields,
             extensions: [],
-            comments: getZodSchemaComments(rootSchema),
+            comments: getZodSchemaComments(this.context, rootSchema),
         })
 
         const transformerInstances = ZodConversionTransformers.intoInstances(
@@ -98,7 +101,7 @@ export class ZodMessageOneOfFieldConverter {
 
         const updatedField = transformerInstances.messageOneOfField.reduce(
             (field, transformer) => {
-                return transformer.transform(rootSchema, field)
+                return transformer.transform(this.context, rootSchema, field)
             },
             field
         )

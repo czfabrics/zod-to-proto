@@ -7,6 +7,7 @@ import type {
     ReadOnlyProto3Enum,
     ReadOnlyProto3Message,
 } from '#proto3_definition/types/messages'
+import type { ZodConversionContext } from '#zod_converter/types/conversion'
 import type {
     AnyZodMessage,
     ZodMessageFieldType,
@@ -18,6 +19,7 @@ import type { SomeType } from 'zod/v4/core'
 
 export interface ZodConversionTransformer<TSchema extends SomeType, TProtoDefinition> {
     transform(
+        context: ZodConversionContext,
         schema: TSchema,
         protoDefinition: ReadOnly<TProtoDefinition>
     ): ReadOnly<TProtoDefinition>

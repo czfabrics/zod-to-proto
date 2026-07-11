@@ -15,6 +15,7 @@ import { assertsAnyZodMessageFieldType } from '#zod_converter/asserts/any_zod_me
 import { ZodMessageFieldConverter } from '#zod_converter/classes/zod_message_field_converter'
 import { ZodMessageOneOfFieldConverter } from '#zod_converter/classes/zod_message_one_of_field_converter'
 import { getZodSchemaComments } from '#zod_converter/helpers/get_zod_schema_comments'
+import type { ZodConversionContext } from '#zod_converter/types/conversion'
 import { ZodMessageFieldType, type AnyZodMessage } from '#zod_converter/types/messages'
 import {
     WithMaybeZodPassthrough,
@@ -31,6 +32,7 @@ import { ZodEnum, ZodObject } from 'zod'
 
 export class ZodMessageConverter {
     public constructor(
+        private readonly context: ZodConversionContext,
         private readonly conversionReuseStrategies: ConversionReuseStrategies,
         private readonly transformers: ZodConversionTransformers,
         private readonly transformationReuseStrategies: TransformationReuseStrategies
@@ -45,18 +47,19 @@ export class ZodMessageConverter {
             name: pascalCase(name),
             fields: [],
             extensions: [],
-            comments: getZodSchemaComments(rootSchema),
+            comments: getZodSchemaComments(this.context, rootSchema),
         })
 
         const fields: ReadOnlyAnyProto3MessageField[] = []
 
         for (const [key, entrySchema] of Object.entries(schema.shape)) {
-            assertsAnyZodMessageFieldType(entrySchema)
+            assertsAnyZodMessageFieldType(this.context, entrySchema)
 
             let field: ReadOnlyProto3MessageField | ReadOnlyProto3MessageOneOfField
 
-            if (ZodMessageFieldType.is(entrySchema)) {
+            if (ZodMessageFieldType.is(this.context, entrySchema)) {
                 const converter = new ZodMessageFieldConverter(
+                    this.context,
                     message,
                     this.conversionReuseStrategies,
                     this.transformers,
@@ -66,6 +69,7 @@ export class ZodMessageConverter {
                 field = converter.convert(key, entrySchema)
             } else {
                 const converter = new ZodMessageOneOfFieldConverter(
+                    this.context,
                     message,
                     this.conversionReuseStrategies,
                     this.transformers,
@@ -88,7 +92,7 @@ export class ZodMessageConverter {
         )
 
         message = transformerInstances.message.reduce((message, transformer) => {
-            return transformer.transform(rootSchema, message)
+            return transformer.transform(this.context, rootSchema, message)
         }, message)
 
         return message
@@ -118,7 +122,7 @@ export class ZodMessageConverter {
             name: pascalCase(name),
             fields,
             extensions: [],
-            comments: getZodSchemaComments(rootSchema),
+            comments: getZodSchemaComments(this.context, rootSchema),
         })
 
         const transformerInstances = ZodConversionTransformers.intoInstances(
@@ -128,7 +132,7 @@ export class ZodMessageConverter {
 
         const updatedMessageEnum = transformerInstances.enum.reduce(
             (messageEnum, transformer) => {
-                return transformer.transform(rootSchema, messageEnum)
+                return transformer.transform(this.context, rootSchema, messageEnum)
             },
             messageEnum
         )
@@ -140,7 +144,7 @@ export class ZodMessageConverter {
         name: string,
         rootSchema: WithMaybeZodPassthrough<AnyZodMessage>
     ): ReadOnlyAnyProto3Message {
-        const deepSchema = ZodPassthroughType.pass(rootSchema)
+        const deepSchema = ZodPassthroughType.pass(this.context.direction, rootSchema)
 
         return match(deepSchema)
             .returnType<ReadOnlyAnyProto3Message>()

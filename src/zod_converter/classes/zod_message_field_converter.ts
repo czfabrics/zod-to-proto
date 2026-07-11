@@ -9,6 +9,7 @@ import type { ReadOnlyProto3Message } from '#proto3_definition/types/messages'
 import { ZodMessageFieldTypeConverter } from '#zod_converter/classes/zod_message_field_type_converter'
 import { getZodSchemaComments } from '#zod_converter/helpers/get_zod_schema_comments'
 import { isZodSchemaOptional } from '#zod_converter/helpers/is_zod_schema_optional'
+import type { ZodConversionContext } from '#zod_converter/types/conversion'
 import type { ZodMessageFieldType } from '#zod_converter/types/messages'
 import {
     WithMaybeZodPassthrough,
@@ -23,6 +24,7 @@ import { snakeCase } from 'change-case'
 
 export class ZodMessageFieldConverter {
     public constructor(
+        private readonly context: ZodConversionContext,
         private readonly message: ReadOnlyProto3Message,
         private readonly conversionReuseStrategies: ConversionReuseStrategies,
         private readonly transformers: ZodConversionTransformers,
@@ -44,9 +46,10 @@ export class ZodMessageFieldConverter {
         rootSchema: WithMaybeZodPassthrough<ZodMessageFieldType>,
         optionalState?: Proto3OptionalState
     ): ReadOnlyProto3MessageField | ReadOnlyProto3MessageOneOfFieldSubField {
-        const deepSchema = ZodPassthroughType.pass(rootSchema)
+        const deepSchema = ZodPassthroughType.pass(this.context.direction, rootSchema)
 
         const converter = new ZodMessageFieldTypeConverter(
+            this.context,
             this.conversionReuseStrategies,
             this.transformers,
             this.transformationReuseStrategies
@@ -63,7 +66,7 @@ export class ZodMessageFieldConverter {
             optionalState: optionalState,
             type,
             extensions: [],
-            comments: getZodSchemaComments(rootSchema),
+            comments: getZodSchemaComments(this.context, rootSchema),
         })
 
         const transformerInstances = ZodConversionTransformers.intoInstances(
@@ -73,7 +76,7 @@ export class ZodMessageFieldConverter {
 
         const updatedField = transformerInstances.messageField.reduce(
             (field, transformer) => {
-                return transformer.transform(rootSchema, field)
+                return transformer.transform(this.context, rootSchema, field)
             },
             field
         )
