@@ -21,12 +21,6 @@ export type Proto3RpcRawFunction = SetOptional<
 
 export const Proto3RpcRawFunction = {
     into: function (raw: Proto3RpcRawFunction, settings: UsageSettings) {
-        const converter = new ZodMessageConverter(
-            settings.conversionReuseStrategies,
-            settings.transformers,
-            settings.transformationReuseStrategies
-        )
-
         const inMessageName = raw.typePrefix ? `Input` : `${raw.name}Input`
         const outMessageName = raw.typePrefix ? `Output` : `${raw.name}Output`
 
@@ -39,12 +33,26 @@ export const Proto3RpcRawFunction = {
         }
 
         if (raw.in !== undefined) {
-            assertsAnyZodMessage(raw.in)
+            const converter = new ZodMessageConverter(
+                { direction: 'IN' },
+                settings.conversionReuseStrategies,
+                settings.transformers,
+                settings.transformationReuseStrategies
+            )
+
+            assertsAnyZodMessage({ direction: 'IN' }, raw.in)
             functionInOut.in = converter.convert(inMessageName, raw.in)
         }
 
         if (raw.out !== undefined) {
-            assertsAnyZodMessage(raw.out)
+            const converter = new ZodMessageConverter(
+                { direction: 'OUT' },
+                settings.conversionReuseStrategies,
+                settings.transformers,
+                settings.transformationReuseStrategies
+            )
+
+            assertsAnyZodMessage({ direction: 'OUT' }, raw.out)
             functionInOut.out = converter.convert(outMessageName, raw.out)
         }
 
