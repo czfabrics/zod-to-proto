@@ -4,12 +4,14 @@ import {
     ReadOnlyProto3MessageOneOfField,
 } from '#proto3_definition/types/fields'
 import { isZodSchemaOptional } from '#zod_converter/helpers/is_zod_schema_optional'
+import type { ZodConversionContext } from '#zod_converter/types/conversion'
 import type { ZodMessageOneOfFieldType } from '#zod_converter/types/messages'
 import type { WithMaybeZodPassthrough } from '#zod_converter/types/passthroughs'
 import type { ZodMessageOneOfFieldConversionTransformer } from '#zod_converter/types/transformers'
 
 export class ZodRequiredOneOfFieldConversionTransformer implements ZodMessageOneOfFieldConversionTransformer {
     transform(
+        _context: ZodConversionContext,
         schema: WithMaybeZodPassthrough<ZodMessageOneOfFieldType>,
         protoDefinition: ReadOnlyProto3MessageOneOfField
     ): ReadOnlyProto3MessageOneOfField {

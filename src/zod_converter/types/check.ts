@@ -2,7 +2,9 @@ import type { ArrayToStringDisplay, CheckTuple } from '#core/types/check_tuple'
 import type { TuplifyUnion } from '#core/types/tuplify_union'
 import type { TypeDebuggingError } from '#core/types/type_debugging_error'
 import type { ZodOneOfUnion } from '#zod/types/zod_one_of_union'
-import type { ExtractZodPassthroughInner } from '#zod_converter/types/passthroughs'
+import type { ZodPassthroughDirection } from '#zod_converter/types/passthroughs'
+import type { ExtractZodPassthroughInInner } from '#zod_converter/types/passthroughs_in'
+import type { ExtractZodPassthroughOutInner } from '#zod_converter/types/passthroughs_out'
 import type {
     ExcludeZodType,
     IntoSomeZodType,
@@ -117,7 +119,7 @@ export type ZodCategoryNoChild =
     | ZodBigIntFormat
     | ZodBoolean
 
-export type ZodCategoryPassthrough<TChild extends SomeType = SomeType> =
+export type ZodCategoryPassthroughIn<TChild extends SomeType = SomeType> =
     | ZodCatch<TChild>
     | ZodOptional<TChild>
     | ZodNonOptional<TChild>
@@ -125,22 +127,32 @@ export type ZodCategoryPassthrough<TChild extends SomeType = SomeType> =
     | ZodDefault<TChild>
     | ZodPrefault<TChild>
     | ZodLazy<TChild>
-    //// We consider `ZodPipe` to have one child because we don’t care about the output type.
     | ZodPipe<TChild>
-    //// We consider `ZodCodec` to have one child because we don’t care about the output type.
     | ZodCodec<TChild>
+
+export type ZodCategoryPassthroughOut<TChild extends SomeType = SomeType> =
+    | ZodCatch<TChild>
+    | ZodOptional<TChild>
+    | ZodNonOptional<TChild>
+    | ZodReadonly<TChild>
+    | ZodDefault<TChild>
+    | ZodPrefault<TChild>
+    | ZodLazy<TChild>
+    | ZodPipe<SomeType, TChild>
+    | ZodCodec<SomeType, TChild>
 
 export type ZodCategoryOneChildWithoutPasstrough = ZodSet | ZodArray
 
 export type ZodCategoryOneChild =
     | ZodCategoryOneChildWithoutPasstrough
-    | ZodCategoryPassthrough
-type GetChild<TZodType extends SomeType> =
+    | ZodCategoryPassthroughIn
+    | ZodCategoryPassthroughOut
+type GetChild<TDirection extends ZodPassthroughDirection, TZodType extends SomeType> =
     TZodType extends SomeZodSet<infer TChild>
         ? readonly [TChild]
         : TZodType extends SomeZodArray<infer TChild>
           ? readonly [TChild]
-          : TZodType extends SomeZodPassthrough<infer TChild>
+          : TZodType extends SomeZodPassthrough<TDirection, infer TChild>
             ? readonly [TChild]
             : []
 
@@ -162,11 +174,14 @@ type ZodCategoryChildArray = ZodOneOfUnion
 type GetChildrenFromChildArray<TZodType extends SomeType> =
     TZodType extends SomeZodUnion<infer TChildArray> ? TChildArray : []
 
-type GetChildZodType<TZodType extends SomeType> =
+type GetChildZodType<
+    TDirection extends ZodPassthroughDirection,
+    TZodType extends SomeType,
+> =
     GetZodTypeValue<TZodType> extends GetZodTypeValue<ZodCategoryNoChild>
         ? []
         : GetZodTypeValue<TZodType> extends GetZodTypeValue<ZodCategoryOneChild>
-          ? GetChild<TZodType>
+          ? GetChild<TDirection, TZodType>
           : GetZodTypeValue<TZodType> extends GetZodTypeValue<ZodCategoryChildRecord>
             ? GetChildrenFromChildRecord<TZodType>
             : GetZodTypeValue<TZodType> extends GetZodTypeValue<ZodCategoryChildArray>
@@ -264,6 +279,7 @@ type GetChildConditionError<
       ? ChildConditions[TIndex]['error']
       : GetChildConditionError<TZodType, [...TRawIndex, '+1']>
 
+// TODO: pass the in or out settings
 type CheckChildConditions<
     TChildren extends readonly SomeType[],
     TChildConditions extends readonly SomeType[],
@@ -272,25 +288,31 @@ type CheckChildConditions<
 > = TChildren['length'] extends TIndex
     ? true
     : //// Avoid using `GetZodTypeValue` since the conditions need strict validation.
-      ExtractZodPassthroughInner<TChildren[TIndex]> extends TChildConditions[TIndex]
+      ExtractZodPassthroughInInner<TChildren[TIndex]> extends TChildConditions[TIndex]
       ? CheckChildConditions<TChildren, TChildConditions, [...TRawIndex, '+1']>
-      : false
+      : ExtractZodPassthroughOutInner<TChildren[TIndex]> extends TChildConditions[TIndex]
+        ? CheckChildConditions<TChildren, TChildConditions, [...TRawIndex, '+1']>
+        : false
 
 type ContinueRecursiveForChildren<
+    TDirection extends ZodPassthroughDirection,
     TRoot extends SomeType,
     TZodTypes extends readonly SomeType[],
     TRawIndex extends string[] = [],
     TIndex extends number = TRawIndex['length'],
 > = TZodTypes['length'] extends TIndex
     ? TRoot
-    : CheckZodSchemaCompatibility<TZodTypes[TIndex]> extends infer TResult extends
-            TypeDebuggingError<string>
+    : CheckZodSchemaCompatibility<
+            TDirection,
+            TZodTypes[TIndex]
+        > extends infer TResult extends TypeDebuggingError<string>
       ? TResult
-      : ContinueRecursiveForChildren<TRoot, TZodTypes, [...TRawIndex, '+1']>
+      : ContinueRecursiveForChildren<TDirection, TRoot, TZodTypes, [...TRawIndex, '+1']>
 
 export type CheckZodSchemaCompatibility<
+    TDirection extends ZodPassthroughDirection,
     TZodType extends SomeType,
-    TChildren extends readonly SomeType[] = GetChildZodType<TZodType>,
+    TChildren extends readonly SomeType[] = GetChildZodType<TDirection, TZodType>,
     TChildConditions extends readonly SomeType[] = GetChildConditions<TZodType>,
     TChildConditionError extends TypeDebuggingError<string> =
         GetChildConditionError<TZodType>,
@@ -300,7 +322,7 @@ export type CheckZodSchemaCompatibility<
         : TChildConditions['length'] extends 0
           ? TChildren['length'] extends 0
               ? TZodType
-              : ContinueRecursiveForChildren<TZodType, TChildren>
+              : ContinueRecursiveForChildren<TDirection, TZodType, TChildren>
           : CheckChildConditions<TChildren, TChildConditions> extends true
-            ? ContinueRecursiveForChildren<TZodType, TChildren>
+            ? ContinueRecursiveForChildren<TDirection, TZodType, TChildren>
             : TChildConditionError

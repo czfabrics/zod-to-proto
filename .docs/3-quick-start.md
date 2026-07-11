@@ -1,7 +1,7 @@
 ## Quick Start
 
 ```ts
-import { zodToProto } from '{{ pkg.name }}'
+import { UnscopedMessage, zodToProto } from '{{ pkg.name }}'
 import z from 'zod'
 
 const User = z.object({
@@ -15,7 +15,7 @@ const result = zodToProto({
     packageName: 'services.authentication.v1',
     services: [],
     unscopedMessages: {
-        user: User,
+        user: UnscopedMessage.new('OUT', User),
     },
 })
 ```

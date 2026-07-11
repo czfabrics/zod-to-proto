@@ -1,6 +1,7 @@
 import type { CheckTuple } from '#core/types/check_tuple'
 import type { Prettify } from '#core/types/prettify'
 import type { ZodCategoryOneChildWithoutPasstrough } from '#zod_converter/types/check'
+import type { ZodConversionContext } from '#zod_converter/types/conversion'
 import type { AnyZodMessage } from '#zod_converter/types/messages'
 import {
     type AnyZodPassthroughInner,
@@ -29,9 +30,10 @@ export const ZodDynamicSizeTypeTuple = {
 
 export const ZodDynamicSizeType = {
     is: function (
+        context: ZodConversionContext,
         schema: WithMaybeZodPassthrough<AnyZodPassthroughInner>
     ): schema is WithMaybeZodPassthrough<ZodDynamicSizeType> {
-        const deepSchema = ZodPassthroughType.pass(schema)
+        const deepSchema = ZodPassthroughType.pass(context.direction, schema)
 
         const zodTypes: string[] = ZodDynamicSizeTypeTuple.new(['array', 'set', 'record'])
 
@@ -73,9 +75,10 @@ export const ZodRepeatedInnerTypeTuple = {
 
 export const ZodRepeatedInnerType = {
     is: function (
+        context: ZodConversionContext,
         schema: SomeType
     ): schema is WithMaybeZodPassthrough<ZodRepeatedInnerType> {
-        const deepSchema = ZodPassthroughType.pass(schema)
+        const deepSchema = ZodPassthroughType.pass(context.direction, schema)
 
         const zodTypes: string[] = ZodRepeatedInnerTypeTuple.get()
 
@@ -108,8 +111,11 @@ export const ZodMapValueTypeTuple = {
 } as const
 
 export const ZodMapValueType = {
-    is: function (schema: SomeType): schema is WithMaybeZodPassthrough<ZodMapValueType> {
-        const deepSchema = ZodPassthroughType.pass(schema)
+    is: function (
+        context: ZodConversionContext,
+        schema: SomeType
+    ): schema is WithMaybeZodPassthrough<ZodMapValueType> {
+        const deepSchema = ZodPassthroughType.pass(context.direction, schema)
 
         const zodTypes: string[] = ZodMapValueTypeTuple.get()
 

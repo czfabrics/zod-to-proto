@@ -1,6 +1,7 @@
 import type { CheckTuple } from '#core/types/check_tuple'
 import type { Prettify } from '#core/types/prettify'
 import type { ZodOneOfUnion } from '#zod/types/zod_one_of_union'
+import type { ZodConversionContext } from '#zod_converter/types/conversion'
 import type { ZodDynamicSizeType } from '#zod_converter/types/dynamic_size'
 import {
     type AnyZodPassthroughInner,
@@ -30,9 +31,10 @@ export const AnyZodMessageTypeTuple = {
 
 export const AnyZodMessage = {
     is: function (
+        context: ZodConversionContext,
         schema: WithMaybeZodPassthrough<AnyZodPassthroughInner>
     ): schema is WithMaybeZodPassthrough<AnyZodMessage> {
-        const deepSchema = ZodPassthroughType.pass(schema)
+        const deepSchema = ZodPassthroughType.pass(context.direction, schema)
 
         const zodTypes: string[] = AnyZodMessageTypeTuple.get()
 
@@ -69,9 +71,10 @@ export const ZodMessageFieldTypeTuple = {
 
 export const ZodMessageFieldType = {
     is: function (
+        context: ZodConversionContext,
         schema: SomeType
     ): schema is WithMaybeZodPassthrough<ZodMessageFieldType> {
-        const deepSchema = ZodPassthroughType.pass(schema)
+        const deepSchema = ZodPassthroughType.pass(context.direction, schema)
 
         const zodTypes: string[] = ZodMessageFieldTypeTuple.get()
 
@@ -98,9 +101,10 @@ export const ZodMessageOneOfFieldTypeTuple = {
 
 export const ZodMessageOneOfFieldType = {
     is: function (
+        context: ZodConversionContext,
         schema: WithMaybeZodPassthrough<AnyZodPassthroughInner>
     ): schema is WithMaybeZodPassthrough<ZodMessageOneOfFieldType> {
-        const deepSchema = ZodPassthroughType.pass(schema)
+        const deepSchema = ZodPassthroughType.pass(context.direction, schema)
 
         const zodTypes: string[] = ZodMessageOneOfFieldTypeTuple.get()
 
@@ -138,9 +142,10 @@ export const AnyZodMessageFieldTypeTuple = {
 
 export const AnyZodMessageFieldType = {
     is: function (
+        context: ZodConversionContext,
         schema: WithMaybeZodPassthrough<AnyZodPassthroughInner>
     ): schema is WithMaybeZodPassthrough<AnyZodMessageFieldType> {
-        const deepSchema = ZodPassthroughType.pass(schema)
+        const deepSchema = ZodPassthroughType.pass(context.direction, schema)
 
         const zodTypes: string[] = AnyZodMessageFieldTypeTuple.get()
 

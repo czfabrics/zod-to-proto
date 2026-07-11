@@ -9,6 +9,7 @@ import type { ReadOnlyProto3ScalarType } from '#proto3_definition/types/scalars'
 import { ZodDynamicSizeConverter } from '#zod_converter/classes/zod_dynamic_size_converter'
 import { ZodMessageConverter } from '#zod_converter/classes/zod_message_converter'
 import { ZodScalarConverter } from '#zod_converter/classes/zod_scalar_converter'
+import type { ZodConversionContext } from '#zod_converter/types/conversion'
 import {
     ZodDynamicSizeType,
     type ZodMapValueType,
@@ -26,6 +27,7 @@ import { ZodConversionTransformers } from '#zod_converter/types/transformers'
 
 export class ZodMessageFieldTypeConverter {
     public constructor(
+        private readonly context: ZodConversionContext,
         private readonly conversionReuseStrategies: ConversionReuseStrategies,
         private readonly transformers: ZodConversionTransformers,
         private readonly transformationReuseStrategies: TransformationReuseStrategies
@@ -59,14 +61,15 @@ export class ZodMessageFieldTypeConverter {
         key: string,
         schema: WithMaybeZodPassthrough<ZodMessageFieldType>
     ): ReadOnlyProto3MessageFieldType {
-        if (ZodScalarType.is(schema)) {
-            const converter = new ZodScalarConverter()
+        if (ZodScalarType.is(this.context, schema)) {
+            const converter = new ZodScalarConverter(this.context)
 
             return converter.convert(schema)
         }
 
-        if (ZodDynamicSizeType.is(schema)) {
+        if (ZodDynamicSizeType.is(this.context, schema)) {
             const converter = new ZodDynamicSizeConverter(
+                this.context,
                 this.conversionReuseStrategies,
                 this.transformers,
                 this.transformationReuseStrategies
@@ -75,8 +78,9 @@ export class ZodMessageFieldTypeConverter {
             return converter.convert(key, schema)
         }
 
-        if (AnyZodMessage.is(schema)) {
+        if (AnyZodMessage.is(this.context, schema)) {
             const converter = new ZodMessageConverter(
+                this.context,
                 this.conversionReuseStrategies,
                 this.transformers,
                 this.transformationReuseStrategies

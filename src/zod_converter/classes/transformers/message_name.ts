@@ -1,5 +1,6 @@
 import { type ReadOnlyProto3Message } from '#proto3_definition/types/messages'
 import { getProtoMeta } from '#zod_converter/helpers/registry'
+import type { ZodConversionContext } from '#zod_converter/types/conversion'
 import type { AnyZodMessage } from '#zod_converter/types/messages'
 import {
     ZodPassthroughType,
@@ -13,10 +14,11 @@ export class ZodMessageNameConversionTransformer implements ZodMessageConversion
     public constructor(private readonly reuseStrategies: TransformationReuseStrategies) {}
 
     transform(
+        context: ZodConversionContext,
         schema: WithMaybeZodPassthrough<AnyZodMessage>,
         protoDefinition: ReadOnlyProto3Message
     ): ReadOnlyProto3Message {
-        const deepSchema = ZodPassthroughType.pass(schema)
+        const deepSchema = ZodPassthroughType.pass(context.direction, schema)
 
         const protoMeta = getProtoMeta(deepSchema)
 

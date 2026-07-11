@@ -1,5 +1,6 @@
 import type { CheckTuple } from '#core/types/check_tuple'
 import type { ZodCategoryNoChild } from '#zod_converter/types/check'
+import type { ZodConversionContext } from '#zod_converter/types/conversion'
 import {
     type WithMaybeZodPassthrough,
     ZodPassthroughType,
@@ -32,8 +33,11 @@ export const ZodScalarTypeTuple = {
 } as const
 
 export const ZodScalarType = {
-    is: function (schema: SomeType): schema is WithMaybeZodPassthrough<ZodScalarType> {
-        const deepSchema = ZodPassthroughType.pass(schema)
+    is: function (
+        context: ZodConversionContext,
+        schema: SomeType
+    ): schema is WithMaybeZodPassthrough<ZodScalarType> {
+        const deepSchema = ZodPassthroughType.pass(context.direction, schema)
 
         const zodTypes: string[] = ZodScalarTypeTuple.get()
 

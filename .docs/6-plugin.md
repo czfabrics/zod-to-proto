@@ -57,20 +57,22 @@ This package allows you to write custom transformers to modify Protobuf definiti
 
 ```ts
 import {
-    Proto3Deprecated,
-    type ReadOnlyProto3MessageField,
     isZodSchemaDeprecated,
-    ZodMessageFieldType,
+    Proto3Deprecated,
     WithMaybeZodPassthrough,
+    ZodConversionContext,
     ZodMessageFieldConversionTransformer,
+    ZodMessageFieldType,
+    type ReadOnlyProto3MessageField,
 } from '{{ pkg.name }}'
 
 export class ZodDeprecatedFieldConversionTransformer implements ZodMessageFieldConversionTransformer {
     transform(
+        context: ZodConversionContext,
         schema: WithMaybeZodPassthrough<ZodMessageFieldType>,
         protoDefinition: ReadOnlyProto3MessageField
     ): ReadOnlyProto3MessageField {
-        const isDeprecated = isZodSchemaDeprecated(schema)
+        const isDeprecated = isZodSchemaDeprecated(context, schema)
 
         if (!isDeprecated) {
             return protoDefinition
