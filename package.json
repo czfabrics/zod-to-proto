@@ -63,9 +63,12 @@
         }
     },
     "dependencies": {
+        "@grpc/grpc-js": "^1.14.3",
         "change-case": "^5.4.4",
         "crypto-random-string": "^5.0.0",
+        "nice-grpc": "^2.1.14",
         "pluralize": "^8.0.0",
+        "protobufjs": "^8.0.0",
         "ts-pattern": "^5.9.0"
     },
     "peerDependencies": {
