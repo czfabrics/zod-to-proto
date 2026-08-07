@@ -1,0 +1,12 @@
+^api\.anthropic\.com$
+^platform\.claude\.com$
+^claude\.ai$
+^claude\.com$
+^code\.claude\.com$
+^cache\.nixos\.org$
+^registry\.terraform\.io$
+^nixos\.org$
+^raw\.githubusercontent\.com$
+^github\.com$
+^api\.github\.com$
+^docs\.netbird\.io$

@@ -1,0 +1,6 @@
+*
+!flake.nix
+!flake.lock
+!tinyproxy.conf
+!proxy-allowlist
+!managed-settings.json

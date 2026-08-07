@@ -1,0 +1,2 @@
+config_path: 'bashly.yml'
+commands_dir: commands

@@ -12,3 +12,9 @@ node_modules
 
 # Finder (MacOS) folder config
 .DS_Store
+
+# Environment
+.env.local
+
+# Claude
+dev/claude/worktrees

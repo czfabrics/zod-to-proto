@@ -12,5 +12,17 @@
         },
     },
     "language_servers": ["tsgo", "!vtsls", "!typescript-language-server", "..."],
-    "file_scan_exclusions": ["bun.lock"],
+    "file_scan_exclusions": ["bun.lock", "dev/claude/worktrees"],
+    "terminal": {
+        "shell": {
+            "with_arguments": {
+                "program": "nix",
+                "args": [
+                    "--extra-experimental-features",
+                    "nix-command flakes",
+                    "develop",
+                ],
+            }
+        },
+    },
 }

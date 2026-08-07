@@ -1,0 +1,92 @@
+name: ${ORGANIZATION_NAME:?}-claude
+
+networks:
+  ## Claude sits here alone: no route off the host, and no DNS beyond the
+  ## service names of this file
+  isolated:
+    internal: true
+  egress:
+
+services:
+  claude:
+    build:
+      context: .
+      dockerfile: claude.Dockerfile
+      args:
+        CLAUDE_UID: ${CLAUDE_UID:-2394}
+        CLAUDE_GID: ${CLAUDE_GID:-2394}
+    image: ${ORGANIZATION_NAME:?}-claude:latest
+    init: true
+    stdin_open: true
+    tty: true
+    working_dir: ${FLAKE_ROOT:?}/dev/claude/worktrees
+    networks:
+      - isolated
+    depends_on:
+      - proxy
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 1024
+    mem_limit: 8g
+    cpus: 4.0
+    environment:
+      - CLAUDE_CONFIG_DIR=/home/claude/config
+      - CLAUDE_CODE_OAUTH_TOKEN
+      ## Read from the host's git config by feature.sh, so commits inside the
+      ## container attribute to a real identity instead of the container user
+      - GIT_AUTHOR_NAME
+      - GIT_AUTHOR_EMAIL
+      - GIT_COMMITTER_NAME
+      - GIT_COMMITTER_EMAIL
+      - TERM=${TERM:-xterm-256color}
+      - CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1
+      - DISABLE_AUTOUPDATER=1
+      ## Both cases: curl and nix read the lower one, most runtimes the upper
+      - HTTPS_PROXY=http://proxy:8888
+      - HTTP_PROXY=http://proxy:8888
+      - https_proxy=http://proxy:8888
+      - http_proxy=http://proxy:8888
+      - NO_PROXY=localhost,127.0.0.1
+      - no_proxy=localhost,127.0.0.1
+    volumes:
+      ## Mounted on its host path because a worktree points at its
+      ## repository through an absolute `gitdir` link
+      - ${FLAKE_ROOT:?}/dev/claude/worktrees:/home/claude/worktrees
+      ## The other end of that link, so git works inside a worktree. Writable,
+      ## so the two ways a file in there runs code on the host are taken away
+      ## below rather than by making the mount read only
+      - ${GIT_COMMON_DIR:?}:${GIT_COMMON_DIR:?}
+      ## A hook written here lands in the container and never reaches the host
+      - type: tmpfs
+        target: ${GIT_COMMON_DIR:?}/hooks
+      ## `core.fsmonitor`, `core.pager` and the filter drivers are commands git
+      ## runs, so the file naming them is the host's to write, not ours
+      - ${GIT_COMMON_DIR:?}/config:${GIT_COMMON_DIR:?}/config:ro
+      - claude_state:/home/claude/config
+
+  proxy:
+    build:
+      context: .
+      dockerfile: claude.Dockerfile
+      args:
+        CLAUDE_UID: ${CLAUDE_UID:-2394}
+        CLAUDE_GID: ${CLAUDE_GID:-2394}
+    image: ${ORGANIZATION_NAME:?}-claude:latest
+    container_name: ${ORGANIZATION_NAME:?}-claude-proxy
+    init: true
+    entrypoint: ["/home/claude/proxy/bin/tinyproxy", "-d", "-c", "/etc/tinyproxy/tinyproxy.conf"]
+    restart: unless-stopped
+    networks:
+      - isolated
+      - egress
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 128
+    mem_limit: 256m
+
+volumes:
+  claude_state:

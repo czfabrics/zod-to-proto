@@ -1,0 +1,76 @@
+name: project
+version: 0.0.1
+
+commands:
+    - name: completions
+      help: |-
+          Generate bash completions
+          Usage: eval "\$(project completions)"
+
+    - name: worktree
+      alias: w
+      help: Claude Code sessions, one git worktree each
+
+      environment_variables:
+          - name: FLAKE_ROOT
+            help: Set by Nix
+            required: true
+          - name: ORGANIZATION_NAME
+            help: Set by Nix
+            required: true
+
+      commands:
+          - name: feature
+            alias: f
+            help: Create the worktrees folder and open Claude Code inside its container
+
+            dependencies:
+                claude_container:
+                    command: [docker]
+                    help: Used to build and run the Claude Code container
+                worktree_creation:
+                    command: [git]
+                    help: Used to create the worktree and rebase it onto its upstream
+
+            examples:
+                - project worktree feature my_feature
+                - project worktree feature my_feature --continue
+
+            completions:
+                - $(ls "$FLAKE_ROOT/dev/claude/worktrees" 2> /dev/null)
+            args:
+                - name: worktree-name
+                  help: Worktree to create under `dev/claude/worktrees`, reused when it already exists
+                  required: true
+
+            catch_all:
+                label: claude-args
+                help: Arguments forwarded to the `claude` command inside the container
+
+          - name: remove
+            alias: r
+            help: Remove the container, the worktree and the branch of a Claude Code session
+
+            dependencies:
+                claude_container:
+                    command: [docker]
+                    help: Used to remove the Claude Code container
+                worktree_removal:
+                    command: [git]
+                    help: Used to remove the worktree and its branch
+
+            examples:
+                - project worktree remove my_feature
+                - project worktree remove --force my_feature
+
+            completions:
+                - $(ls "$FLAKE_ROOT/dev/claude/worktrees" 2> /dev/null)
+            args:
+                - name: worktree-name
+                  help: Worktree to remove from `dev/claude/worktrees`, along with its container and its branch
+                  required: true
+
+            flags:
+                - long: --force
+                  short: -f
+                  help: Remove the worktree even when it holds uncommitted or untracked files, and its branch even when it holds unmerged commits
