@@ -12,7 +12,8 @@ definition can express — messages, enums, scalars, `repeated`, `map`, `oneof`,
 crossing the boundary are converted to the JS shapes the Zod schemas were written in:
 enum names as strings, oneofs as `{ $case, value }`, field keys camelCased. Done = a
 `Proto3RuntimeDefinition` whose service definitions can be handed straight to
-`makeClientConstructor` / `server.addService`, and `bun run typecheck` passes.
+`makeClientConstructor` / `server.addService`, each resolver class covered by its own unit
+test, and `bun run typecheck` passing.
 
 ## Analysis
 
@@ -33,12 +34,17 @@ run, so `node_modules/` is populated.
 - `ReadOnlyProto3MessageField` (`.../fields.ts`) holds `key`, `index`, `optionalState`
   (`'PRESENT' | 'NONE' | 'NOT_NEEDED'`) and `type`.
 - `ReadOnlyProto3MessageOneOfField` holds `key` and `subFields`; each sub-field is a
-  `Proto3MessageOneOfFieldSubField` with its own `key` / `index` / `type`.
+  `Proto3MessageOneOfFieldSubField` with its own `key` / `index` / `type`, and its `new`
+  forces `optionalState` to `'NOT_NEEDED'` (`.../fields.ts:157`).
 - Field types are `Proto3DynamicSizeType | Proto3ScalarType | AnyProto3Message |
   Proto3ImportedType`. `Proto3RepeatedType.inner` may itself be `repeated`;
   `Proto3MapType` has `key` (scalar) and `value`.
 - Every node is discriminated by `internalName`, and the codebase matches on it with
   `ts-pattern`'s `match(...).with(...).exhaustive()`.
+- Every node is built through a `X.new(params)` factory whose parameter object is
+  `GetNewParams<X>` — the node's own data properties minus `id`, `internalName` and the
+  methods (`src/proto3_definition/types/get_new_params.ts`). Tests construct fixtures with
+  these factories directly.
 
 ### The pattern to imitate
 
@@ -131,6 +137,28 @@ accepts a grpc-js definition directly via `CompatServiceDefinition`
 (`node_modules/nice-grpc/src/service-definitions/index.ts:56-60`), so no separate output
 is needed for it.
 
+`Buffer` is typed despite `typeRoots: []` in `tsconfig.compiler.json` — `@types/node`
+arrives transitively through protobufjs. Verified by typechecking a probe file that calls
+`Buffer.from(...)`; it produced no error.
+
+### Test conventions
+
+- One test file per source file, co-located, named `<source>.test.ts`. Today only
+  `src/usage/helpers/zod_to_proto.test.ts` exists.
+- `import { describe, test } from 'vitest'`, then
+  `describe('<subject> test suite', () => { test('Testing …', async ({ expect }) => { … }) })`.
+  Note `expect` is **destructured from the test context**, not imported.
+- `vitest.config.ts` sets `expect: { requireAssertions: true }`, so every `test` must make
+  at least one assertion or it fails.
+- `vitest.config.ts` also sets `watch: true`, so a one-shot run needs `bunx vitest --run`.
+- Test files are excluded from the `index.ts` barrel glob (`!./src/**/*.test.ts`) but are
+  **included** in `tsconfig.json`'s `src/**/*.ts`, so they are typechecked under `strict`,
+  `noUnusedLocals` and `noUncheckedIndexedAccess` like any other file.
+- The existing suite uses `toMatchSnapshot('result')` for generated `.proto` text. For the
+  descriptors and round-trips added here, prefer explicit `toStrictEqual` — a JSON
+  descriptor snapshot is unreviewable, and the point of these tests is to pin specific
+  mappings.
+
 ### Repository conventions
 
 - Path aliases live in `tsconfig.alias.json` and are consumed by `tsconfig.json` and by
@@ -138,8 +166,6 @@ is needed for it.
   entry there.
 - `index.ts` is a generated barrel (`bun run prepare:index`, glob `./src/**/*.ts`
   excluding `*.test.ts`, sorted by path).
-- `tsconfig.compiler.json` enables `strict`, `noUnusedLocals`, `noUnusedParameters`,
-  `noUncheckedIndexedAccess`, `noPropertyAccessFromIndexSignature`.
 - `.claude/rules.md`: no comments unless they state something undeducible from the code;
   documentation ships in the same commit as the change; one concern per commit.
 - Existing comments in this codebase use the `////` prefix for prose lines.
@@ -151,14 +177,14 @@ is needed for it.
     src/test.ts(97,7): error TS6133: 'grpcServiceDefinition' is declared but its value is never read.
     src/test.ts(141,7): error TS6133: 'nicegrpcServiceDefinition' is declared but its value is never read.
 
-Step 11 resolves it.
+Step 19 resolves it.
 
 ### TODO_FOR_LLM
 
 A search for `TODO_FOR_LLM` across the repository matched only `.claude/skills/**`
 documentation, never source. There are no `TODO_FOR_LLM` tasks to schedule. Two plain
 `TODO:` comments exist in scope — `src/test.ts:116` / `:134` (`.toJSON() utile?`, answered
-by the conversion layer in Step 7, and removed with the file in Step 11) and
+by the conversion layer in Step 11, and removed with the file in Step 19) and
 `src/proto3_definition/types/scalars.ts:40` (unrelated, left alone).
 
 ## Files Touched (at a glance)
@@ -168,18 +194,25 @@ by the conversion layer in Step 7, and removed with the file in Step 11) and
 | 1  | `tsconfig.alias.json` | modify | Register the `#proto3_runtime/*` path alias |
 | 2  | `src/proto3_runtime/types/runtime.ts` | create | `Proto3RuntimeDefinition` output type |
 | 3  | `src/proto3_runtime/classes/proto3_runtime_field_resolver.ts` | create | Field into `IField` / `IMapField` + type references |
-| 4  | `src/proto3_runtime/classes/proto3_runtime_message_resolver.ts` | create | Message / enum into `IType` / `IEnum` |
-| 5  | `src/proto3_runtime/classes/proto3_runtime_service_resolver.ts` | create | Service into `IService` |
-| 6  | `src/proto3_runtime/classes/proto3_runtime_descriptor_resolver.ts` | create | File into a `protobuf.INamespace` |
-| 7  | `src/proto3_runtime/classes/proto3_runtime_codec_resolver.ts` | create | Install JS-shape `encode` / `decode` overrides |
-| 8  | `src/proto3_runtime/classes/proto3_runtime_resolver.ts` | create | Orchestrator producing grpc-js service definitions |
-| 9  | `src/usage/helpers/get_full_usage_settings.ts` | create | Extract the `UsageSettings` defaulting block |
-| 10 | `src/usage/helpers/zod_to_proto.ts` | modify | Use the extracted helper |
-| 11 | `src/usage/helpers/zod_to_runtime.ts` | create | Public `zodToRuntime()` entry point |
-| 12 | `src/test.ts` | delete | Superseded exploratory file; unblocks the typecheck |
-| 13 | `index.ts` | modify | Barrel entries for the new files, drop `./src/test` |
-| 14 | `.docs/4-usage.md` | modify | Document `zodToRuntime()` + regenerate `README.md` |
-| 15 | `.docs/5-compatibility.md` | modify | Document the runtime conversion table |
+| 4  | `src/proto3_runtime/classes/proto3_runtime_field_resolver.test.ts` | create | Unit-test every field shape and type reference |
+| 5  | `src/proto3_runtime/classes/proto3_runtime_message_resolver.ts` | create | Message / enum into `IType` / `IEnum` |
+| 6  | `src/proto3_runtime/classes/proto3_runtime_message_resolver.test.ts` | create | Unit-test fields, oneofs and enum values |
+| 7  | `src/proto3_runtime/classes/proto3_runtime_service_resolver.ts` | create | Service into `IService` |
+| 8  | `src/proto3_runtime/classes/proto3_runtime_service_resolver.test.ts` | create | Unit-test methods, streaming and imported in/out |
+| 9  | `src/proto3_runtime/classes/proto3_runtime_descriptor_resolver.ts` | create | File into a `protobuf.INamespace` |
+| 10 | `src/proto3_runtime/classes/proto3_runtime_descriptor_resolver.test.ts` | create | Unit-test package nesting, dedupe, import collection |
+| 11 | `src/proto3_runtime/classes/proto3_runtime_codec_resolver.ts` | create | Install JS-shape `encode` / `decode` overrides |
+| 12 | `src/proto3_runtime/classes/proto3_runtime_codec_resolver.test.ts` | create | Round-trip and wire-compatibility tests |
+| 13 | `src/proto3_runtime/classes/proto3_runtime_resolver.ts` | create | Orchestrator producing grpc-js service definitions |
+| 14 | `src/proto3_runtime/classes/proto3_runtime_resolver.test.ts` | create | Unit-test service definitions end to end |
+| 15 | `src/usage/helpers/get_full_usage_settings.ts` | create | Extract the `UsageSettings` defaulting block |
+| 16 | `src/usage/helpers/zod_to_proto.ts` | modify | Use the extracted helper |
+| 17 | `src/usage/helpers/zod_to_runtime.ts` | create | Public `zodToRuntime()` entry point |
+| 18 | `src/usage/helpers/zod_to_runtime.test.ts` | create | Zod-to-wire round-trip through the public entry point |
+| 19 | `src/test.ts` | delete | Superseded exploratory file; unblocks the typecheck |
+| 20 | `index.ts` | modify | Barrel entries for the new files, drop `./src/test` |
+| 21 | `.docs/4-usage.md` | modify | Document `zodToRuntime()` + regenerate `README.md` |
+| 22 | `.docs/5-compatibility.md` | modify | Document the runtime conversion table |
 
 ## Implementation Steps
 
@@ -242,7 +275,7 @@ by the conversion layer in Step 7, and removed with the file in Step 11) and
   - the fifteen scalar `internalName`s return `scalarType.name` verbatim — protobufjs uses
     the same spellings (`string`, `bool`, `int32`, …, `bytes`);
   - `message` / `enum` return `message.name` — every message is hoisted flat into the
-    package namespace by Step 6, so a bare name resolves;
+    package namespace by Step 9, so a bare name resolves;
   - `imported_type` pushes onto the accumulator and returns `.${imported.typeReference}`,
     the leading dot forcing absolute lookup from the root
     (`node_modules/protobufjs/src/namespace.js:409-410`);
@@ -284,7 +317,45 @@ by the conversion layer in Step 7, and removed with the file in Step 11) and
   has been pushed onto the accumulator; the scalar match arm is `.exhaustive()` over all
   fifteen scalar names, matching the list in `Proto3FieldProcessor`.
 
-### Step 4 — Resolve a message or enum into a protobufjs type descriptor
+### Step 4 — Test the field resolver
+
+- **File:** `src/proto3_runtime/classes/proto3_runtime_field_resolver.test.ts` (create)
+- **What:** Cover every branch of `resolve()` and `getTypeReference()` by building
+  `Proto3MessageField` fixtures directly with the definition factories — no Zod involved,
+  so a failure points at this class alone.
+- **How:** One `describe('`Proto3RuntimeFieldResolver` test suite', …)` with one `test`
+  per shape. Build fixtures with `Proto3MessageField.new({ key, index, optionalState,
+  type, extensions: [], comments: [] })` and assert with `toStrictEqual`:
+  - **scalar** — `Proto3StringType.new()`, `optionalState: 'NONE'` →
+    `{ id: 1, type: 'string' }`;
+  - **optional scalar** — same with `optionalState: 'PRESENT'` →
+    `{ id: 2, type: 'string', options: { proto3_optional: true } }`;
+  - **message reference** — `Proto3Message.new({ name: 'User', fields: [], extensions: [],
+    comments: [] })` → `{ id: 1, type: 'User' }`;
+  - **enum reference** — `Proto3Enum.new({ name: 'UserRole', fields: [], … })` →
+    `{ id: 1, type: 'UserRole' }`;
+  - **imported type** — `Proto3Empty.useType()` → `{ id: 1, type: '.google.protobuf.Empty' }`,
+    and the accumulator passed to the constructor now has length 1 with that
+    `importPath`;
+  - **repeated** — `Proto3RepeatedType.new({ inner: Proto3StringType.new() })` →
+    `{ id: 1, rule: 'repeated', type: 'string' }`;
+  - **nested repeated** — `Proto3RepeatedType.new({ inner: Proto3RepeatedType.new({ inner:
+    Proto3Int32Type.new() }) })` → `{ id: 1, rule: 'repeated', type: 'int32' }`, pinning
+    that `getDeepInnerType()` collapses the layers rather than emitting a bogus reference;
+  - **map** — `Proto3MapType.new({ key: Proto3StringType.new(), value: someMessage })` →
+    `{ id: 1, keyType: 'string', type: 'Access' }` and **no** `rule` key.
+
+  A `test` for the oneof sub-field variant too:
+  `Proto3MessageOneOfFieldSubField.new({ key, index, optionalState: 'NOT_NEEDED', type,
+  extensions: [], comments: [] })` resolves the same as a plain field.
+- **Depends on:** Step 3
+- **Verify (by inspection):** Each `test` destructures `expect` from the context and makes
+  at least one assertion (`requireAssertions` is on). Assertions are `toStrictEqual` on the
+  whole descriptor, not property spot-checks, so an unexpected extra key fails. The nested
+  repeated and map cases are present — they are the two the implementation is most likely
+  to get wrong.
+
+### Step 5 — Resolve a message or enum into a protobufjs type descriptor
 
 - **File:** `src/proto3_runtime/classes/proto3_runtime_message_resolver.ts` (create)
 - **What:** Add `Proto3RuntimeMessageResolver` with
@@ -331,7 +402,31 @@ by the conversion layer in Step 7, and removed with the file in Step 11) and
   `fields` (with their own ids) and, by key, in the `oneofs[...].oneof` array. A message
   with no oneof emits no `oneofs` key.
 
-### Step 5 — Resolve a service into a protobufjs service descriptor
+### Step 6 — Test the message resolver
+
+- **File:** `src/proto3_runtime/classes/proto3_runtime_message_resolver.test.ts` (create)
+- **What:** Pin the `IType` / `IEnum` shapes for a plain message, a message carrying a
+  oneof, and an enum.
+- **How:** `describe('`Proto3RuntimeMessageResolver` test suite', …)` with three tests:
+  - **plain message** — `Proto3Message.new({ name: 'User', fields: [idField,
+    fullNameField], extensions: [], comments: [] })` where `idField` is an `int64` with
+    `optionalState: 'NONE'` and `fullNameField` a `string` with `'PRESENT'`. Assert
+    `toStrictEqual({ fields: { id: { id: 1, type: 'int64' }, full_name: { id: 2, type:
+    'string', options: { proto3_optional: true } } } })` and that no `oneofs` key exists;
+  - **message with a oneof** — one `Proto3MessageOneOfField.new({ key: 'task', subFields:
+    [...], extensions: [], comments: [] })` holding three sub-fields at ids 1-3. Assert
+    each sub-field appears in `fields` *and* that
+    `oneofs.task.oneof` equals `['synchronize_users', 'create_workspace',
+    'update_workspace']`. This is the mapping the codec later relies on;
+  - **enum** — `Proto3Enum.new({ name: 'UserRole', fields: [Proto3EnumField.new({ key:
+    'ADMIN', index: 0, extensions: [], comments: [] }), … ] })` → `toStrictEqual({ values:
+    { ADMIN: 0, VIEWER: 1 } })`.
+- **Depends on:** Step 5
+- **Verify (by inspection):** The oneof test asserts both halves of the split (fields and
+  the `oneof` name array) — asserting only one would let a half-built descriptor pass. The
+  plain-message test asserts the *absence* of `oneofs`.
+
+### Step 7 — Resolve a service into a protobufjs service descriptor
 
 - **File:** `src/proto3_runtime/classes/proto3_runtime_service_resolver.ts` (create)
 - **What:** Add `Proto3RuntimeServiceResolver` with
@@ -377,7 +472,27 @@ by the conversion layer in Step 7, and removed with the file in Step 11) and
   from `inStream` / `outStream` so both streaming directions survive; an imported in/out
   is dot-prefixed and recorded on the accumulator.
 
-### Step 6 — Resolve the file into a protobufjs namespace descriptor
+### Step 8 — Test the service resolver
+
+- **File:** `src/proto3_runtime/classes/proto3_runtime_service_resolver.test.ts` (create)
+- **What:** Pin method keys, in/out references and the streaming flags.
+- **How:** `describe('`Proto3RuntimeServiceResolver` test suite', …)`:
+  - **unary with an imported response** — a `Proto3RpcService.new({ name:
+    'SynchronizationService', typePrefix: null, functions: [Proto3RpcFunction.new({ name:
+    'PostAsyncTasks', typePrefix: null, in: inputMessage, inStream: false, out:
+    Proto3Empty.useType(), outStream: false, extensions: [], comments: [] })], extensions:
+    [], comments: [] })`. Assert `toStrictEqual({ methods: { PostAsyncTasks: { requestType:
+    'PostAsyncTasksInput', requestStream: false, responseType: '.google.protobuf.Empty',
+    responseStream: false } } })`, and that the accumulator recorded
+    `google/protobuf/empty.proto`;
+  - **bidirectional streaming** — the same function with `inStream: true, outStream: true`;
+    assert both flags are `true` in the descriptor, so neither direction is dropped.
+- **Depends on:** Step 7
+- **Verify (by inspection):** The method key is `PostAsyncTasks`, not camelCased — the
+  camelCase form belongs to `originalName` in Step 13, not to the protobufjs descriptor.
+  The imported response is dot-prefixed.
+
+### Step 9 — Resolve the file into a protobufjs namespace descriptor
 
 - **File:** `src/proto3_runtime/classes/proto3_runtime_descriptor_resolver.ts` (create)
 - **What:** Add `Proto3RuntimeDescriptorResolver` with
@@ -428,16 +543,46 @@ by the conversion layer in Step 7, and removed with the file in Step 11) and
   are included. Do **not** use `file.getDeepImportedTypes()` to collect imports — it also
   returns extension keys such as `buf.validate.field`
   (`src/proto3_definition/types/fields.ts:92-99`), which are field options with no runtime
-  descriptor and must not be resolved. Collecting during traversal, as Steps 3 and 5 do,
+  descriptor and must not be resolved. Collecting during traversal, as Steps 3 and 7 do,
   yields only payload-position imports.
-- **Depends on:** Steps 4, 5
+- **Depends on:** Steps 5, 7
 - **Verify (by inspection):** `resolve()` does not itself call `propagateTypePrefix()`
-  (Step 8 owns that, mirroring `Proto3FileProcessor.process()`); messages appear once each
+  (Step 13 owns that, mirroring `Proto3FileProcessor.process()`); messages appear once each
   despite `getDeepMessages()` repeating them; the descriptor nests one level per dot in
   `packageName`; the returned `importPaths` contain `google/protobuf/empty.proto` for a
   default file and never `buf/validate/validate.proto`.
 
-### Step 7 — Install the JS-shape `encode` / `decode` overrides
+### Step 10 — Test the descriptor resolver
+
+- **File:** `src/proto3_runtime/classes/proto3_runtime_descriptor_resolver.test.ts` (create)
+- **What:** Pin package nesting, message de-duplication, and — most importantly — that
+  extension imports are excluded from `importPaths` while payload imports are included.
+- **How:** `describe('`Proto3RuntimeDescriptorResolver` test suite', …)`:
+  - **package nesting** — a `Proto3File.new({ syntax: 'proto3', packageName:
+    'services.authentication.v1', typePrefix: null, services: [], unscopedMessages:
+    [userMessage], extensions: [] })`. Assert the descriptor is
+    `{ nested: { services: { nested: { authentication: { nested: { v1: { nested: { User:
+    … } } } } } } } }` — walk it with explicit property access so a wrong depth fails
+    loudly;
+  - **message de-duplication** — a file whose service references the *same*
+    `Proto3Message` instance from two rpcs, so `getDeepMessages()` returns it twice.
+    Assert the innermost `nested` has exactly one key for that message name. Without the
+    `reduceRight` this is where `Namespace.add` would later throw `duplicate name`;
+  - **import collection** — a file with an rpc returning `Proto3Empty.useType()` **and** a
+    field carrying a `buf.validate` extension via
+    `Proto3ValidateFieldAnnotation.useExtension({ required: true })`. Assert
+    `importPaths` `toStrictEqual(['google/protobuf/empty.proto'])` — the positive and the
+    negative in one assertion. This is the test that protects the distinction between
+    payload imports and option imports;
+  - **duplicate import paths collapse** — two rpcs both returning `Proto3Empty.useType()`
+    yield `importPaths` of length 1.
+- **Depends on:** Step 9
+- **Verify (by inspection):** The import-collection test asserts the whole array rather
+  than `toContain`, so a leaked `buf/validate/validate.proto` fails. The de-duplication
+  test reuses one message *instance* (same `id`), which is what `getDeepMessages()`
+  actually repeats.
+
+### Step 11 — Install the JS-shape `encode` / `decode` overrides
 
 - **File:** `src/proto3_runtime/classes/proto3_runtime_codec_resolver.ts` (create)
 - **What:** Add `Proto3RuntimeCodecResolver`, constructed with the resolved
@@ -448,7 +593,7 @@ by the conversion layer in Step 7, and removed with the file in Step 11) and
   `// TODO: .toJSON() utile?` questions in `src/test.ts:116` and `:134`.
 - **How:** Walk `root.lookup(packageName)`'s `nestedArray` recursively, collecting
   `protobuf.Type` instances. Types outside the package — the well-known google types added
-  in Step 8 — are deliberately left with protobufjs's native behaviour. Then per type:
+  in Step 13 — are deliberately left with protobufjs's native behaviour. Then per type:
 
       type.setup()
 
@@ -516,7 +661,79 @@ by the conversion layer in Step 7, and removed with the file in Step 11) and
   touched. The `int64` comment is present, one line, and states the constraint rather than
   restating the code.
 
-### Step 8 — Add the orchestrating `Proto3RuntimeResolver`
+### Step 12 — Test the codec resolver
+
+- **File:** `src/proto3_runtime/classes/proto3_runtime_codec_resolver.test.ts` (create)
+- **What:** The highest-value tests in the plan. Build a `protobuf.Root` directly from a
+  hand-written JSON descriptor — bypassing Steps 3-9 so a failure isolates to the codec —
+  install the overrides, and assert both directions plus wire compatibility.
+- **How:** A module-level fixture builder returning a fresh root per test (the overrides
+  mutate the root, so tests must not share one):
+
+      const getRoot = function () {
+          return protobuf.Root.fromJSON({
+              nested: { demo: { nested: { v1: { nested: {
+                  UserRole: { values: { ADMIN: 0, VIEWER: 1 } },
+                  Access: { fields: { level: { type: 'int32', id: 1 } } },
+                  Target: { fields: { external_id: { type: 'string', id: 1 } } },
+                  Task: {
+                      oneofs: { task: { oneof: ['synchronize_users', 'create_workspace'] } },
+                      fields: {
+                          synchronize_users: { type: 'Target', id: 1 },
+                          create_workspace: { type: 'Target', id: 2 },
+                      },
+                  },
+                  Input: {
+                      fields: {
+                          user_id: { type: 'int64', id: 1 },
+                          full_name: { type: 'string', id: 2, options: { proto3_optional: true } },
+                          role: { type: 'UserRole', id: 3 },
+                          tasks: { rule: 'repeated', type: 'Task', id: 4 },
+                          accesses: { keyType: 'string', type: 'Access', id: 5 },
+                      },
+                  },
+              } } } } },
+          })
+      }
+
+  Then the tests, each resolving the root, calling
+  `new Proto3RuntimeCodecResolver(root, 'demo.v1').install()`, and looking up
+  `demo.v1.Input`:
+  - **round-trip** — encode a JS-shaped value and decode it back, asserting
+    `toStrictEqual` against the original:
+
+        const value = {
+            userId: 42,
+            fullName: 'Ada',
+            role: 'VIEWER',
+            tasks: [{ task: { $case: 'synchronizeUsers', value: { externalId: 'w-1' } } }],
+            accesses: { 'team-a': { level: 3 } },
+        }
+
+    This single assertion covers camelCase keys, enum-as-string, `$case` oneofs, 64-bit as
+    `number`, repeated-of-message recursion and map-of-message recursion at once;
+  - **omitted optional** — the same value without `fullName`; assert the decoded object
+    has no `fullName` key (`toStrictEqual` on the whole object, so an unexpected `''`
+    fails);
+  - **absent non-optional** — decode bytes for an empty `Input`; assert `userId` is `0`,
+    `role` is `'ADMIN'` (the zero-valued name), `tasks` is `[]` and `accesses` is `{}`;
+  - **map keys are untouched** — a map key that looks camelCase-able, such as
+    `'team_a'`, survives decode as `'team_a'` and not `'teamA'`. This pins the one place
+    where applying the field-name conversion would be wrong;
+  - **wire compatibility** — encode through the overridden type, then decode the same
+    bytes with a **second, un-installed** root built by `getRoot()`, and assert the
+    protobuf-shaped result (`full_name`, `role: 1`, `synchronize_users`). This proves the
+    conversion layer changes only the JS surface and not the wire format;
+  - **nested override recursion** — assert that `demo.v1.Target`'s own `decode` produced
+    the camelCased `externalId` inside the nested value, which the round-trip test already
+    exercises implicitly but is worth asserting directly against `Target.decode(...)`.
+- **Depends on:** Step 11
+- **Verify (by inspection):** Every test builds its own root — no shared mutable fixture,
+  since `install()` permanently rewrites the type instances. The wire-compatibility test
+  uses a genuinely separate root, not the same one. Assertions are `toStrictEqual` on whole
+  objects so extra or missing keys fail.
+
+### Step 13 — Add the orchestrating `Proto3RuntimeResolver`
 
 - **File:** `src/proto3_runtime/classes/proto3_runtime_resolver.ts` (create)
 - **What:** Add `Proto3RuntimeResolver` with
@@ -594,14 +811,44 @@ by the conversion layer in Step 7, and removed with the file in Step 11) and
   null checks satisfy `noUncheckedIndexedAccess` and protobufjs's
   `resolvedRequestType: Type | null`. `camelCase` comes from `change-case`, already a
   dependency and already used across `src/zod_converter/classes/`.
-- **Depends on:** Steps 6, 7
+- **Depends on:** Steps 9, 11
 - **Verify (by inspection):** `propagateTypePrefix()` is called first; `resolveAll()`
   happens after every `addJSON` and before `install()`; each method's `path` is
   `/<package>.<Service>/<Method>`; keys are the original function names with `originalName`
   camelCased; serialize wraps in `Buffer.from`; an unbundled import produces the explicit
   error rather than a protobufjs internal one.
 
-### Step 9 — Extract the `UsageSettings` defaulting block
+### Step 14 — Test the orchestrating resolver
+
+- **File:** `src/proto3_runtime/classes/proto3_runtime_resolver.test.ts` (create)
+- **What:** Assert the grpc-js definition shape and that the wired codecs round-trip, from
+  a `Proto3File` built with the definition factories.
+- **How:** `describe('`Proto3RuntimeResolver` test suite', …)`, with a fixture file whose
+  package is `services.synchronization.v1`, one service `SynchronizationService`, and one
+  unary rpc `PostAsyncTasks` taking a message and returning `Proto3Empty.useType()`:
+  - **service definition shape** — assert `Object.keys(result.services)` is
+    `['services.synchronization.v1.SynchronizationService']`, and that the method entry has
+    `path` `'/services.synchronization.v1.SynchronizationService/PostAsyncTasks'`,
+    `originalName` `'postAsyncTasks'`, and `requestStream` / `responseStream` both `false`;
+  - **serializer round-trip** — call `requestSerialize` on a JS-shaped value, assert the
+    result `toBeInstanceOf(Buffer)`, then feed it to `requestDeserialize` and assert
+    `toStrictEqual` against the original value. This proves Steps 11 and 13 are wired
+    together, which neither class's own test can show;
+  - **imported response type resolves** — call `responseSerialize({})` and
+    `responseDeserialize` on the result without throwing, proving
+    `google.protobuf.Empty` was registered from `protobuf.common`;
+  - **streaming flags** — a second fixture with `inStream: true` / `outStream: true`
+    asserts both flags reach the definition;
+  - **unresolvable import throws** — a file with an rpc returning
+    `Proto3ImportedType.new({ importPath: 'acme/custom.proto', typeReference:
+    'acme.Custom' })`; assert `resolve()` throws with `toThrowError(/acme\/custom\.proto/)`
+    so the message names the offending file.
+- **Depends on:** Step 13
+- **Verify (by inspection):** The path assertion is a full string literal, not a regex, so
+  a missing leading slash or a camelCased method segment fails. The throwing test asserts
+  on the message, not merely that something threw.
+
+### Step 15 — Extract the `UsageSettings` defaulting block
 
 - **File:** `src/usage/helpers/get_full_usage_settings.ts` (create)
 - **What:** Add `getFullUsageSettings(settings?: Partial<UsageSettings>): UsageSettings`
@@ -630,7 +877,7 @@ by the conversion layer in Step 7, and removed with the file in Step 11) and
   helper follows the `export const … = function (…)` style used by every other file in
   `src/usage/helpers/`.
 
-### Step 10 — Point `zodToProto` at the extracted helper
+### Step 16 — Point `zodToProto` at the extracted helper
 
 - **File:** `src/usage/helpers/zod_to_proto.ts` (modify)
 - **What:** Replace the inline `fullSettings` literal with a call to
@@ -654,12 +901,14 @@ by the conversion layer in Step 7, and removed with the file in Step 11) and
   `getDefaultConversionReuseStrategies` and `getDefaultTransformationReuseStrategies`
   become orphans of this change and are removed; `FileBuilder`,
   `Proto3FileProcessor`, `Proto3RawFile` and the `UsageSettings` type stay.
-- **Depends on:** Step 9
+- **Depends on:** Step 15
 - **Verify (by inspection):** `zodToProto`'s signature and return value are unchanged; only
   the settings construction moved; no import remains that the file no longer references
-  (`noUnusedLocals` would otherwise fail at the end).
+  (`noUnusedLocals` would otherwise fail at the end). The existing
+  `zod_to_proto.test.ts` snapshots must still match — this refactor changes no behaviour,
+  so any snapshot diff means it went wrong.
 
-### Step 11 — Add the `zodToRuntime` entry point
+### Step 17 — Add the `zodToRuntime` entry point
 
 - **File:** `src/usage/helpers/zod_to_runtime.ts` (create)
 - **What:** Add `zodToRuntime(raw: Proto3RawFile, settings?: Partial<UsageSettings>):
@@ -678,37 +927,69 @@ by the conversion layer in Step 7, and removed with the file in Step 11) and
           return resolver.resolve(file)
       }
 
-- **Depends on:** Steps 8, 9
+- **Depends on:** Steps 13, 15
 - **Verify (by inspection):** The function mirrors `zodToProto()` line for line apart from
   the resolver and the return type; it takes the same `Proto3RawFile` and optional
   `Partial<UsageSettings>`.
 
-### Step 12 — Delete the superseded exploratory file
+### Step 18 — Test the public entry point against real Zod schemas
+
+- **File:** `src/usage/helpers/zod_to_runtime.test.ts` (create)
+- **What:** The one test that closes the loop: a Zod schema goes in, bytes come out, and
+  the decoded value parses back through the *same* Zod schema. Everything before this tests
+  the Proto3-to-runtime half; this tests that the runtime's JS shape actually matches what
+  Zod expects.
+- **How:** `describe('`zodToRuntime` test suite', …)`. Reuse the fixture style of
+  `zod_to_proto.test.ts` — in particular `pz.oneOfUnion([...])` from
+  `#zod/helpers/zod_one_of_union`, which is what makes the `$case` assertion meaningful:
+  - **round-trip through a Zod schema** — build a service whose input message has a
+    camelCase field (`fullName`), a `z.enum([...])`, an array, and a `pz.oneOfUnion`
+    branch. Call `zodToRuntime(raw)`, take the method definition, `requestSerialize` a
+    value that the Zod schema accepts, `requestDeserialize` it back, and assert both
+    `toStrictEqual` against the original *and* that
+    `InputSchema.safeParse(decoded).success` is `true`. The second assertion is the point
+    of the test — it is what proves the camelCase and `$case` conventions are right rather
+    than merely self-consistent;
+  - **naming parity with `zodToProto`** — for the same raw file, assert that the proto text
+    from `zodToProto(raw)` contains `full_name` while the runtime round-trip yields
+    `fullName`, pinning the two halves of the `snakeCase`/`camelCase` convention against
+    each other;
+  - **`z.int()` precision caveat is real and pinned** — a field declared `z.int()` round-
+    trips as a `number`. Assert `typeof decoded.someInt === 'number'`. If a future change
+    switches 64-bit decoding to `bigint`, this test is the one that should fail and force
+    the decision to be revisited.
+- **Depends on:** Step 17
+- **Verify (by inspection):** The Zod `safeParse` assertion is present — without it the
+  suite only proves the runtime agrees with itself. The oneof fixture uses `pz.oneOfUnion`,
+  not a hand-rolled discriminated union, so it exercises the same helper users will.
+
+### Step 19 — Delete the superseded exploratory file
 
 - **File:** `src/test.ts` (delete)
 - **What:** Remove the file. It is hand-written scratch work for exactly this feature, it
   is re-exported into the package's public API by the barrel, and its two unused consts are
   the sole reason `bun run typecheck` is red today. Its two `// TODO: .toJSON() utile?`
-  questions are answered by Step 7.
+  questions are answered by Step 11.
 - **How:** Delete the file outright. Nothing imports it — the only reference is
-  `export * from './src/test'` in `index.ts`, removed in Step 13. Confirm with a search for
+  `export * from './src/test'` in `index.ts`, removed in Step 20. Confirm with a search for
   `from '#*/test'` and `src/test` before deleting. If the file should be kept instead, the
   minimal alternative is to `export` the two consts so `noUnusedLocals` is satisfied — but
   note that keeps demonstrably broken protobufjs usage (see Analysis) in the published
   surface.
-- **Depends on:** Step 8
+- **Depends on:** Step 13
 - **Verify (by inspection):** The file is gone and no source file references it. The two
   `TS6133` errors quoted in the Analysis can no longer be produced.
 
-### Step 13 — Update the generated barrel
+### Step 20 — Update the generated barrel
 
 - **File:** `index.ts` (modify)
-- **What:** Add one `export * from` line per new file, and remove
+- **What:** Add one `export * from` line per new non-test file, and remove
   `export * from './src/test'`.
 - **How:** The barrel is generated by `bun run prepare:index` from the glob
-  `./src/**/*.ts` sorted by path, so insert the new lines in the position that command
-  would put them — the `proto3_runtime` block goes after the last
-  `proto3_processor/classes/*` line and where `./src/test` used to be:
+  `./src/**/*.ts` **excluding `*.test.ts`**, sorted by path, so the seven new test files
+  get no entries. Insert the new lines where that command would put them — the
+  `proto3_runtime` block goes after the last `proto3_processor/classes/*` line and where
+  `./src/test` used to be:
 
       export * from './src/proto3_runtime/classes/proto3_runtime_codec_resolver'
       export * from './src/proto3_runtime/classes/proto3_runtime_descriptor_resolver'
@@ -722,12 +1003,12 @@ by the conversion layer in Step 7, and removed with the file in Step 11) and
   `get_full_transformers`, and `zod_to_runtime` after `zod_to_proto`. Running
   `bun run prepare:index` instead of editing by hand is equivalent and preferable if the
   generator is available.
-- **Depends on:** Steps 2-12
-- **Verify (by inspection):** Every new file has exactly one barrel entry, `./src/test` is
-  gone, and the list stays in the sorted order the generator produces — otherwise the next
-  `bun run prepare:index` will churn the file.
+- **Depends on:** Steps 2-19
+- **Verify (by inspection):** Every new non-test file has exactly one barrel entry, no
+  `*.test.ts` file has one, `./src/test` is gone, and the list stays in the sorted order the
+  generator produces — otherwise the next `bun run prepare:index` will churn the file.
 
-### Step 14 — Document the runtime entry point
+### Step 21 — Document the runtime entry point
 
 - **File:** `.docs/4-usage.md` (modify)
 - **What:** Add a `### gRPC runtime` section after the existing `### gRPC Service` section
@@ -743,12 +1024,12 @@ by the conversion layer in Step 7, and removed with the file in Step 11) and
   `.docs/3-quick-start.md`). Then run `bun run generate:readme` so `README.md` picks the
   new section up — the file is generated from `.blueprint.md`, which `load:`s each
   `.docs/*.md` in order.
-- **Depends on:** Step 11
+- **Depends on:** Step 17
 - **Verify (by inspection):** The new section sits inside `## Usage` at `###` depth,
-  matching its neighbours; the example compiles against the signature written in Step 11;
+  matching its neighbours; the example compiles against the signature written in Step 17;
   `README.md` contains the new section after regeneration.
 
-### Step 15 — Document the runtime conversion table
+### Step 22 — Document the runtime conversion table
 
 - **File:** `.docs/5-compatibility.md` (modify)
 - **What:** Add a `### Runtime` section documenting the JS-to-proto value mapping the
@@ -760,7 +1041,7 @@ by the conversion layer in Step 7, and removed with the file in Step 11) and
   verbatim keys, `oneof` as `{ $case, value }`, and `optional` as an omitted key. Also state
   that field keys are camelCase at runtime and snake_case in the `.proto`, and that only
   the protobufjs well-known google types resolve at runtime.
-- **Depends on:** Step 14
+- **Depends on:** Step 21
 - **Verify (by inspection):** The 64-bit row names the `z.int()` / `z.int64()` ambiguity as
   the reason, so a reader hitting a precision bug finds the explanation here rather than
   in the source comment.
@@ -774,12 +1055,14 @@ by the conversion layer in Step 7, and removed with the file in Step 11) and
   one proto scalar, so no runtime can be correct for both. Decoding everything to `number`
   is right for `z.int()` and silently corrupts `z.int64()` values above 2^53. The clean
   fix is upstream — either carry a JS-type hint on `Proto3ScalarType`, or map `z.int()` to
-  `int32`/`sint64` rather than reusing `int64`. Worth a follow-up issue; out of scope here.
+  `int32`/`sint64` rather than reusing `int64`. Step 18 pins the current behaviour so the
+  decision resurfaces if anyone changes it. Worth a follow-up issue; out of scope here.
 - **`camelCase()` re-derivation is not a guaranteed round-trip.** The converter applies
   `snakeCase()` and the runtime inverts it. That is exact for ordinary camelCase keys but
   not for acronyms: a Zod key `HTTPRequest` becomes `http_request` becomes `httpRequest`.
   Same risk for oneof `$case` values. Recording the original key on the definition would
-  remove it entirely.
+  remove it entirely. No test covers the acronym case because it is a known limitation
+  rather than a bug to guard.
 - **Extensions and comments are intentionally dropped.** `buf.validate` annotations and
   doc comments are `.proto` source concerns with no wire-format effect, so they have no
   place in the runtime descriptor. The consequence is that Protovalidate constraints are
@@ -787,38 +1070,42 @@ by the conversion layer in Step 7, and removed with the file in Step 11) and
   as it is with a `.proto` compiled by `buf`.
 - **Only well-known google imports resolve.** `Proto3ImportedType` is open-ended, but
   protobufjs bundles only `any`, `duration`, `empty`, `field_mask`, `struct`, `timestamp`
-  and `wrappers`. Anything else used in a payload position throws in Step 8. This is fine
-  today because `Proto3Empty` is the only imported payload type the library emits, but a
-  user-supplied one will hit it. If that becomes a real need, the natural extension is an
-  optional `extraTypes: protobuf.INamespace` parameter on the resolver — deliberately not
-  built now.
+  and `wrappers`. Anything else used in a payload position throws in Step 13, and Step 14
+  asserts that error. This is fine today because `Proto3Empty` is the only imported payload
+  type the library emits, but a user-supplied one will hit it. If that becomes a real need,
+  the natural extension is an optional `extraTypes: protobuf.INamespace` parameter on the
+  resolver — deliberately not built now.
 - **Overrides are fragile against later mutation.** `clearCache()` does `delete type.encode`
   (`node_modules/protobufjs/src/type.js:212-217`), so adding or removing a field on a type
-  after Step 7 has run silently reverts it to protobufjs's native codec. Nothing in this
-  design mutates the tree post-`install()`, but anything added later must not.
+  after Step 11 has run silently reverts it to protobufjs's native codec. Nothing in this
+  design mutates the tree post-`install()`, but anything added later must not. It is also
+  why Step 12's fixtures build a fresh root per test.
 - **Name collisions surface as protobufjs errors.** Two messages sharing a name after
   prefix propagation make `Namespace.add` throw `duplicate name`. The `.proto` output has
   the same defect today, so this is parity rather than a regression — but the runtime fails
   loudly at build time where the text output fails only at `protoc` time.
-- **`google.protobuf.Timestamp` and friends keep protobufjs's native shapes.** Step 7
+- **`google.protobuf.Timestamp` and friends keep protobufjs's native shapes.** Step 11
   installs overrides only on types under the package namespace, so a field of an imported
   well-known type expects protobufjs's representation (`{ seconds, nanos }`) rather than a
   converted one. Only `Empty` is reachable today, where the distinction is moot.
-- **No tests are specified.** `vitest` is configured and
-  `src/usage/helpers/zod_to_proto.test.ts` snapshots the text output, so a
-  `zod_to_runtime.test.ts` asserting an encode/decode round-trip over the oneof + repeated
-  + enum + optional fixture would be the natural counterpart. Adding it is not part of this
-  plan — say so if you want it folded in.
-- **Commit boundaries.** Per `.claude/rules.md`, this is not one commit: Steps 9-10 (the
+- **Commit boundaries.** Per `.claude/rules.md`, this is not one commit: Steps 15-16 (the
   `getFullUsageSettings` extraction) are a refactor with no behaviour change and belong on
-  their own; Step 12 (deleting `src/test.ts`) is its own concern; Steps 1-8 plus 11 plus 13
-  are the feature; Steps 14-15 travel *with* the feature commit, not after it.
+  their own; Step 19 (deleting `src/test.ts`) is its own concern; Steps 1-14 plus 17-18 plus
+  20 are the feature; Steps 21-22 travel *with* the feature commit, not after it. Each
+  test file belongs in the same commit as the code it covers, not in a trailing "add tests"
+  commit.
 
 ## Final Verification
 
 - Run the typecheck once, at the very end: `bun run typecheck`. It must exit clean.
   Note the baseline is currently **failing** with two `TS6133` errors in `src/test.ts`, so
-  "clean" here means those are gone (Step 12) and no new errors were introduced — not
-  merely "no worse than before".
+  "clean" here means those are gone (Step 19) and no new errors were introduced — not
+  merely "no worse than before". Test files are inside `tsconfig.json`'s `src/**/*.ts`, so
+  this typechecks them too.
+- Then run the suite once: `bunx vitest --run`. Use `--run` explicitly —
+  `vitest.config.ts` sets `watch: true`, so a bare `bun run test` hangs in watch mode
+  rather than exiting. All seven new test files plus the existing
+  `zod_to_proto.test.ts` must pass; the latter's snapshots must be unchanged, since Step 16
+  is a pure refactor.
 - Individual steps are confirmed by inspection during execution — no per-step test or build
   runs.
