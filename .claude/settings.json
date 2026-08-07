@@ -124,6 +124,8 @@
             "Bash(yamlfmt:*)",
             "Bash(beautysh:*)",
             "Bash(prettier:*)",
+            "Bash(eslint:*)",
+            "Bash(vitest:*)",
             "Bash(bashly:*)",
 
             "Bash(terraform init:*)",
