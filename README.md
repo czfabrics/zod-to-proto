@@ -27,6 +27,7 @@
 * [Usage](#usage)
 	* [Basic](#basic)
 	* [gRPC Service](#grpc-service)
+	* [gRPC runtime](#grpc-runtime)
 	* [gRPC Service with gRPC gateway annotations](#grpc-service-with-grpc-gateway-annotations)
 	* [Type prefix](#type-prefix)
 	* [Enforced typecheck](#enforced-typecheck)
@@ -36,6 +37,7 @@
 	* [Proto3](#proto3)
 	* [Protovalidate](#protovalidate)
 	* [Google](#google)
+	* [Runtime](#runtime)
 * [Plugin](#plugin)
 	* [Custom Type](#custom-type)
 	* [Custom Extension](#custom-extension)
@@ -254,6 +256,93 @@ message GetUsersOutput {
   ];
 }
 ```
+
+### gRPC runtime
+
+`zodToRuntime` returns a runnable counterpart of the same definition instead of
+`.proto` text: a `protobufjs` root and one `@grpc/grpc-js` `ServiceDefinition` per
+service, keyed by fully qualified service name.
+
+```ts
+import { MessageIn, zodToRuntime } from '@czfabrics/zod-to-proto'
+import { Server, ServerCredentials, makeClientConstructor } from '@grpc/grpc-js'
+import z from 'zod'
+
+const PostUsersInput = z.object({
+    fullName: z.string(),
+    role: z.enum(['ADMIN', 'VIEWER']),
+})
+
+const { root, services } = zodToRuntime({
+    syntax: 'proto3',
+    packageName: 'services.user.v1',
+    services: [
+        {
+            name: 'UserService',
+            functions: [
+                {
+                    name: 'PostUsers',
+                    in: MessageIn.new(PostUsersInput),
+                },
+            ],
+        },
+    ],
+})
+
+const definition = services['services.user.v1.UserService']!
+
+const server = new Server()
+
+server.addService(definition, {
+    PostUsers: (call, callback) => {
+        //// `call.request` is `{ fullName: string, role: 'ADMIN' | 'VIEWER' }`
+        callback(null, {})
+    },
+})
+
+server.bindAsync('0.0.0.0:50051', ServerCredentials.createInsecure(), () => {})
+
+const UserClient = makeClientConstructor(definition, 'UserService')
+```
+
+**Result:**
+
+```ts
+{
+    root: Root,                                   //// protobufjs, for lookups
+    services: {
+        'services.user.v1.UserService': {
+            PostUsers: {
+                path: '/services.user.v1.UserService/PostUsers',
+                originalName: 'postUsers',        //// camelCase, as `@grpc/proto-loader` emits
+                requestStream: false,
+                responseStream: false,
+                requestSerialize: (value) => Buffer,
+                requestDeserialize: (bytes) => object,
+                responseSerialize: (value) => Buffer,
+                responseDeserialize: (bytes) => object,
+            },
+        },
+    },
+}
+```
+
+Methods are keyed by their Proto3 name (`PostUsers`) with `originalName` holding the
+camelCase form, matching what `@grpc/proto-loader` produces. The definition is accepted
+as-is by `nice-grpc`.
+
+Values crossing the codecs use the JS shapes the Zod schemas were written in, not the
+protobuf ones — see [Compatibility](#runtime) for the full table:
+
+- keys are camelCase (`fullName`), while the `.proto` declares them snake_case
+  (`full_name`)
+- enums are their string names (`'VIEWER'`), not their numeric ids
+- `oneof` values are `{ $case, value }`, as produced by `pz.oneOfUnion`
+- 64-bit integers are `number`
+- an absent `optional` field is an absent key
+
+Only the `protobufjs` well-known google types resolve at runtime. Any other imported
+type used as a field or an rpc input/output throws, naming the import path.
 
 ### gRPC Service with gRPC gateway annotations
 
@@ -687,6 +776,46 @@ message GetUsersOutput {
 | ----------------------- | ---------------------- |
 | `google.api.http`       | `Proto3HttpAnnotation` |
 | `google.protobuf.Empty` | `Proto3Empty`          |
+
+### Runtime
+
+`zodToRuntime` converts values at the codec boundary so they match the Zod schemas they
+came from rather than the protobuf wire representation. The wire format itself is
+unaffected — a message encoded here is byte-identical to one produced from the generated
+`.proto`.
+
+| Proto3                                              | JS at runtime                | Notice                                                              |
+| --------------------------------------------------- | ---------------------------- | ------------------------------------------------------------------- |
+| `string`                                            | `string`                     |                                                                       |
+| `bool`                                              | `boolean`                    |                                                                       |
+| `bytes`                                             | `Uint8Array`                 |                                                                       |
+| `int32`<br>`uint32`<br>`sint32`<br>`fixed32`<br>`sfixed32`<br>`float`<br>`double` | `number` |                                                            |
+| `int64`<br>`uint64`<br>`sint64`<br>`fixed64`<br>`sfixed64` | `number`              | Loses precision past 2^53. See the note below.                        |
+| `enum`                                              | `string`                     | The value name (`'VIEWER'`), not its id.                              |
+| `repeated`                                          | `Array`                      | Absent means `[]`.                                                    |
+| `map`                                               | `Record`                     | Keys are passed through verbatim, never camel cased.                  |
+| `oneof`                                             | `{ $case, value }`           | The shape `pz.oneOfUnion` produces.                                   |
+| `optional`                                          | absent key                   | A non-optional absent field decodes to its proto3 default instead.    |
+
+Field keys are camelCase at runtime and snake_case in the `.proto`: a Zod `fullName`
+is declared `full_name` and decodes back to `fullName`. The inverse is derived, so a key
+whose casing does not round trip through `snakeCase`/`camelCase` — an acronym such as
+`HTTPRequest` — comes back as `httpRequest`.
+
+**Note on 64-bit integers.** `z.int()` (a JS `number`) and `z.int64()` (a JS `bigint`)
+both convert to Proto3 `int64`, so the definition cannot say which JS type a field came
+from. The runtime always decodes to `number`, which is correct for `z.int()` and loses
+precision for `z.int64()` values above 2^53.
+
+Only the `protobufjs` well-known google types (`any`, `duration`, `empty`, `field_mask`,
+`struct`, `timestamp`, `wrappers`) resolve at runtime. The conversions above do **not**
+apply to them: they keep their `protobufjs` representation, so a `google.protobuf.Empty`
+response — the default for a function without an `out` — decodes to an `Empty` message
+instance rather than a plain `{}`, and a `google.protobuf.Timestamp` decodes to
+`{ seconds, nanos }` with `seconds` as a `Long`. Any other imported type used as a field
+or an rpc input/output throws, naming its import path.
+
+Protovalidate annotations carry no wire-format meaning and are not enforced by the codecs.
 
 
 [![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/dark.png)](#plugin)

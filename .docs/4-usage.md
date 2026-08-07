@@ -119,6 +119,93 @@ message GetUsersOutput {
 }
 ```
 
+### gRPC runtime
+
+`zodToRuntime` returns a runnable counterpart of the same definition instead of
+`.proto` text: a `protobufjs` root and one `@grpc/grpc-js` `ServiceDefinition` per
+service, keyed by fully qualified service name.
+
+```ts
+import { MessageIn, zodToRuntime } from '{{ pkg.name }}'
+import { Server, ServerCredentials, makeClientConstructor } from '@grpc/grpc-js'
+import z from 'zod'
+
+const PostUsersInput = z.object({
+    fullName: z.string(),
+    role: z.enum(['ADMIN', 'VIEWER']),
+})
+
+const { root, services } = zodToRuntime({
+    syntax: 'proto3',
+    packageName: 'services.user.v1',
+    services: [
+        {
+            name: 'UserService',
+            functions: [
+                {
+                    name: 'PostUsers',
+                    in: MessageIn.new(PostUsersInput),
+                },
+            ],
+        },
+    ],
+})
+
+const definition = services['services.user.v1.UserService']!
+
+const server = new Server()
+
+server.addService(definition, {
+    PostUsers: (call, callback) => {
+        //// `call.request` is `{ fullName: string, role: 'ADMIN' | 'VIEWER' }`
+        callback(null, {})
+    },
+})
+
+server.bindAsync('0.0.0.0:50051', ServerCredentials.createInsecure(), () => {})
+
+const UserClient = makeClientConstructor(definition, 'UserService')
+```
+
+**Result:**
+
+```ts
+{
+    root: Root,                                   //// protobufjs, for lookups
+    services: {
+        'services.user.v1.UserService': {
+            PostUsers: {
+                path: '/services.user.v1.UserService/PostUsers',
+                originalName: 'postUsers',        //// camelCase, as `@grpc/proto-loader` emits
+                requestStream: false,
+                responseStream: false,
+                requestSerialize: (value) => Buffer,
+                requestDeserialize: (bytes) => object,
+                responseSerialize: (value) => Buffer,
+                responseDeserialize: (bytes) => object,
+            },
+        },
+    },
+}
+```
+
+Methods are keyed by their Proto3 name (`PostUsers`) with `originalName` holding the
+camelCase form, matching what `@grpc/proto-loader` produces. The definition is accepted
+as-is by `nice-grpc`.
+
+Values crossing the codecs use the JS shapes the Zod schemas were written in, not the
+protobuf ones — see [Compatibility](#runtime) for the full table:
+
+- keys are camelCase (`fullName`), while the `.proto` declares them snake_case
+  (`full_name`)
+- enums are their string names (`'VIEWER'`), not their numeric ids
+- `oneof` values are `{ $case, value }`, as produced by `pz.oneOfUnion`
+- 64-bit integers are `number`
+- an absent `optional` field is an absent key
+
+Only the `protobufjs` well-known google types resolve at runtime. Any other imported
+type used as a field or an rpc input/output throws, naming the import path.
+
 ### gRPC Service with gRPC gateway annotations
 
 ```ts
