@@ -10,3 +10,4 @@
 ^github\.com$
 ^api\.github\.com$
 ^docs\.netbird\.io$
+^registry\.npmjs\.org$
